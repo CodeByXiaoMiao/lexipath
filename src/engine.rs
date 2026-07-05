@@ -19,6 +19,14 @@ pub struct AnswerResult {
     pub remaining: usize,
 }
 
+pub struct QuestionLookup(Option<Question>);
+
+impl QuestionLookup {
+    pub fn cloned(self) -> Option<Question> {
+        self.0
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct LearningSession {
     lesson: Lesson,
@@ -137,13 +145,17 @@ impl LearningSession {
         ))
     }
 
-    pub fn current_question(&self) -> Option<Question> {
-        let index = self.current_mastery_index()?;
+    pub fn current_question(&self) -> QuestionLookup {
+        let Some(index) = self.current_mastery_index() else {
+            return QuestionLookup(None);
+        };
         if let Some(question) = self.lesson.reading.questions.get(index) {
-            return Some(question.clone());
+            return QuestionLookup(Some(question.clone()));
         }
-        let sentence = self.lesson.sentences.get(index)?;
-        Some(Question {
+        let Some(sentence) = self.lesson.sentences.get(index) else {
+            return QuestionLookup(None);
+        };
+        QuestionLookup(Some(Question {
             prompt: format!("请选择与中文含义对应的句子：{}", sentence.meaning),
             options: self
                 .lesson
@@ -152,7 +164,7 @@ impl LearningSession {
                 .map(|item| item.text.clone())
                 .collect(),
             correct_index: index,
-        })
+        }))
     }
 
     pub fn mark_current_audio_played(&mut self) {
