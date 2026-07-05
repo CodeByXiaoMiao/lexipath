@@ -1,13 +1,21 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod app;
+mod app_v2;
 mod audio;
+mod catalog;
 mod course;
 mod engine;
+mod progress_data;
+mod progress_lesson;
+mod progress_query;
+mod progress_review;
+mod progress_store;
+mod scheduler;
+mod shell;
 mod storage;
 mod validator;
 
-use app::LexiPathApp;
+use app_v2::LexiPathApp;
 use course::CoursePack;
 use validator::validate_course;
 
@@ -28,7 +36,7 @@ fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
             .with_inner_size([620.0, 520.0])
-            .with_min_inner_size([460.0, 360.0]),
+            .with_min_inner_size([360.0, 220.0]),
         ..Default::default()
     };
 
