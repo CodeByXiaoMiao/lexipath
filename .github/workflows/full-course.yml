@@ -1,0 +1,69 @@
+name: Full course
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["bootstrap/**"]
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "Cargo.toml"
+      - ".github/workflows/full-course.yml"
+
+jobs:
+  build-course:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout LexiPath
+        uses: actions/checkout@v4
+        with:
+          path: lexipath
+
+      - name: Checkout CEFR word list
+        uses: actions/checkout@v4
+        with:
+          repository: Kolia951/The_Oxford_3000_CEFR
+          path: sources/oxford
+
+      - name: Checkout ECDICT
+        uses: actions/checkout@v4
+        with:
+          repository: skywind3000/ECDICT
+          path: sources/ecdict
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Generate complete catalog
+        working-directory: lexipath
+        run: >-
+          cargo run --release --
+          --import-catalog
+          --word-list ../sources/oxford/package.txt
+          --dictionary ../sources/ecdict/ecdict.csv
+          --output course.json
+
+      - name: Run tests
+        working-directory: lexipath
+        run: cargo test --all-targets
+
+      - name: Build Windows application
+        working-directory: lexipath
+        run: cargo build --release
+
+      - name: Prepare portable folder
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path package/LexiPath | Out-Null
+          Copy-Item lexipath/target/release/lexipath.exe package/LexiPath/LexiPath.exe
+          Copy-Item lexipath/course.json package/LexiPath/course.json
+          Copy-Item lexipath/README.md package/LexiPath/README.md
+
+      - name: Upload portable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: LexiPath-Windows-x64
+          path: package/LexiPath
+          if-no-files-found: error
