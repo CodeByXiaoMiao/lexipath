@@ -27,3 +27,16 @@ pub fn load() -> anyhow::Result<CoursePack> {
     course.version = 2;
     Ok(course)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::validator::validate_course;
+
+    #[test]
+    fn expanded_course_contains_only_opened_words() {
+        let course = load().expect("course should load");
+        assert_eq!(course.stages[0].lessons.len(), 9);
+        assert_eq!(validate_course(&course), Ok(()));
+    }
+}
