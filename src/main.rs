@@ -46,7 +46,7 @@ fn main() -> eframe::Result<()> {
         return Ok(());
     }
     if arguments.first().map(String::as_str) == Some("--import-catalog") {
-        if let Err(error) = catalog_import::import_catalog(&arguments[1..]) {
+        if let Err(error) = import_and_finalize_catalog(&arguments[1..]) {
             eprintln!("catalog import failed: {error:#}");
             std::process::exit(1);
         }
@@ -83,4 +83,22 @@ fn main() -> eframe::Result<()> {
                 .map_err(|error| Box::<dyn std::error::Error + Send + Sync>::from(error))
         }),
     )
+}
+
+fn import_and_finalize_catalog(arguments: &[String]) -> anyhow::Result<()> {
+    catalog_import::import_catalog(arguments)?;
+    let output_index = arguments
+        .iter()
+        .position(|argument| argument == "--output")
+        .ok_or_else(|| anyhow::anyhow!("--output is required"))?;
+    let output = arguments
+        .get(output_index + 1)
+        .ok_or_else(|| anyhow::anyhow!("missing value after --output"))?
+        .clone();
+    course_finalize_file::run(&[
+        "--input".to_owned(),
+        output.clone(),
+        "--output".to_owned(),
+        output,
+    ])
 }
