@@ -103,6 +103,14 @@ fn validate_lesson_text(
         validate_text(lesson, &format!("sentences[{index}]"), &sentence.text, allowed, errors);
     }
 
+    validate_text(
+        lesson,
+        "reading.title",
+        &lesson.reading.title,
+        allowed,
+        errors,
+    );
+
     for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
         validate_text(
             lesson,
@@ -207,5 +215,14 @@ mod tests {
 
         let errors = validate_course(&course).expect_err("unknown word must fail validation");
         assert!(errors.iter().any(|item| item.message.contains("outside")));
+    }
+
+    #[test]
+    fn unknown_reading_title_word_is_rejected() {
+        let mut course = CoursePack::embedded().expect("embedded course should parse");
+        course.stages[0].lessons[0].reading.title = "Here and there".to_owned();
+
+        let errors = validate_course(&course).expect_err("unknown title word must fail validation");
+        assert!(errors.iter().any(|item| item.message.contains("and")));
     }
 }
