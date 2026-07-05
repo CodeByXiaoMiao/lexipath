@@ -6,6 +6,7 @@ use crate::audio::SystemSpeaker;
 use crate::catalog::CourseCatalog;
 use crate::course::CoursePack;
 use crate::engine::{LearningSession, Phase};
+use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
 use crate::shell::DesktopShell;
 
@@ -59,7 +60,7 @@ impl LexiPathApp {
             .cloned()
         {
             if let Some(lesson) = self.course.lesson_by_id(&review.lesson_id) {
-                self.session = LearningSession::new(lesson.clone());
+                self.session = due_practice_session(lesson.clone());
                 self.active_review_id = Some(review.id);
                 self.course_finished = false;
                 self.status = format!("正在完成第 {} 次到期复习。", review.step + 1);
@@ -234,7 +235,7 @@ impl LexiPathApp {
     fn show_reading(&mut self, ui: &mut egui::Ui) {
         let lesson = self.session.lesson().clone();
         ui.heading(&lesson.reading.title);
-        ui.label("正文已通过累计已学词白名单校验。");
+        ui.label("正文已通过累计已学词白名单和内容质量检查。");
         ui.separator();
         for sentence in &lesson.reading.sentences {
             ui.horizontal_wrapped(|ui| {
@@ -351,10 +352,17 @@ impl eframe::App for LexiPathApp {
                 ui.label(format!("阶段：{}", phase_name(self.session.phase())));
                 if let Some(store) = &self.progress {
                     ui.separator();
-                    ui.label(format!("已完成 {} / {}", store.completed_count(), self.course.lesson_count()));
+                    ui.label(format!(
+                        "已完成 {} / {}",
+                        store.completed_count(),
+                        self.course.lesson_count()
+                    ));
                     ui.label(format!("到期复习 {}", store.due_count()));
                 }
-                if ui.small_button(if self.compact { "展开" } else { "紧凑" }).clicked() {
+                if ui
+                    .small_button(if self.compact { "展开" } else { "紧凑" })
+                    .clicked()
+                {
                     self.apply_compact_mode(context);
                 }
             });
