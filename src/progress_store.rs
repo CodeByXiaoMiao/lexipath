@@ -32,6 +32,14 @@ impl ProgressStore {
                 if let Ok(on_disk) = serde_json::from_str::<ProgressData>(&text) {
                     merged.ipa_completed_days =
                         merged.ipa_completed_days.max(on_disk.ipa_completed_days);
+                    merged.ipa_last_completed_day = match (
+                        merged.ipa_last_completed_day,
+                        on_disk.ipa_last_completed_day,
+                    ) {
+                        (Some(memory), Some(disk)) => Some(memory.max(disk)),
+                        (Some(day), None) | (None, Some(day)) => Some(day),
+                        (None, None) => None,
+                    };
                 }
             }
         }
