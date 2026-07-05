@@ -1,4 +1,4 @@
-use crate::course::{CoursePack, Question, Reading, SentenceItem};
+use crate::course::{CoursePack, Question, Reading, SentenceItem, WordItem};
 
 pub fn polish_generated_content(course: &mut CoursePack) {
     for stage in &mut course.stages {
@@ -13,6 +13,7 @@ pub fn polish_generated_content(course: &mut CoursePack) {
 
             for word in &mut lesson.new_words {
                 word.text = clean_display_word(&word.text);
+                apply_lexicon_override(word);
                 let template = template_for(&word.text, &word.meaning);
                 word.phrase = template.phrase;
                 word.example = template.first.clone();
@@ -66,7 +67,7 @@ fn template_for(word: &str, meaning: &str) -> Template {
         );
     }
 
-    match lexical_class(meaning) {
+    match lexical_class(&normalized, meaning) {
         LexicalClass::CountNoun => {
             let article = indefinite_article(word);
             make(
@@ -166,16 +167,16 @@ fn fixed_template(word: &str) -> Option<Template> {
         "who" => ("who is here", "Who is here?", "Who is there?"),
         "because" => ("because you come", "I go because you come.", "You go because I come."),
         "but" => ("but not", "I go, but you do not.", "You come, but I do not."),
-        "or" => ("you or me", "You or me?", "This or that?"),
+        "or" => ("you or me", "You or me?", "He or she?"),
         "if" => ("if you come", "I go if you come.", "You go if I come."),
         "though" => ("though it is small", "I like it, though it is small.", "You like it, though it is big."),
         "while" => ("while you are here", "I go while you are here.", "You go while I am here."),
-        "how" => ("how to do it", "How do I do it?", "How do you do it?"),
+        "how" => ("how do", "How do I do it?", "How do you do it?"),
         "when" => ("when you come", "When do you come?", "I go when you come."),
         "where" => ("where it is", "Where is it?", "Where are you?"),
         "again" => ("go again", "I can go again.", "You can come again."),
         "ever" => ("ever here", "Are you ever here?", "Am I ever there?"),
-        "far" => ("far from here", "It is far from here.", "It is far from there."),
+        "far" => ("far", "It is far.", "This is far."),
         "forward" => ("go forward", "I can go forward.", "You can go forward."),
         "out" => ("go out", "I can go out.", "You can go out."),
         "still" => ("still here", "I am still here.", "You are still there."),
@@ -201,7 +202,7 @@ enum LexicalClass {
     Other,
 }
 
-fn lexical_class(meaning: &str) -> LexicalClass {
+fn lexical_class(word: &str, meaning: &str) -> LexicalClass {
     let normalized = meaning.trim().to_ascii_lowercase();
     if normalized.starts_with("adv.") {
         return LexicalClass::Adverb;
@@ -219,9 +220,47 @@ fn lexical_class(meaning: &str) -> LexicalClass {
         return LexicalClass::Number;
     }
     if normalized.starts_with("n.") {
-        return LexicalClass::CountNoun;
+        return if is_no_article_noun(word) {
+            LexicalClass::NoArticleNoun
+        } else {
+            LexicalClass::CountNoun
+        };
     }
     LexicalClass::Other
+}
+
+fn apply_lexicon_override(word: &mut WordItem) {
+    let normalized = word.text.to_ascii_lowercase();
+    let Some((ipa, meaning)) = (match normalized.as_str() {
+        "ant" => Some(("/ænt/", "n. 蚂蚁")),
+        "able" => Some(("/ˈeɪbl/", "adj. 能够的；有能力的")),
+        "form" => Some(("/fɔːrm/", "n. 形式；表格")),
+        "head" => Some(("/hed/", "n. 头；负责人")),
+        "arch" => Some(("/ɑːrtʃ/", "n. 拱门；拱形")),
+        "meal" => Some(("/miːl/", "n. 一餐；饭")),
+        "phone" => Some(("/foʊn/", "n. 电话")),
+        "speak" => Some(("/spiːk/", "vi. 说话；讲话")),
+        "them" => Some(("/ðem/", "pron. 他们；她们；它们（宾格）")),
+        "style" => Some(("/staɪl/", "n. 风格；样式")),
+        "age" => Some(("/eɪdʒ/", "n. 年龄；时代")),
+        "later" => Some(("/ˈleɪtər/", "adv. 后来；较晚")),
+        "its" => Some(("/ɪts/", "pron. 它的")),
+        "ability" => Some(("/əˈbɪləti/", "n. 能力")),
+        "specific" => Some(("/spəˈsɪfɪk/", "adj. 特定的；明确的")),
+        "penny" => Some(("/ˈpeni/", "n. 便士")),
+        "gate" => Some(("/ɡeɪt/", "n. 大门；出入口")),
+        "app" => Some(("/æp/", "n. 应用程序")),
+        "ad" => Some(("/æd/", "n. 广告")),
+        "grade" => Some(("/ɡreɪd/", "n. 等级；成绩")),
+        "path" => Some(("/pæθ/", "n. 小路；路径")),
+        "logical" => Some(("/ˈlɑːdʒɪkl/", "adj. 合乎逻辑的")),
+        "resist" => Some(("/rɪˈzɪst/", "vt. 抵抗；忍住")),
+        _ => None,
+    }) else {
+        return;
+    };
+    word.ipa = ipa.to_owned();
+    word.meaning = meaning.to_owned();
 }
 
 fn make(phrase: &str, first: &str, second: &str) -> Template {
@@ -245,11 +284,14 @@ fn clean_display_word(value: &str) -> String {
 }
 
 fn indefinite_article(word: &str) -> &'static str {
-    match word
-        .chars()
-        .find(|character| character.is_ascii_alphabetic())
-        .map(|character| character.to_ascii_lowercase())
-    {
+    let normalized = word.to_ascii_lowercase();
+    if matches!(normalized.as_str(), "hour" | "honest") {
+        return "an";
+    }
+    if matches!(normalized.as_str(), "university" | "user" | "use" | "euro") {
+        return "a";
+    }
+    match normalized.chars().find(|character| character.is_ascii_alphabetic()) {
         Some('a' | 'e' | 'i' | 'o' | 'u') => "an",
         _ => "a",
     }
@@ -280,11 +322,61 @@ fn is_calendar_word(word: &str) -> bool {
     )
 }
 
+fn is_no_article_noun(word: &str) -> bool {
+    is_plural_noun(word)
+        || matches!(
+            word,
+            "advice"
+                | "air"
+                | "art"
+                | "bread"
+                | "business"
+                | "coffee"
+                | "data"
+                | "education"
+                | "energy"
+                | "equipment"
+                | "food"
+                | "furniture"
+                | "health"
+                | "homework"
+                | "information"
+                | "knowledge"
+                | "luggage"
+                | "meat"
+                | "media"
+                | "milk"
+                | "money"
+                | "music"
+                | "news"
+                | "paper"
+                | "police"
+                | "research"
+                | "rice"
+                | "salt"
+                | "space"
+                | "sugar"
+                | "tea"
+                | "traffic"
+                | "water"
+                | "weather"
+                | "work"
+        )
+}
+
 fn is_plural_noun(word: &str) -> bool {
     word.ends_with('s')
         && !matches!(
             word,
-            "business" | "class" | "dress" | "glass" | "means" | "news" | "success"
+            "business"
+                | "class"
+                | "dress"
+                | "glass"
+                | "means"
+                | "news"
+                | "series"
+                | "species"
+                | "success"
         )
 }
 
@@ -299,6 +391,21 @@ mod tests {
     }
 
     #[test]
+    fn repairs_affix_dictionary_meanings() {
+        let mut word = WordItem {
+            id: "phone".to_owned(),
+            text: "phone".to_owned(),
+            ipa: "bad".to_owned(),
+            meaning: "suffix".to_owned(),
+            phrase: String::new(),
+            example: String::new(),
+        };
+        apply_lexicon_override(&mut word);
+        assert_eq!(word.ipa, "/foʊn/");
+        assert!(word.meaning.starts_with("n."));
+    }
+
+    #[test]
     fn calendar_words_use_natural_frames() {
         let template = template_for("Friday", "n. 星期五");
         assert_eq!(template.first, "It is Friday.");
@@ -308,5 +415,11 @@ mod tests {
     fn transitive_verbs_receive_an_object() {
         let template = template_for("accept", "vt. 接受");
         assert_eq!(template.first, "I can accept this.");
+    }
+
+    #[test]
+    fn mass_nouns_do_not_receive_an_indefinite_article() {
+        let template = template_for("information", "n. 信息");
+        assert_eq!(template.first, "This is information.");
     }
 }
