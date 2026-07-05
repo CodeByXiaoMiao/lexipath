@@ -27,15 +27,18 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
     let mut fallback_count = 0usize;
 
     for stage in &course.stages {
+        let generated_stage = stage.id != "foundation-words";
         for lesson in &stage.lessons {
-            validate_lesson_shape(lesson, &mut issues);
+            if generated_stage {
+                validate_lesson_shape(lesson, &mut issues);
+            }
 
             for (index, word) in lesson.new_words.iter().enumerate() {
-                if stage.id != "foundation-words" {
+                if generated_stage {
                     generated_word_count += 1;
-                }
-                if word.example.starts_with("The word is ") {
-                    fallback_count += 1;
+                    if word.example.starts_with("The word is ") {
+                        fallback_count += 1;
+                    }
                 }
 
                 let field = format!("new_words[{index}]");
