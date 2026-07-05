@@ -4,6 +4,7 @@ mod app_v2;
 mod audio;
 mod catalog;
 mod course;
+mod embedded_course;
 mod engine;
 mod progress_data;
 mod progress_lesson;
@@ -12,15 +13,13 @@ mod progress_review;
 mod progress_store;
 mod scheduler;
 mod shell;
-mod storage;
 mod validator;
 
 use app_v2::LexiPathApp;
-use course::CoursePack;
 use validator::validate_course;
 
 fn main() -> eframe::Result<()> {
-    let course = CoursePack::embedded().expect("embedded course could not be loaded");
+    let course = embedded_course::load().expect("embedded course could not be loaded");
     if course.first_lesson().is_none() {
         panic!("embedded course contains no lesson");
     }
