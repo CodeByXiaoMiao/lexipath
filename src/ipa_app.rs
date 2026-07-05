@@ -12,6 +12,7 @@ pub struct IpaApp {
     store: ProgressStore,
     speaker: SystemSpeaker,
     status: String,
+    locked_today: bool,
 }
 
 impl IpaApp {
@@ -22,6 +23,7 @@ impl IpaApp {
         if day_index >= lessons.len() {
             return Ok(None);
         }
+        let locked_today = store.ipa_completed_today();
         let session = PhoneticSession::new(lessons[day_index].clone());
         Ok(Some(Self {
             lessons,
@@ -29,11 +31,22 @@ impl IpaApp {
             session,
             store,
             speaker: SystemSpeaker,
-            status: "每个示例必须先播放，测试最终 100% 才能进入下一天。".to_owned(),
+            status: if locked_today {
+                "今日音标课程已完成，下一课将在明天开放。".to_owned()
+            } else {
+                "每个示例必须先播放，测试最终 100% 才能完成今天课程。".to_owned()
+            },
+            locked_today,
         }))
     }
 
     pub fn update(&mut self, context: &egui::Context) -> bool {
+        if self.locked_today && !self.store.ipa_completed_today() {
+            self.locked_today = false;
+            self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
+            self.status = "新的一天已经开始，可以继续音标课程。".to_owned();
+        }
+
         let mut all_complete = false;
 
         egui::TopBottomPanel::top("ipa_header").show(context, |ui| {
@@ -51,23 +64,33 @@ impl IpaApp {
         });
 
         egui::CentralPanel::default().show(context, |ui| {
-            ui.vertical_centered_justified(|ui| match self.session.phase() {
-                PhoneticPhase::Exposure => self.show_exposure(ui),
-                PhoneticPhase::ListeningTest => self.show_test(ui),
-                PhoneticPhase::Complete => {
-                    ui.heading("本日音标测试最终正确率 100%");
-                    if ui.button("保存并进入下一天").clicked() {
-                        if let Err(error) = self.store.complete_ipa_day(self.lessons.len()) {
-                            self.status = format!("保存音标进度失败：{error}");
-                            return;
-                        }
-                        self.day_index += 1;
-                        if self.day_index >= self.lessons.len() {
-                            all_complete = true;
-                        } else {
-                            self.session =
-                                PhoneticSession::new(self.lessons[self.day_index].clone());
-                            self.status = "开始下一天音标课程。".to_owned();
+            ui.vertical_centered_justified(|ui| {
+                if self.locked_today {
+                    ui.heading("今日音标学习已完成");
+                    ui.label("固定计划每天只开放一课音标，明天继续下一课。");
+                    return;
+                }
+
+                match self.session.phase() {
+                    PhoneticPhase::Exposure => self.show_exposure(ui),
+                    PhoneticPhase::ListeningTest => self.show_test(ui),
+                    PhoneticPhase::Complete => {
+                        ui.heading("本日音标测试最终正确率 100%");
+                        if ui.button("完成今天课程").clicked() {
+                            if let Err(error) = self.store.complete_ipa_day(self.lessons.len()) {
+                                self.status = format!("保存音标进度失败：{error}");
+                                return;
+                            }
+                            self.day_index += 1;
+                            if self.day_index >= self.lessons.len() {
+                                all_complete = true;
+                            } else {
+                                self.session =
+                                    PhoneticSession::new(self.lessons[self.day_index].clone());
+                                self.locked_today = true;
+                                self.status =
+                                    "今日音标课程已完成，下一课将在明天开放。".to_owned();
+                            }
                         }
                     }
                 }
