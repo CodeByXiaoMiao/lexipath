@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fmt;
 
 use crate::course::{CoursePack, Lesson};
@@ -12,7 +12,11 @@ pub struct ValidationError {
 
 impl fmt::Display for ValidationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "lesson {} / {}: {}", self.lesson_id, self.field, self.message)
+        write!(
+            f,
+            "lesson {} / {}: {}",
+            self.lesson_id, self.field, self.message
+        )
     }
 }
 
@@ -33,12 +37,16 @@ pub fn tokenize(text: &str) -> Vec<String> {
         tokens.push(current.trim_matches('\'').to_owned());
     }
 
-    tokens.into_iter().filter(|token| !token.is_empty()).collect()
+    tokens
+        .into_iter()
+        .filter(|token| !token.is_empty())
+        .collect()
 }
 
 pub fn validate_course(course: &CoursePack) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
-    let mut learned_words = HashSet::<String>::new();
+    let mut learned_entries = HashSet::<String>::new();
+    let mut learned_tokens = HashSet::<String>::new();
     let mut lesson_ids = HashSet::<String>::new();
 
     for stage in &course.stages {
@@ -47,28 +55,33 @@ pub fn validate_course(course: &CoursePack) -> Result<(), Vec<ValidationError>> 
                 errors.push(error(lesson, "id", "duplicate lesson id"));
             }
 
-            let mut current_words = HashSet::new();
+            let mut current_entries = Vec::<(String, Vec<String>)>::new();
             for word in &lesson.new_words {
-                let normalized = word.text.to_ascii_lowercase();
-                if tokenize(&word.text).len() != 1 {
+                let tokens = tokenize(&word.text);
+                if tokens.is_empty() {
                     errors.push(error(
                         lesson,
                         "new_words",
-                        &format!("word '{}' must contain exactly one token", word.text),
+                        &format!("entry '{}' contains no English token", word.text),
                     ));
+                    continue;
                 }
-                if !current_words.insert(normalized.clone()) || learned_words.contains(&normalized) {
+
+                let normalized = tokens.join(" ");
+                if !learned_entries.insert(normalized) {
                     errors.push(error(
                         lesson,
                         "new_words",
-                        &format!("word '{}' is duplicated in the course path", word.text),
+                        &format!("entry '{}' is duplicated in the course path", word.text),
                     ));
                 }
+
+                learned_tokens.extend(tokens.iter().cloned());
+                current_entries.push((word.text.clone(), tokens));
             }
 
-            learned_words.extend(current_words.iter().cloned());
-            validate_lesson_text(lesson, &learned_words, &mut errors);
-            validate_reading_coverage(lesson, &current_words, &mut errors);
+            validate_lesson_text(lesson, &learned_tokens, &mut errors);
+            validate_reading_coverage(lesson, &current_entries, &mut errors);
 
             for (index, question) in lesson.reading.questions.iter().enumerate() {
                 if question.options.is_empty() || question.correct_index >= question.options.len() {
@@ -95,12 +108,30 @@ fn validate_lesson_text(
     errors: &mut Vec<ValidationError>,
 ) {
     for (index, word) in lesson.new_words.iter().enumerate() {
-        validate_text(lesson, &format!("new_words[{index}].phrase"), &word.phrase, allowed, errors);
-        validate_text(lesson, &format!("new_words[{index}].example"), &word.example, allowed, errors);
+        validate_text(
+            lesson,
+            &format!("new_words[{index}].phrase"),
+            &word.phrase,
+            allowed,
+            errors,
+        );
+        validate_text(
+            lesson,
+            &format!("new_words[{index}].example"),
+            &word.example,
+            allowed,
+            errors,
+        );
     }
 
     for (index, sentence) in lesson.sentences.iter().enumerate() {
-        validate_text(lesson, &format!("sentences[{index}]"), &sentence.text, allowed, errors);
+        validate_text(
+            lesson,
+            &format!("sentences[{index}]"),
+            &sentence.text,
+            allowed,
+            errors,
+        );
     }
 
     validate_text(
@@ -146,44 +177,55 @@ fn validate_text(
         return;
     }
 
-    let unknown: Vec<String> = tokenize(text)
+    let mut unknown = tokenize(text)
         .into_iter()
         .filter(|token| !allowed.contains(token))
         .collect::<HashSet<_>>()
         .into_iter()
-        .collect();
+        .collect::<Vec<_>>();
+    unknown.sort();
 
     if !unknown.is_empty() {
         errors.push(error(
             lesson,
             field,
-            &format!("contains words outside the learned whitelist: {}", unknown.join(", ")),
+            &format!(
+                "contains words outside the learned whitelist: {}",
+                unknown.join(", ")
+            ),
         ));
     }
 }
 
 fn validate_reading_coverage(
     lesson: &Lesson,
-    current_words: &HashSet<String>,
+    current_entries: &[(String, Vec<String>)],
     errors: &mut Vec<ValidationError>,
 ) {
-    let counts = tokenize(&lesson.full_reading_text())
-        .into_iter()
-        .fold(HashMap::<String, usize>::new(), |mut counts, token| {
-            *counts.entry(token).or_default() += 1;
-            counts
-        });
+    let reading_tokens = tokenize(&lesson.full_reading_text());
 
-    for word in current_words {
-        let count = counts.get(word).copied().unwrap_or_default();
+    for (display, tokens) in current_entries {
+        let count = sequence_count(&reading_tokens, tokens);
         if count < 2 {
             errors.push(error(
                 lesson,
                 "reading",
-                &format!("new word '{word}' must appear at least twice; found {count}"),
+                &format!(
+                    "new entry '{display}' must appear at least twice; found {count}"
+                ),
             ));
         }
     }
+}
+
+fn sequence_count(haystack: &[String], needle: &[String]) -> usize {
+    if needle.is_empty() || haystack.len() < needle.len() {
+        return 0;
+    }
+    haystack
+        .windows(needle.len())
+        .filter(|window| *window == needle)
+        .count()
 }
 
 fn error(lesson: &Lesson, field: &str, message: &str) -> ValidationError {
@@ -224,5 +266,12 @@ mod tests {
 
         let errors = validate_course(&course).expect_err("unknown title word must fail validation");
         assert!(errors.iter().any(|item| item.message.contains("and")));
+    }
+
+    #[test]
+    fn phrase_coverage_uses_the_full_token_sequence() {
+        let reading = tokenize("I am in front. You are in front.");
+        let phrase = tokenize("in front");
+        assert_eq!(sequence_count(&reading, &phrase), 2);
     }
 }
