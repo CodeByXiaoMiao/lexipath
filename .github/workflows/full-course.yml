@@ -43,6 +43,27 @@ jobs:
           repository: skywind3000/ECDICT
           path: sources/ecdict
 
+      - name: Merge LexiPath dictionary supplements
+        shell: pwsh
+        run: |
+          $dictionary = "sources/ecdict/ecdict.csv"
+          $headers = (Get-Content $dictionary -TotalCount 1) -split ','
+          Get-ChildItem "lexipath/assets/*-entry.json" | ForEach-Object {
+            $entry = Get-Content $_.FullName -Raw | ConvertFrom-Json
+            $record = [ordered]@{}
+            foreach ($header in $headers) { $record[$header] = "" }
+            $record["word"] = $entry.word
+            $record["phonetic"] = $entry.phonetic
+            $record["translation"] = $entry.meaning
+            $record["pos"] = $entry.part_of_speech
+            $record["bnc"] = "900000"
+            $record["frq"] = "900000"
+            [pscustomobject]$record |
+              ConvertTo-Csv -NoTypeInformation |
+              Select-Object -Skip 1 |
+              Add-Content $dictionary -Encoding utf8
+          }
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
