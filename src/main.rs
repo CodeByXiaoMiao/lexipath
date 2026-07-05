@@ -6,8 +6,13 @@ mod catalog;
 mod catalog_daily;
 mod catalog_import;
 mod catalog_load;
+mod catalog_polish;
+mod catalog_quality;
 mod catalog_repair;
 mod course;
+mod course_finalize;
+mod course_finalize_file;
+mod daily_gate;
 mod embedded_course;
 mod engine;
 mod fonts;
@@ -30,7 +35,6 @@ mod shell;
 mod validator;
 
 use root_app::RootApp;
-use validator::validate_course;
 
 fn main() -> eframe::Result<()> {
     let arguments = std::env::args().skip(1).collect::<Vec<_>>();
@@ -48,19 +52,20 @@ fn main() -> eframe::Result<()> {
         }
         return Ok(());
     }
+    if arguments.first().map(String::as_str) == Some("--finalize-catalog") {
+        if let Err(error) = course_finalize_file::run(&arguments[1..]) {
+            eprintln!("catalog finalization failed: {error:#}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
 
-    let course = catalog_load::load().expect("course catalog could not be loaded");
+    let mut course = catalog_load::load().expect("course catalog could not be loaded");
     if course.first_lesson().is_none() {
         panic!("course catalog contains no lesson");
     }
-    if let Err(errors) = validate_course(&course) {
-        let details = errors
-            .into_iter()
-            .map(|error| error.to_string())
-            .collect::<Vec<_>>()
-            .join("\n");
-        panic!("course validation failed:\n{details}");
-    }
+    course_finalize::finalize_course(&mut course)
+        .expect("course catalog failed final content validation");
 
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
