@@ -3,9 +3,12 @@
 mod app_v2;
 mod audio;
 mod catalog;
+mod catalog_import;
+mod catalog_load;
 mod course;
 mod embedded_course;
 mod engine;
+mod practice;
 mod progress_data;
 mod progress_lesson;
 mod progress_query;
@@ -19,9 +22,18 @@ use app_v2::LexiPathApp;
 use validator::validate_course;
 
 fn main() -> eframe::Result<()> {
-    let course = embedded_course::load().expect("embedded course could not be loaded");
+    let arguments = std::env::args().skip(1).collect::<Vec<_>>();
+    if arguments.first().map(String::as_str) == Some("--import-catalog") {
+        if let Err(error) = catalog_import::import_catalog(&arguments[1..]) {
+            eprintln!("catalog import failed: {error:#}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
+
+    let course = catalog_load::load().expect("course catalog could not be loaded");
     if course.first_lesson().is_none() {
-        panic!("embedded course contains no lesson");
+        panic!("course catalog contains no lesson");
     }
     if let Err(errors) = validate_course(&course) {
         let details = errors
