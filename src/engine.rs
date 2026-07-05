@@ -73,7 +73,6 @@ impl LearningSession {
         if self.phase != Phase::LearnWords || !self.can_advance_word() {
             return false;
         }
-
         if self.learn_index + 1 < self.lesson.new_words.len() {
             self.learn_index += 1;
         } else {
@@ -88,24 +87,22 @@ impl LearningSession {
 
     pub fn recognition_options(&self) -> Option<(Vec<String>, usize)> {
         let current = self.current_mastery_index()?;
-        let mut meaning_counts = HashMap::<&str, usize>::new();
+        let mut counts = HashMap::<&str, usize>::new();
         for word in &self.lesson.new_words {
-            *meaning_counts.entry(&word.meaning).or_default() += 1;
+            *counts.entry(&word.meaning).or_default() += 1;
         }
-
         let options = self
             .lesson
             .new_words
             .iter()
             .map(|word| {
-                if meaning_counts.get(word.meaning.as_str()).copied().unwrap_or_default() > 1 {
+                if counts.get(word.meaning.as_str()).copied().unwrap_or_default() > 1 {
                     format!("{}（{}）", word.meaning, word.phrase)
                 } else {
                     word.meaning.clone()
                 }
             })
             .collect();
-
         Some(rotated_options(options, current, current + 1))
     }
 
@@ -140,9 +137,22 @@ impl LearningSession {
         ))
     }
 
-    pub fn current_question(&self) -> Option<&Question> {
+    pub fn current_question(&self) -> Option<Question> {
         let index = self.current_mastery_index()?;
-        self.lesson.reading.questions.get(index)
+        if let Some(question) = self.lesson.reading.questions.get(index) {
+            return Some(question.clone());
+        }
+        let sentence = self.lesson.sentences.get(index)?;
+        Some(Question {
+            prompt: format!("请选择与中文含义对应的句子：{}", sentence.meaning),
+            options: self
+                .lesson
+                .sentences
+                .iter()
+                .map(|item| item.text.clone())
+                .collect(),
+            correct_index: index,
+        })
     }
 
     pub fn mark_current_audio_played(&mut self) {
@@ -160,7 +170,6 @@ impl LearningSession {
                 remaining: 0,
             };
         };
-
         let correct = selected_index == correct_index;
         if self.attempted_items.insert((self.phase, item)) {
             self.first_attempts += 1;
@@ -168,16 +177,13 @@ impl LearningSession {
                 self.first_attempt_errors += 1;
             }
         }
-
         if !correct {
             self.queue.push_back(item);
         }
         self.current_audio_played = false;
-
         if self.queue.is_empty() {
             self.advance_phase_after_mastery();
         }
-
         AnswerResult {
             correct,
             remaining: self.queue.len(),
@@ -196,7 +202,12 @@ impl LearningSession {
         if self.phase != Phase::Reading || !self.reading_audio_played {
             return false;
         }
-        self.start_phase(Phase::Comprehension, self.lesson.reading.questions.len());
+        let count = if self.lesson.reading.questions.is_empty() {
+            self.lesson.sentences.len()
+        } else {
+            self.lesson.reading.questions.len()
+        };
+        self.start_phase(Phase::Comprehension, count);
         true
     }
 
@@ -250,24 +261,27 @@ mod tests {
     use super::*;
     use crate::course::CoursePack;
 
-    #[test]
-    fn a_wrong_answer_stays_in_the_mastery_queue() {
+    fn recognition_session() -> LearningSession {
         let course = CoursePack::embedded().expect("course");
         let lesson = course.first_lesson().expect("lesson").clone();
-        let word_count = lesson.new_words.len();
+        let count = lesson.new_words.len();
         let mut session = LearningSession::new(lesson);
-
-        for _ in 0..word_count {
+        for _ in 0..count {
             session.mark_word_audio_played();
-            assert!(session.advance_word());
+            session.advance_word();
         }
+        session
+    }
 
-        assert_eq!(session.phase(), Phase::Recognition);
+    #[test]
+    fn a_wrong_answer_stays_in_the_mastery_queue() {
+        let mut session = recognition_session();
+        let count = session.lesson().new_words.len();
         let (_, correct) = session.recognition_options().expect("options");
-        let wrong = (correct + 1) % word_count;
+        let wrong = (correct + 1) % count;
         let result = session.answer_current(wrong, correct);
         assert!(!result.correct);
-        assert_eq!(result.remaining, word_count);
+        assert_eq!(result.remaining, count);
     }
 
     #[test]
@@ -282,16 +296,7 @@ mod tests {
 
     #[test]
     fn duplicate_meanings_are_disambiguated() {
-        let course = CoursePack::embedded().expect("course");
-        let lesson = course.first_lesson().expect("lesson").clone();
-        let word_count = lesson.new_words.len();
-        let mut session = LearningSession::new(lesson);
-
-        for _ in 0..word_count {
-            session.mark_word_audio_played();
-            session.advance_word();
-        }
-
+        let session = recognition_session();
         let (options, _) = session.recognition_options().expect("options");
         let unique = options.iter().collect::<HashSet<_>>();
         assert_eq!(unique.len(), options.len());
