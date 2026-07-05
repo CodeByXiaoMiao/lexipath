@@ -1,3 +1,4 @@
+use crate::catalog_function_templates::function_template;
 use crate::catalog_semantic_templates::semantic_template;
 use crate::catalog_template_overrides::{normalize_display, reviewed_template};
 use crate::course::CoursePack;
@@ -11,7 +12,8 @@ pub fn apply_reviewed_templates(course: &mut CoursePack) {
         for lesson in &mut stage.lessons {
             for (index, word) in lesson.new_words.iter_mut().enumerate() {
                 let display = normalize_display(&word.text);
-                let template = reviewed_template(&display)
+                let template = function_template(&display)
+                    .or_else(|| reviewed_template(&display))
                     .or_else(|| semantic_template(&display, &word.meaning))
                     .or_else(|| renamed_word_template(&display));
                 word.text = display;
