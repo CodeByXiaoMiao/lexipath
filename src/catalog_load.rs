@@ -23,7 +23,7 @@ pub fn load() -> anyhow::Result<CoursePack> {
     };
 
     for stage in &mut course.stages {
-        if stage.id.starts_with("oxford-") {
+        if stage.id.starts_with("ogden-") || stage.id.starts_with("oxford-") {
             add_daily_combined_readings(stage);
         }
     }
