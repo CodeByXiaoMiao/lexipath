@@ -18,8 +18,14 @@ pub struct LessonRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ProgressData {
+    #[serde(default)]
     pub current_lesson_id: Option<String>,
+    #[serde(default)]
+    pub course_complete: bool,
+    #[serde(default)]
     pub lessons: Vec<LessonRecord>,
+    #[serde(default)]
     pub reviews: Vec<ReviewRecord>,
+    #[serde(default)]
     pub next_review_id: u64,
 }
