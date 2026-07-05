@@ -1,3 +1,6 @@
+#[path = "catalog_template_apply.rs"]
+mod catalog_template_apply;
+
 use crate::catalog_polish::polish_generated_content;
 use crate::catalog_quality::validate_content_quality;
 use crate::course::CoursePack;
@@ -5,6 +8,8 @@ use crate::validator::validate_course;
 
 pub fn finalize_course(course: &mut CoursePack) -> anyhow::Result<()> {
     polish_generated_content(course);
+    catalog_template_apply::apply_reviewed_templates(course);
+
     validate_course(course).map_err(|errors| {
         anyhow::anyhow!(
             "zero-unknown validation failed: {}",
