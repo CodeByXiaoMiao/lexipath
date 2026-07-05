@@ -15,6 +15,7 @@ const EXTRA_LESSONS: &[&str] = &[
     include_str!("../assets/courses/foundation-010.json"),
     include_str!("../assets/courses/foundation-011.json"),
     include_str!("../assets/courses/foundation-012.json"),
+    include_str!("../assets/courses/foundation-013.json"),
 ];
 
 pub fn load() -> anyhow::Result<CoursePack> {
@@ -28,7 +29,7 @@ pub fn load() -> anyhow::Result<CoursePack> {
             .context("failed to parse an embedded foundation lesson")?;
         stage.lessons.push(lesson);
     }
-    course.version = 4;
+    course.version = 6;
     Ok(course)
 }
 
@@ -40,7 +41,7 @@ mod tests {
     #[test]
     fn expanded_course_contains_only_opened_words() {
         let course = load().expect("course should load");
-        assert_eq!(course.stages[0].lessons.len(), 13);
+        assert_eq!(course.stages[0].lessons.len(), 14);
         assert_eq!(validate_course(&course), Ok(()));
     }
 }
