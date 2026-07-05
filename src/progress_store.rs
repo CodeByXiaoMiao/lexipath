@@ -26,8 +26,18 @@ impl ProgressStore {
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
+        let mut merged = self.data.clone();
+        if self.path.exists() {
+            if let Ok(text) = fs::read_to_string(&self.path) {
+                if let Ok(on_disk) = serde_json::from_str::<ProgressData>(&text) {
+                    merged.ipa_completed_days =
+                        merged.ipa_completed_days.max(on_disk.ipa_completed_days);
+                }
+            }
+        }
+
         let temporary = self.path.with_extension("tmp");
-        fs::write(&temporary, serde_json::to_vec_pretty(&self.data)?)?;
+        fs::write(&temporary, serde_json::to_vec_pretty(&merged)?)?;
         fs::rename(temporary, &self.path)?;
         Ok(())
     }
