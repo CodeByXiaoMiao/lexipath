@@ -3,7 +3,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context};
-use serde::Deserialize;
 
 use crate::course::{
     CoursePack, Lesson, Question, Reading, SentenceItem, Stage, WordItem,
@@ -30,9 +29,6 @@ struct DictionaryEntry {
     rank: u32,
 }
 
-#[derive(Debug, Deserialize)]
-struct OxfordLevels(BTreeMap<String, Vec<String>>);
-
 pub fn import_catalog(arguments: &[String]) -> anyhow::Result<()> {
     let arguments = parse_arguments(arguments)?;
     let levels = load_word_levels(&arguments.word_list)?;
@@ -53,7 +49,7 @@ pub fn import_catalog(arguments: &[String]) -> anyhow::Result<()> {
                 if already_present.contains(&key) {
                     return None;
                 }
-                dictionary.get(&word.to_ascii_lowercase()).cloned()
+                dictionary.get(&key).cloned()
             })
             .collect::<Vec<_>>();
         entries.sort_by_key(|entry| entry.rank);
@@ -67,7 +63,8 @@ pub fn import_catalog(arguments: &[String]) -> anyhow::Result<()> {
             .iter()
             .map(|entry| normalize_entry(&entry.word))
             .collect::<HashSet<_>>();
-        let missing = expected.difference(&found).cloned().collect::<Vec<_>>();
+        let mut missing = expected.difference(&found).cloned().collect::<Vec<_>>();
+        missing.sort();
         if !missing.is_empty() {
             bail!(
                 "dictionary is missing {} required {} entries; first items: {}",
@@ -143,7 +140,22 @@ fn parse_arguments(arguments: &[String]) -> anyhow::Result<ImportArguments> {
 fn load_word_levels(path: &Path) -> anyhow::Result<BTreeMap<String, Vec<String>>> {
     let text = fs::read_to_string(path)
         .with_context(|| format!("failed to read word list {}", path.display()))?;
-    serde_json::from_str(&text).context("failed to parse CEFR word list")
+    let mut levels: BTreeMap<String, Vec<String>> =
+        serde_json::from_str(&text).context("failed to parse CEFR word list")?;
+    deduplicate_levels(&mut levels);
+    Ok(levels)
+}
+
+fn deduplicate_levels(levels: &mut BTreeMap<String, Vec<String>>) {
+    let mut seen = HashSet::<String>::new();
+    for level in LEVELS {
+        if let Some(words) = levels.get_mut(level) {
+            words.retain(|word| {
+                let normalized = normalize_entry(word);
+                !normalized.is_empty() && seen.insert(normalized)
+            });
+        }
+    }
 }
 
 fn collect_target_words(levels: &BTreeMap<String, Vec<String>>) -> HashSet<String> {
@@ -151,7 +163,7 @@ fn collect_target_words(levels: &BTreeMap<String, Vec<String>>) -> HashSet<Strin
         .iter()
         .filter_map(|level| levels.get(*level))
         .flatten()
-        .map(|word| word.to_ascii_lowercase())
+        .map(|word| normalize_entry(word))
         .collect()
 }
 
@@ -175,7 +187,7 @@ fn load_dictionary(
     for row in reader.records() {
         let row = row?;
         let word = row.get(word_index).unwrap_or_default().trim();
-        let key = word.to_ascii_lowercase();
+        let key = normalize_entry(word);
         if !target_words.contains(&key) {
             continue;
         }
@@ -252,7 +264,6 @@ fn build_lesson(level: &str, unit_index: usize, entries: &[DictionaryEntry]) -> 
 
     for entry in entries {
         let (phrase, first_sentence, second_sentence) = templates(entry);
-        let correct_index = reading_sentences.len();
         reading_sentences.push(first_sentence.clone());
         reading_sentences.push(second_sentence);
         word_items.push(WordItem {
@@ -266,7 +277,7 @@ fn build_lesson(level: &str, unit_index: usize, entries: &[DictionaryEntry]) -> 
         questions.push(Question {
             prompt: format!("选择包含“{}”对应词义的英文句子。", entry.translation),
             options: Vec::new(),
-            correct_index,
+            correct_index: 0,
         });
     }
 
@@ -355,4 +366,32 @@ fn normalize_entry(value: &str) -> String {
 
 fn slug(value: &str) -> String {
     normalize_entry(value).replace(' ', "-")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn duplicate_spelling_is_kept_at_the_earliest_level_only() {
+        let mut levels = BTreeMap::from([
+            ("A1".to_owned(), vec!["adult".to_owned(), "book".to_owned()]),
+            ("A2".to_owned(), vec!["adult".to_owned(), "bridge".to_owned()]),
+            ("B1".to_owned(), vec!["bridge".to_owned(), "career".to_owned()]),
+            ("B2".to_owned(), vec!["career".to_owned(), "debate".to_owned()]),
+        ]);
+
+        deduplicate_levels(&mut levels);
+
+        assert_eq!(levels["A1"], ["adult", "book"]);
+        assert_eq!(levels["A2"], ["bridge"]);
+        assert_eq!(levels["B1"], ["career"]);
+        assert_eq!(levels["B2"], ["debate"]);
+    }
+
+    #[test]
+    fn hyphenated_entries_use_a_stable_dictionary_key() {
+        assert_eq!(normalize_entry("T-shirt"), "t shirt");
+        assert_eq!(normalize_entry("T shirt"), "t shirt");
+    }
 }
