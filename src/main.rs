@@ -3,6 +3,7 @@
 mod app_v2;
 mod audio;
 mod catalog;
+mod catalog_daily;
 mod catalog_import;
 mod catalog_load;
 mod course;
