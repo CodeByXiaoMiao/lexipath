@@ -9,17 +9,26 @@ mod catalog_load;
 mod course;
 mod embedded_course;
 mod engine;
+mod fonts;
+mod ipa_app;
+mod phonetics;
+mod phonetics_catalog;
+mod phonetics_consonants;
+mod phonetics_engine;
+mod phonetics_vowels;
 mod practice;
 mod progress_data;
+mod progress_ipa;
 mod progress_lesson;
 mod progress_query;
 mod progress_review;
 mod progress_store;
+mod root_app;
 mod scheduler;
 mod shell;
 mod validator;
 
-use app_v2::LexiPathApp;
+use root_app::RootApp;
 use validator::validate_course;
 
 fn main() -> eframe::Result<()> {
@@ -55,6 +64,10 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Reference",
         options,
-        Box::new(move |context| Ok(Box::new(LexiPathApp::new(context, course)))),
+        Box::new(move |context| {
+            RootApp::new(context, course)
+                .map(|app| Box::new(app) as Box<dyn eframe::App>)
+                .map_err(|error| Box::<dyn std::error::Error + Send + Sync>::from(error))
+        }),
     )
 }
