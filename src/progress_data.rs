@@ -19,6 +19,8 @@ pub struct LessonRecord {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ProgressData {
     #[serde(default)]
+    pub ipa_completed_days: usize,
+    #[serde(default)]
     pub current_lesson_id: Option<String>,
     #[serde(default)]
     pub course_complete: bool,
