@@ -1,6 +1,6 @@
 [package]
 name = "lexipath"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A fixed-path English learning desktop application"
 license = "MIT"
@@ -8,6 +8,7 @@ publish = false
 
 [dependencies]
 anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
 csv = "1"
 eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
 global-hotkey = "0.8"
