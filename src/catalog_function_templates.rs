@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn all_reviewed_templates_are_loaded_once() {
-        assert_eq!(templates().len(), 257);
+        assert_eq!(templates().len(), 261);
     }
 
     #[test]
@@ -68,5 +68,11 @@ mod tests {
     fn irregular_plural_nouns_use_plural_agreement() {
         let template = function_template("bacteria").expect("template");
         assert_eq!(template.1, "These are bacteria.");
+    }
+
+    #[test]
+    fn unit_uses_a_because_it_begins_with_a_y_sound() {
+        let template = function_template("unit").expect("template");
+        assert_eq!(template.1, "This is a unit.");
     }
 }
