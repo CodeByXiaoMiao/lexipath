@@ -1,3 +1,4 @@
+use crate::catalog_core_meanings::core_sense_template;
 use crate::catalog_function_templates::function_template;
 use crate::catalog_semantic_templates::semantic_template;
 use crate::catalog_template_overrides::{normalize_display, reviewed_template};
@@ -12,11 +13,19 @@ pub fn apply_reviewed_templates(course: &mut CoursePack) {
         for lesson in &mut stage.lessons {
             for (index, word) in lesson.new_words.iter_mut().enumerate() {
                 let display = normalize_display(&word.text);
-                let template = function_template(&display)
-                    .or_else(|| reviewed_template(&display))
-                    .or_else(|| semantic_template(&display, &word.meaning))
-                    .or_else(|| renamed_word_template(&display));
-                word.text = display;
+                word.text = display.clone();
+
+                let template = if let Some((meaning, phrase, first, second)) =
+                    core_sense_template(&display)
+                {
+                    word.meaning = meaning;
+                    Some((phrase, first, second))
+                } else {
+                    function_template(&display)
+                        .or_else(|| reviewed_template(&display))
+                        .or_else(|| semantic_template(&display, &word.meaning))
+                        .or_else(|| renamed_word_template(&display))
+                };
 
                 let Some((phrase, first, second)) = template else {
                     continue;
@@ -78,9 +87,8 @@ mod tests {
     use crate::catalog_polish::polish_generated_content;
     use crate::course::{CoursePack, Lesson, Reading, Stage, WordItem};
 
-    #[test]
-    fn reviewed_template_replaces_the_generated_contexts() {
-        let mut course = CoursePack {
+    fn one_word_course(word: &str, meaning: &str) -> CoursePack {
+        CoursePack {
             id: "test".to_owned(),
             title: "test".to_owned(),
             version: 1,
@@ -91,10 +99,10 @@ mod tests {
                     id: "unit".to_owned(),
                     title: "unit".to_owned(),
                     new_words: vec![WordItem {
-                        id: "awake".to_owned(),
-                        text: "awake".to_owned(),
-                        ipa: "/əˈweɪk/".to_owned(),
-                        meaning: "adj. 醒着的".to_owned(),
+                        id: word.to_owned(),
+                        text: word.to_owned(),
+                        ipa: "/test/".to_owned(),
+                        meaning: meaning.to_owned(),
                         phrase: String::new(),
                         example: String::new(),
                     }],
@@ -106,13 +114,28 @@ mod tests {
                     },
                 }],
             }],
-        };
+        }
+    }
 
+    #[test]
+    fn reviewed_template_replaces_the_generated_contexts() {
+        let mut course = one_word_course("awake", "adj. 醒着的");
         polish_generated_content(&mut course);
         apply_reviewed_templates(&mut course);
 
         let lesson = &course.stages[0].lessons[0];
         assert_eq!(lesson.new_words[0].example, "I am awake.");
         assert_eq!(lesson.reading.sentences[1], "You are awake.");
+    }
+
+    #[test]
+    fn core_sense_review_replaces_meaning_and_contexts_together() {
+        let mut course = one_word_course("old", "n. 旧事物");
+        polish_generated_content(&mut course);
+        apply_reviewed_templates(&mut course);
+
+        let word = &course.stages[0].lessons[0].new_words[0];
+        assert_eq!(word.meaning, "adj. 老的；旧的");
+        assert_eq!(word.example, "It is old.");
     }
 }
