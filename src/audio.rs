@@ -28,14 +28,12 @@ fn speak_platform(text: String) -> Result<(), String> {
         .name("lexipath-speech".to_owned())
         .spawn(move || {
             let _ = Command::new("powershell.exe")
-                .args([
-                    "-NoProfile",
-                    "-NonInteractive",
-                    "-WindowStyle",
-                    "Hidden",
-                    "-Command",
-                    &script,
-                ])
+                .arg("-NoProfile")
+                .arg("-NonInteractive")
+                .arg("-WindowStyle")
+                .arg("Hidden")
+                .arg("-Command")
+                .arg(script)
                 .status();
         })
         .map(|_| ())
