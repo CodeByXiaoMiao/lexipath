@@ -6,6 +6,7 @@ mod catalog;
 mod catalog_daily;
 mod catalog_import;
 mod catalog_load;
+mod catalog_repair;
 mod course;
 mod embedded_course;
 mod engine;
@@ -33,6 +34,13 @@ use validator::validate_course;
 
 fn main() -> eframe::Result<()> {
     let arguments = std::env::args().skip(1).collect::<Vec<_>>();
+    if arguments.first().map(String::as_str) == Some("--repair-dictionary") {
+        if let Err(error) = catalog_repair::repair(&arguments[1..]) {
+            eprintln!("dictionary repair failed: {error:#}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
     if arguments.first().map(String::as_str) == Some("--import-catalog") {
         if let Err(error) = catalog_import::import_catalog(&arguments[1..]) {
             eprintln!("catalog import failed: {error:#}");
