@@ -9,7 +9,7 @@
       "lessons": [
         {
           "id": "foundation-001",
-          "title": "Here and There",
+          "title": "第一课",
           "new_words": [
             {
               "id": "word-i",
@@ -71,7 +71,7 @@
             }
           ],
           "reading": {
-            "title": "Here and There",
+            "title": "I am here. You are there.",
             "sentences": [
               "I am here.",
               "You are there.",
