@@ -69,6 +69,21 @@ jobs:
         with:
           components: rustfmt
 
+      - name: Repair derived phonetics
+        working-directory: lexipath
+        shell: pwsh
+        run: |
+          & cargo run --release -- `
+            --repair-dictionary `
+            --ogden ../sources/ogden/word-lists/basic-english-850.txt `
+            --word-list ../sources/oxford/package.txt `
+            --input ../sources/ecdict/ecdict.csv `
+            --output dictionary-repairs.csv 2>&1 | Tee-Object -FilePath dictionary-repair.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-Content dictionary-repairs.csv |
+            Select-Object -Skip 1 |
+            Add-Content ../sources/ecdict/ecdict.csv -Encoding utf8
+
       - name: Generate complete catalog
         working-directory: lexipath
         shell: pwsh
@@ -86,7 +101,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: course-generation-log
-          path: lexipath/course-generation.log
+          path: |
+            lexipath/dictionary-repair.log
+            lexipath/course-generation.log
           if-no-files-found: warn
 
       - name: Run tests
