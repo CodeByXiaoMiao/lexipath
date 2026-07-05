@@ -50,13 +50,23 @@ jobs:
 
       - name: Generate complete catalog
         working-directory: lexipath
-        run: >-
-          cargo run --release --
-          --import-catalog
-          --ogden ../sources/ogden/word-lists/basic-english-850.txt
-          --word-list ../sources/oxford/package.txt
-          --dictionary ../sources/ecdict/ecdict.csv
-          --output course.json
+        shell: pwsh
+        run: |
+          & cargo run --release -- `
+            --import-catalog `
+            --ogden ../sources/ogden/word-lists/basic-english-850.txt `
+            --word-list ../sources/oxford/package.txt `
+            --dictionary ../sources/ecdict/ecdict.csv `
+            --output course.json 2>&1 | Tee-Object -FilePath course-generation.log
+          exit $LASTEXITCODE
+
+      - name: Upload course generation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-generation-log
+          path: lexipath/course-generation.log
+          if-no-files-found: warn
 
       - name: Run tests
         working-directory: lexipath
