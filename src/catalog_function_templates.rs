@@ -33,6 +33,7 @@ fn templates() -> &'static HashMap<String, TemplateRecord> {
             include_str!("../assets/course-templates/function-2.json"),
             include_str!("../assets/course-templates/function-3.json"),
             include_str!("../assets/course-templates/function-4.json"),
+            include_str!("../assets/course-templates/function-5.json"),
         ] {
             let records: Vec<TemplateRecord> =
                 serde_json::from_str(source).expect("reviewed function template data is invalid");
@@ -54,12 +55,18 @@ mod tests {
 
     #[test]
     fn all_reviewed_templates_are_loaded_once() {
-        assert_eq!(templates().len(), 255);
+        assert_eq!(templates().len(), 257);
     }
 
     #[test]
     fn pronouns_use_a_real_sentence_instead_of_metalinguistic_fallback() {
         let template = function_template("my").expect("template");
         assert_eq!(template.1, "My book is here.");
+    }
+
+    #[test]
+    fn irregular_plural_nouns_use_plural_agreement() {
+        let template = function_template("bacteria").expect("template");
+        assert_eq!(template.1, "These are bacteria.");
     }
 }
