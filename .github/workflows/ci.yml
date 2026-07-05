@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "bootstrap/**"]
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Test
+        run: cargo test --all-targets
+      - name: Release check
+        run: cargo check --release
