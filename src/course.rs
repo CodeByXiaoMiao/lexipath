@@ -1,7 +1,7 @@
 use anyhow::Context;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CoursePack {
     pub id: String,
     pub title: String,
@@ -9,14 +9,14 @@ pub struct CoursePack {
     pub stages: Vec<Stage>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Stage {
     pub id: String,
     pub title: String,
     pub lessons: Vec<Lesson>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Lesson {
     pub id: String,
     pub title: String,
@@ -25,7 +25,7 @@ pub struct Lesson {
     pub reading: Reading,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct WordItem {
     pub id: String,
     pub text: String,
@@ -35,20 +35,20 @@ pub struct WordItem {
     pub example: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SentenceItem {
     pub text: String,
     pub meaning: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Reading {
     pub title: String,
     pub sentences: Vec<String>,
     pub questions: Vec<Question>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Question {
     pub prompt: String,
     pub options: Vec<String>,
