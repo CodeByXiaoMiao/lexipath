@@ -3,6 +3,7 @@
 mod app_v2;
 mod audio;
 mod catalog;
+mod catalog_core_meanings;
 mod catalog_daily;
 mod catalog_function_templates;
 mod catalog_import;
