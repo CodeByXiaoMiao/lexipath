@@ -55,7 +55,7 @@ impl UiSettings {
     }
 
     fn normalize(&mut self) {
-        self.visible_opacity_percent = self.visible_opacity_percent.clamp(35, 100);
+        self.visible_opacity_percent = self.visible_opacity_percent.clamp(5, 100);
     }
 }
 
@@ -150,7 +150,7 @@ impl RootApp {
                         .changed();
                     changed |= ui
                         .add(
-                            egui::Slider::new(&mut self.settings.visible_opacity_percent, 35..=100)
+                            egui::Slider::new(&mut self.settings.visible_opacity_percent, 5..=100)
                                 .text("界面透明度 %"),
                         )
                         .changed();
