@@ -13,12 +13,19 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+      - name: Runner diagnostic
+        shell: pwsh
+        run: |
+          "runner started" | Set-Content -Encoding UTF8 build.log
+          rustc --version 2>&1 | Add-Content build.log
+          cargo --version 2>&1 | Add-Content build.log
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Build real Rust egui release
         shell: pwsh
         run: |
-          cargo build --release 2>&1 | Tee-Object -FilePath build.log
+          cargo build --release 2>&1 | Tee-Object -FilePath build-output.log
+          Get-Content build-output.log | Add-Content build.log
           exit $LASTEXITCODE
       - name: Prepare runnable package
         if: success()
@@ -26,18 +33,18 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force package/data | Out-Null
           Copy-Item target/release/lexipath.exe package/LexiPath.exe
-          @'{
-            "enable_transparent_mode": false,
-            "enable_hover_show_hide": false,
-            "visible_opacity_percent": 85
-          }
-          '@ | Set-Content -Encoding UTF8 package/data/settings.json
-          @'
+          $settings = [ordered]@{
+            enable_transparent_mode = $false
+            enable_hover_show_hide = $false
+            visible_opacity_percent = 85
+          } | ConvertTo-Json
+          $settings | Set-Content -Encoding UTF8 package/data/settings.json
+          @"
           LexiPath v0.10.4
 
           This package is built from the real Rust/egui project on the fix/v0.10.4-from-bootstrap-mvp branch.
           Extract to a new folder and run LexiPath.exe.
-          '@ | Set-Content -Encoding UTF8 package/README.txt
+          "@ | Set-Content -Encoding UTF8 package/README.txt
           Compress-Archive -Path package/* -DestinationPath LexiPath-Windows-x64-v0.10.4-real.zip -Force
       - name: Upload runnable package
         if: success()
