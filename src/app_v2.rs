@@ -8,7 +8,6 @@ use crate::course::CoursePack;
 use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
-use crate::shell::DesktopShell;
 use crate::validator::tokenize;
 
 pub struct LexiPathApp {
@@ -17,9 +16,7 @@ pub struct LexiPathApp {
     active_review_id: Option<u64>,
     progress: Option<ProgressStore>,
     speaker: SystemSpeaker,
-    shell: DesktopShell,
     status: String,
-    compact: bool,
     course_finished: bool,
 }
 
@@ -44,9 +41,7 @@ impl LexiPathApp {
             active_review_id: None,
             progress,
             speaker: SystemSpeaker,
-            shell: DesktopShell::new(),
             status: "按固定顺序完成学习。到期复习优先于新课。".to_owned(),
-            compact: false,
             course_finished: false,
         };
         app.load_next_available();
@@ -157,20 +152,18 @@ impl LexiPathApp {
             self.speak(&word.text);
             self.session.mark_word_audio_played();
         }
-        if !self.compact {
-            ui.horizontal_wrapped(|ui| {
-                ui.label(format!("词组：{}", word.phrase));
-                if ui.small_button("▶").clicked() {
-                    self.speak(&word.phrase);
-                }
-            });
-            ui.horizontal_wrapped(|ui| {
-                ui.label(format!("例句：{}", word.example));
-                if ui.small_button("▶").clicked() {
-                    self.speak(&word.example);
-                }
-            });
-        }
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("词组：{}", word.phrase));
+            if ui.small_button("▶").clicked() {
+                self.speak(&word.phrase);
+            }
+        });
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("例句：{}", word.example));
+            if ui.small_button("▶").clicked() {
+                self.speak(&word.example);
+            }
+        });
         let enabled = self.session.can_advance_word();
         if ui
             .add_enabled(enabled, egui::Button::new("继续"))
@@ -318,7 +311,10 @@ impl LexiPathApp {
                     self.status = if result.correct {
                         "正确。".to_owned()
                     } else {
-                        "错误，本题会重新出现，不能带错通过。".to_owned()
+                        format!(
+                            "错误：你选择了「{}」。正确答案是「{}」。本题会重新出现，不能带错通过。",
+                            option, question.options[question.correct_index]
+                        )
                     };
                 }
             });
@@ -332,16 +328,20 @@ impl LexiPathApp {
         correct_index: usize,
         enabled: bool,
     ) {
+        let correct_text = options.get(correct_index).cloned().unwrap_or_default();
         for (index, option) in options.into_iter().enumerate() {
             if ui
-                .add_enabled(enabled, egui::Button::new(option))
+                .add_enabled(enabled, egui::Button::new(&option))
                 .clicked()
             {
                 let result = self.session.answer_current(index, correct_index);
                 self.status = if result.correct {
                     "正确。".to_owned()
                 } else {
-                    "错误，该项目仍留在待掌握队列。".to_owned()
+                    format!(
+                        "错误：你选择了「{}」。正确答案是「{}」。该项目仍留在待掌握队列。",
+                        option, correct_text
+                    )
                 };
             }
         }
@@ -375,25 +375,10 @@ impl LexiPathApp {
         ui.heading("当前计划已完成");
         ui.label("没有到期复习。未来复习到期后，重新打开软件即可继续。");
     }
-
-    fn apply_compact_mode(&mut self, context: &egui::Context) {
-        self.compact = !self.compact;
-        let size = if self.compact {
-            egui::vec2(380.0, 240.0)
-        } else {
-            egui::vec2(620.0, 520.0)
-        };
-        context.send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
-        context.send_viewport_cmd(egui::ViewportCommand::Focus);
-    }
 }
 
 impl eframe::App for LexiPathApp {
     fn update(&mut self, context: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.shell.compact_toggle_requested() {
-            self.apply_compact_mode(context);
-        }
-
         egui::TopBottomPanel::top("header").show(context, |ui| {
             ui.horizontal_wrapped(|ui| {
                 ui.strong(&self.course.title);
@@ -407,12 +392,6 @@ impl eframe::App for LexiPathApp {
                         self.course.lesson_count()
                     ));
                     ui.label(format!("到期复习 {}", store.due_count()));
-                }
-                if ui
-                    .small_button(if self.compact { "展开" } else { "紧凑" })
-                    .clicked()
-                {
-                    self.apply_compact_mode(context);
                 }
             });
         });
