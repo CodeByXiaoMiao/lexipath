@@ -21,7 +21,7 @@ impl SystemSpeaker {
 fn speak_platform(text: String) -> Result<(), String> {
     const CREATE_NO_WINDOW: u32 = 0x08000000;
 
-    let escaped = text.replace(''', "''");
+    let escaped = text.replace('\'', "''");
     let script = format!(
         "Add-Type -AssemblyName System.Speech; \
          $voice = New-Object System.Speech.Synthesis.SpeechSynthesizer; \
