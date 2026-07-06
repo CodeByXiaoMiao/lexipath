@@ -1,0 +1,24 @@
+name: v0.10.4 debug
+
+on:
+  push:
+    branches:
+      - fix/v0.10.4-from-bootstrap-mvp
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: windows-latest
+    steps:
+      - name: Create first diagnostic
+        shell: pwsh
+        run: |
+          "runner started" | Set-Content -Encoding UTF8 debug.log
+          Get-Location | Add-Content debug.log
+          rustc --version 2>&1 | Add-Content debug.log
+          cargo --version 2>&1 | Add-Content debug.log
+      - name: Upload debug log
+        uses: actions/upload-artifact@v4
+        with:
+          name: v0104-debug-log
+          path: debug.log
