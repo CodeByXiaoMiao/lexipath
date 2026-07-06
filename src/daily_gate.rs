@@ -1,3 +1,4 @@
+use crate::course::STAGE_ASSESSMENT_PREFIX;
 use crate::progress_store::ProgressStore;
 use crate::scheduler::current_day;
 
@@ -9,12 +10,23 @@ impl ProgressStore {
         self.data
             .lessons
             .iter()
-            .filter(|lesson| lesson.completed_day == today)
+            .filter(|lesson| {
+                lesson.completed_day == today
+                    && !lesson.lesson_id.starts_with(STAGE_ASSESSMENT_PREFIX)
+            })
             .count()
     }
 
     pub fn vocabulary_locked_today(&self) -> bool {
-        self.due_count() == 0 && self.new_units_completed_today() >= NEW_UNITS_PER_DAY
+        let assessment_is_current = self
+            .data
+            .current_lesson_id
+            .as_deref()
+            .map(|lesson_id| lesson_id.starts_with(STAGE_ASSESSMENT_PREFIX))
+            .unwrap_or(false);
+        !assessment_is_current
+            && self.due_count() == 0
+            && self.new_units_completed_today() >= NEW_UNITS_PER_DAY
     }
 }
 
