@@ -1,6 +1,8 @@
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
+pub const STAGE_ASSESSMENT_PREFIX: &str = "stage-final-";
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CoursePack {
     pub id: String,
@@ -69,5 +71,9 @@ impl CoursePack {
 impl Lesson {
     pub fn full_reading_text(&self) -> String {
         self.reading.sentences.join(" ")
+    }
+
+    pub fn is_stage_assessment(&self) -> bool {
+        self.id.starts_with(STAGE_ASSESSMENT_PREFIX)
     }
 }
