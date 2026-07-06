@@ -78,6 +78,7 @@ pub struct RootApp {
     settings: UiSettings,
     show_window_settings: bool,
     pointer_faded: bool,
+    topmost_applied: bool,
 }
 
 impl RootApp {
@@ -96,6 +97,7 @@ impl RootApp {
             settings,
             show_window_settings: false,
             pointer_faded: false,
+            topmost_applied: false,
         })
     }
 
@@ -145,6 +147,8 @@ impl RootApp {
                 {
                     self.show_window_settings = !self.show_window_settings;
                 }
+                ui.separator();
+                ui.label("窗口保持置顶");
                 if self.pointer_faded {
                     ui.separator();
                     ui.label("鼠标已移出：界面已降到 0%。");
@@ -166,7 +170,7 @@ impl RootApp {
                         )
                         .changed();
                 });
-                ui.label("弱化版：鼠标移出后把界面降到 0%，鼠标移入后恢复到滑块透明度；不做点击穿透。");
+                ui.label("弱化版：鼠标移出后把界面降到 0%，鼠标移入后恢复到滑块透明度；不做点击穿透。窗口会保持置顶。");
             }
         });
         if changed {
@@ -189,10 +193,21 @@ impl RootApp {
             context.request_repaint_after(std::time::Duration::from_millis(250));
         }
     }
+
+    fn ensure_topmost(&mut self, context: &egui::Context) {
+        if self.topmost_applied {
+            return;
+        }
+        context.send_viewport_cmd(egui::ViewportCommand::WindowLevel(
+            egui::WindowLevel::AlwaysOnTop,
+        ));
+        self.topmost_applied = true;
+    }
 }
 
 impl eframe::App for RootApp {
     fn update(&mut self, context: &egui::Context, frame: &mut eframe::Frame) {
+        self.ensure_topmost(context);
         self.update_pointer_fade(context);
         self.show_window_settings(context);
 
