@@ -170,7 +170,7 @@ impl RootApp {
                         )
                         .changed();
                 });
-                ui.label("弱化版：鼠标移出后把界面降到 0%，鼠标移入后恢复到滑块透明度；不做点击穿透。窗口会保持置顶。");
+                ui.label("鼠标移出后界面降到 0%，鼠标移入后恢复到滑块透明度；窗口保持置顶，不点击穿透。");
             }
         });
         if changed {
@@ -231,7 +231,6 @@ impl eframe::App for RootApp {
 }
 
 fn apply_soft_transparency(context: &egui::Context, settings: &UiSettings, faded: bool) {
-    let mut style = (*context.style()).clone();
     let alpha = if settings.enable_soft_transparency {
         if faded {
             0
@@ -241,12 +240,23 @@ fn apply_soft_transparency(context: &egui::Context, settings: &UiSettings, faded
     } else {
         255
     };
+    let ratio = f32::from(alpha) / 255.0;
 
-    style.visuals.panel_fill = style.visuals.panel_fill.linear_multiply(f32::from(alpha) / 255.0);
-    style.visuals.window_fill = style.visuals.window_fill.linear_multiply(f32::from(alpha) / 255.0);
-    style.visuals.extreme_bg_color = style
-        .visuals
-        .extreme_bg_color
-        .linear_multiply(f32::from(alpha) / 255.0);
+    let mut style = egui::Style::default();
+    style.visuals = egui::Visuals::light();
+    style.visuals.panel_fill = egui::Color32::from_rgba_premultiplied(248, 248, 248, alpha);
+    style.visuals.window_fill = egui::Color32::from_rgba_premultiplied(248, 248, 248, alpha);
+    style.visuals.extreme_bg_color = egui::Color32::from_rgba_premultiplied(255, 255, 255, alpha);
+    style.visuals.faint_bg_color = egui::Color32::from_rgba_premultiplied(240, 240, 240, alpha);
+    style.visuals.override_text_color = Some(egui::Color32::from_rgba_premultiplied(
+        40,
+        40,
+        40,
+        alpha,
+    ));
+    style.visuals.widgets.noninteractive.bg_fill = style.visuals.widgets.noninteractive.bg_fill.gamma_multiply(ratio);
+    style.visuals.widgets.inactive.bg_fill = style.visuals.widgets.inactive.bg_fill.gamma_multiply(ratio);
+    style.visuals.widgets.hovered.bg_fill = style.visuals.widgets.hovered.bg_fill.gamma_multiply(ratio);
+    style.visuals.widgets.active.bg_fill = style.visuals.widgets.active.bg_fill.gamma_multiply(ratio);
     context.set_style(style);
 }
