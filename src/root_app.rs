@@ -11,6 +11,8 @@ use crate::fonts;
 use crate::ipa_app::IpaApp;
 use crate::progress_store::ProgressStore;
 
+const WINDOW_TITLE: &str = "LexiPath";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 struct UiSettings {
@@ -70,6 +72,81 @@ fn settings_path() -> anyhow::Result<PathBuf> {
         .join("settings.json"))
 }
 
+#[cfg(target_os = "windows")]
+struct NativeOpacity {
+    title: Vec<u16>,
+    hwnd: windows_sys::Win32::Foundation::HWND,
+    current_alpha: Option<u8>,
+}
+
+#[cfg(target_os = "windows")]
+impl NativeOpacity {
+    fn new(title: &str) -> Self {
+        let mut title = title.encode_utf16().collect::<Vec<_>>();
+        title.push(0);
+        Self {
+            title,
+            hwnd: std::ptr::null_mut(),
+            current_alpha: None,
+        }
+    }
+
+    fn set_alpha(&mut self, alpha: u8) {
+        if self.current_alpha == Some(alpha) {
+            return;
+        }
+        let hwnd = self.hwnd();
+        if hwnd.is_null() {
+            return;
+        }
+        unsafe {
+            let style = windows_sys::Win32::UI::WindowsAndMessaging::GetWindowLongPtrW(
+                hwnd,
+                windows_sys::Win32::UI::WindowsAndMessaging::GWL_EXSTYLE,
+            );
+            let wanted = style | windows_sys::Win32::UI::WindowsAndMessaging::WS_EX_LAYERED as isize;
+            if wanted != style {
+                windows_sys::Win32::UI::WindowsAndMessaging::SetWindowLongPtrW(
+                    hwnd,
+                    windows_sys::Win32::UI::WindowsAndMessaging::GWL_EXSTYLE,
+                    wanted,
+                );
+            }
+            windows_sys::Win32::UI::WindowsAndMessaging::SetLayeredWindowAttributes(
+                hwnd,
+                0,
+                alpha,
+                windows_sys::Win32::UI::WindowsAndMessaging::LWA_ALPHA,
+            );
+        }
+        self.current_alpha = Some(alpha);
+    }
+
+    fn hwnd(&mut self) -> windows_sys::Win32::Foundation::HWND {
+        if self.hwnd.is_null() {
+            self.hwnd = unsafe {
+                windows_sys::Win32::UI::WindowsAndMessaging::FindWindowW(
+                    std::ptr::null(),
+                    self.title.as_ptr(),
+                )
+            };
+        }
+        self.hwnd
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+struct NativeOpacity;
+
+#[cfg(not(target_os = "windows"))]
+impl NativeOpacity {
+    fn new(_title: &str) -> Self {
+        Self
+    }
+
+    fn set_alpha(&mut self, _alpha: u8) {}
+}
+
 pub struct RootApp {
     ipa: Option<IpaApp>,
     vocabulary: LexiPathApp,
@@ -79,6 +156,7 @@ pub struct RootApp {
     show_window_settings: bool,
     pointer_faded: bool,
     topmost_applied: bool,
+    opacity: NativeOpacity,
 }
 
 impl RootApp {
@@ -88,7 +166,7 @@ impl RootApp {
     ) -> anyhow::Result<Self> {
         fonts::install(&context.egui_ctx);
         let settings = UiSettings::load();
-        apply_soft_transparency(&context.egui_ctx, &settings, false);
+        reset_normal_style(&context.egui_ctx);
         Ok(Self {
             ipa: IpaApp::load()?,
             vocabulary: LexiPathApp::new(context, course),
@@ -98,6 +176,7 @@ impl RootApp {
             show_window_settings: false,
             pointer_faded: false,
             topmost_applied: false,
+            opacity: NativeOpacity::new(WINDOW_TITLE),
         })
     }
 
@@ -151,30 +230,30 @@ impl RootApp {
                 ui.label("窗口保持置顶");
                 if self.pointer_faded {
                     ui.separator();
-                    ui.label("鼠标已移出：界面已降到 0%。");
+                    ui.label("鼠标已移出：窗口已透明到 0%。");
                 }
             });
             if self.show_window_settings {
                 ui.separator();
                 ui.horizontal_wrapped(|ui| {
                     changed |= ui
-                        .checkbox(&mut self.settings.enable_soft_transparency, "弱化透明模式")
+                        .checkbox(&mut self.settings.enable_soft_transparency, "原生透明模式")
                         .changed();
                     changed |= ui
-                        .checkbox(&mut self.settings.enable_hover_fade, "鼠标移出淡隐 / 移入显示")
+                        .checkbox(&mut self.settings.enable_hover_fade, "鼠标移出透明 / 移入显示")
                         .changed();
                     changed |= ui
                         .add(
                             egui::Slider::new(&mut self.settings.visible_opacity_percent, 5..=100)
-                                .text("界面透明度 %"),
+                                .text("窗口透明度 %"),
                         )
                         .changed();
                 });
-                ui.label("鼠标移出后界面降到 0%，鼠标移入后恢复到滑块透明度；窗口保持置顶，不点击穿透。");
+                ui.label("这版使用 Windows 原生窗口透明度：整窗按滑块透明，移出降到 0%，移入恢复；不点击穿透。 ");
             }
         });
         if changed {
-            apply_soft_transparency(context, &self.settings, self.pointer_faded);
+            self.apply_window_alpha();
             if let Err(error) = self.settings.save() {
                 self.root_status = format!("窗口设置保存失败：{error:#}");
             }
@@ -187,11 +266,24 @@ impl RootApp {
             && context.input(|input| input.pointer.hover_pos().is_none());
         if faded != self.pointer_faded {
             self.pointer_faded = faded;
-            apply_soft_transparency(context, &self.settings, self.pointer_faded);
+            self.apply_window_alpha();
         }
         if self.settings.enable_soft_transparency && self.settings.enable_hover_fade {
             context.request_repaint_after(std::time::Duration::from_millis(250));
         }
+    }
+
+    fn apply_window_alpha(&mut self) {
+        let alpha = if self.settings.enable_soft_transparency {
+            if self.pointer_faded {
+                0
+            } else {
+                self.settings.alpha()
+            }
+        } else {
+            255
+        };
+        self.opacity.set_alpha(alpha);
     }
 
     fn ensure_topmost(&mut self, context: &egui::Context) {
@@ -208,6 +300,7 @@ impl RootApp {
 impl eframe::App for RootApp {
     fn update(&mut self, context: &egui::Context, frame: &mut eframe::Frame) {
         self.ensure_topmost(context);
+        self.apply_window_alpha();
         self.update_pointer_fade(context);
         self.show_window_settings(context);
 
@@ -230,33 +323,8 @@ impl eframe::App for RootApp {
     }
 }
 
-fn apply_soft_transparency(context: &egui::Context, settings: &UiSettings, faded: bool) {
-    let alpha = if settings.enable_soft_transparency {
-        if faded {
-            0
-        } else {
-            settings.alpha()
-        }
-    } else {
-        255
-    };
-    let ratio = f32::from(alpha) / 255.0;
-
+fn reset_normal_style(context: &egui::Context) {
     let mut style = egui::Style::default();
     style.visuals = egui::Visuals::light();
-    style.visuals.panel_fill = egui::Color32::from_rgba_premultiplied(248, 248, 248, alpha);
-    style.visuals.window_fill = egui::Color32::from_rgba_premultiplied(248, 248, 248, alpha);
-    style.visuals.extreme_bg_color = egui::Color32::from_rgba_premultiplied(255, 255, 255, alpha);
-    style.visuals.faint_bg_color = egui::Color32::from_rgba_premultiplied(240, 240, 240, alpha);
-    style.visuals.override_text_color = Some(egui::Color32::from_rgba_premultiplied(
-        40,
-        40,
-        40,
-        alpha,
-    ));
-    style.visuals.widgets.noninteractive.bg_fill = style.visuals.widgets.noninteractive.bg_fill.gamma_multiply(ratio);
-    style.visuals.widgets.inactive.bg_fill = style.visuals.widgets.inactive.bg_fill.gamma_multiply(ratio);
-    style.visuals.widgets.hovered.bg_fill = style.visuals.widgets.hovered.bg_fill.gamma_multiply(ratio);
-    style.visuals.widgets.active.bg_fill = style.visuals.widgets.active.bg_fill.gamma_multiply(ratio);
     context.set_style(style);
 }
