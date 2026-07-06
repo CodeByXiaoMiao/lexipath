@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use serde::Deserialize;
+
 use crate::course::{CoursePack, Lesson, Question, Reading, Stage};
 use crate::validator::tokenize;
 
@@ -9,8 +11,23 @@ const MAX_READING_WORDS: usize = 1_150;
 const TARGET_QUESTIONS: usize = 20;
 const MIN_QUESTIONS: usize = 15;
 
+#[derive(Debug, Clone, Deserialize)]
+struct AssessmentAsset {
+    title: String,
+    sentences: Vec<String>,
+    questions: Vec<Question>,
+}
+
 pub fn append_required_stage_assessments(course: &mut CoursePack) {
+    let mut learned_tokens = HashSet::<String>::new();
+
     for stage in &mut course.stages {
+        for lesson in &stage.lessons {
+            for word in &lesson.new_words {
+                learned_tokens.extend(tokenize(&word.text));
+            }
+        }
+
         if !requires_final_assessment(&stage.id) {
             continue;
         }
@@ -18,7 +35,7 @@ pub fn append_required_stage_assessments(course: &mut CoursePack) {
         stage
             .lessons
             .retain(|lesson| !lesson.is_stage_assessment());
-        if let Some(assessment) = build_stage_assessment(stage) {
+        if let Some(assessment) = build_stage_assessment(stage, &learned_tokens) {
             stage.lessons.push(assessment);
         }
     }
@@ -28,7 +45,73 @@ fn requires_final_assessment(stage_id: &str) -> bool {
     stage_id.starts_with("ogden-")
 }
 
-fn build_stage_assessment(stage: &Stage) -> Option<Lesson> {
+fn build_stage_assessment(
+    stage: &Stage,
+    learned_tokens: &HashSet<String>,
+) -> Option<Lesson> {
+    if let Some(asset) = curated_asset(&stage.id) {
+        if asset_is_valid(&asset, learned_tokens) {
+            return Some(Lesson {
+                id: format!("stage-final-{}", stage.id),
+                title: format!("{} · 阶段总结阅读", stage.title),
+                new_words: Vec::new(),
+                sentences: Vec::new(),
+                reading: Reading {
+                    title: asset.title,
+                    sentences: asset.sentences,
+                    questions: asset.questions,
+                },
+            });
+        }
+    }
+
+    build_fallback_assessment(stage)
+}
+
+fn curated_asset(stage_id: &str) -> Option<AssessmentAsset> {
+    let source = match stage_id {
+        "ogden-850" => include_str!("../assets/stage-assessments/ogden-850.json"),
+        _ => return None,
+    };
+    serde_json::from_str(source).ok()
+}
+
+fn asset_is_valid(asset: &AssessmentAsset, learned_tokens: &HashSet<String>) -> bool {
+    let reading_words = asset
+        .sentences
+        .iter()
+        .map(|sentence| tokenize(sentence).len())
+        .sum::<usize>();
+    if !(MIN_READING_WORDS..=MAX_READING_WORDS).contains(&reading_words)
+        || !(MIN_QUESTIONS..=25).contains(&asset.questions.len())
+    {
+        return false;
+    }
+
+    let all_text_is_learned = asset
+        .sentences
+        .iter()
+        .chain(
+            asset
+                .questions
+                .iter()
+                .flat_map(|question| question.options.iter()),
+        )
+        .flat_map(|text| tokenize(text))
+        .all(|token| learned_tokens.contains(&token));
+    if !all_text_is_learned {
+        return false;
+    }
+
+    asset.questions.iter().all(|question| {
+        question.options.len() >= 2
+            && question.correct_index < question.options.len()
+            && question.options.iter().collect::<HashSet<_>>().len()
+                == question.options.len()
+    })
+}
+
+fn build_fallback_assessment(stage: &Stage) -> Option<Lesson> {
     let source_lessons = stage
         .lessons
         .iter()
@@ -100,8 +183,6 @@ fn collect_spread_sentences(source_lessons: &[&Lesson]) -> Vec<String> {
         }
     }
 
-    // A very small or unusually repetitive course can still reach the minimum
-    // by reusing already validated contexts. The order remains deterministic.
     if selected_words < MIN_READING_WORDS {
         'fill: loop {
             let before = selected_words;
@@ -223,5 +304,20 @@ mod tests {
         let assessment = course.stages[0].lessons.last().expect("assessment");
         assert!(assessment.reading.questions.len() >= MIN_QUESTIONS);
         assert!(tokenize(&assessment.full_reading_text()).len() >= MIN_READING_WORDS);
+    }
+
+    #[test]
+    fn curated_asset_rejects_unlearned_words() {
+        let asset = AssessmentAsset {
+            title: "测试".to_owned(),
+            sentences: vec!["Unknown word.".to_owned(); 500],
+            questions: vec![Question {
+                prompt: "问题".to_owned(),
+                options: vec!["Unknown word.".to_owned(), "Known word.".to_owned()],
+                correct_index: 0,
+            }; 20],
+        };
+        let learned = HashSet::from(["known".to_owned(), "word".to_owned()]);
+        assert!(!asset_is_valid(&asset, &learned));
     }
 }
