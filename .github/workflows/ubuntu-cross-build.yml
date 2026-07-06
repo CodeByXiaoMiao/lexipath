@@ -1,0 +1,50 @@
+name: Ubuntu Windows cross build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["bootstrap/mvp"]
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "Cargo.toml"
+      - ".github/workflows/ubuntu-cross-build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MinGW toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+
+      - name: Install Rust Windows GNU target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu
+
+      - name: Test host-independent logic
+        run: cargo test --lib --all-targets || cargo test --all-targets
+
+      - name: Cross-compile Windows x64 release
+        env:
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc
+          CC_x86_64_pc_windows_gnu: x86_64-w64-mingw32-gcc
+          CXX_x86_64_pc_windows_gnu: x86_64-w64-mingw32-g++
+        run: cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Prepare executable artifact
+        run: |
+          mkdir -p package
+          cp target/x86_64-pc-windows-gnu/release/lexipath.exe package/LexiPath.exe
+          cp README.md package/README.md
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: LexiPath-Windows-x64-exe
+          path: package
+          if-no-files-found: error
