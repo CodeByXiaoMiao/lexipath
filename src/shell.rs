@@ -20,7 +20,7 @@ impl DesktopShell {
         }
     }
 
-    pub fn compact_toggle_requested(&self) -> bool {
+    pub fn force_full_toggle_requested(&self) -> bool {
         let Some(shortcut_id) = self.shortcut_id else {
             return false;
         };
@@ -30,6 +30,10 @@ impl DesktopShell {
                 return true;
             }
         }
+        false
+    }
+
+    pub fn compact_toggle_requested(&self) -> bool {
         false
     }
 }
@@ -59,7 +63,7 @@ fn create_tray_icon() -> Option<TrayIcon> {
 
     let icon = Icon::from_rgba(rgba, size, size).ok()?;
     TrayIconBuilder::new()
-        .with_tooltip("Reference")
+        .with_tooltip("LexiPath")
         .with_icon(icon)
         .build()
         .ok()
