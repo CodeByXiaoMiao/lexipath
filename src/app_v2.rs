@@ -9,6 +9,7 @@ use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
 use crate::shell::DesktopShell;
+use crate::validator::tokenize;
 
 pub struct LexiPathApp {
     course: CoursePack,
@@ -94,7 +95,11 @@ impl LexiPathApp {
             self.session = LearningSession::new(lesson.clone());
             self.active_review_id = None;
             self.course_finished = false;
-            self.status = "开始当前固定课程。".to_owned();
+            self.status = if lesson.is_stage_assessment() {
+                "Ogden 已学完。完成阶段总结长文和理解测试后才能进入 Oxford。".to_owned()
+            } else {
+                "开始当前固定课程。".to_owned()
+            };
         }
     }
 
@@ -234,24 +239,54 @@ impl LexiPathApp {
 
     fn show_reading(&mut self, ui: &mut egui::Ui) {
         let lesson = self.session.lesson().clone();
+        let is_assessment = lesson.is_stage_assessment();
         ui.heading(&lesson.reading.title);
-        ui.label("正文已通过累计已学词白名单和内容质量检查。");
+        if is_assessment {
+            let word_count = tokenize(&lesson.full_reading_text()).len();
+            ui.label(format!(
+                "Ogden 阶段结业阅读：约 {word_count} 词，{} 道理解题。全文只使用已经学过的词。",
+                lesson.reading.questions.len()
+            ));
+        } else {
+            ui.label("正文已通过累计已学词白名单和内容质量检查。");
+        }
         ui.separator();
-        for sentence in &lesson.reading.sentences {
-            ui.horizontal_wrapped(|ui| {
-                ui.label(egui::RichText::new(sentence).size(19.0));
-                if ui.small_button("▶").clicked() {
-                    self.speak(sentence);
+
+        let reserved_height = if is_assessment { 145.0 } else { 120.0 };
+        let reading_height = (ui.available_height() - reserved_height).max(150.0);
+        egui::ScrollArea::vertical()
+            .max_height(reading_height)
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
+                    if is_assessment && index % 12 == 0 {
+                        if index > 0 {
+                            ui.add_space(10.0);
+                        }
+                        ui.strong(format!("第 {} 段", index / 12 + 1));
+                    }
+                    ui.horizontal_wrapped(|ui| {
+                        ui.label(egui::RichText::new(sentence).size(19.0));
+                        if ui.small_button("▶").clicked() {
+                            self.speak(sentence);
+                        }
+                    });
                 }
             });
-        }
+
+        ui.separator();
         if ui.button("▶ 播放全文").clicked() {
             self.speak(&lesson.full_reading_text());
             self.session.mark_reading_audio_played();
         }
         let enabled = self.session.reading_audio_played();
+        let next_label = if is_assessment {
+            "进入阶段结业测试"
+        } else {
+            "进入阅读理解"
+        };
         if ui
-            .add_enabled(enabled, egui::Button::new("进入阅读理解"))
+            .add_enabled(enabled, egui::Button::new(next_label))
             .clicked()
         {
             self.session.finish_reading();
@@ -265,7 +300,11 @@ impl LexiPathApp {
         let Some(question) = self.session.current_question().cloned() else {
             return;
         };
-        ui.heading("阅读理解");
+        ui.heading(if self.session.lesson().is_stage_assessment() {
+            "阶段结业阅读理解"
+        } else {
+            "阅读理解"
+        });
         ui.label(&question.prompt);
         for (index, option) in question.options.iter().enumerate() {
             ui.horizontal(|ui| {
@@ -312,12 +351,22 @@ impl LexiPathApp {
     }
 
     fn show_complete(&mut self, ui: &mut egui::Ui) {
-        ui.heading("本项最终正确率 100%");
+        let is_assessment = self.session.lesson().is_stage_assessment();
+        ui.heading(if is_assessment {
+            "Ogden 阶段总结阅读已通过"
+        } else {
+            "本项最终正确率 100%"
+        });
         ui.label(format!(
             "首次作答正确率：{:.0}%",
             self.session.first_attempt_accuracy() * 100.0
         ));
-        if ui.button("保存并继续固定计划").clicked() {
+        let button = if is_assessment {
+            "完成并解锁 Oxford"
+        } else {
+            "保存并继续固定计划"
+        };
+        if ui.button(button).clicked() {
             self.commit_and_continue();
         }
     }
