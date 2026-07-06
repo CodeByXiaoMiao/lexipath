@@ -1,23 +1,23 @@
 use crate::phonetics::{PhoneticItem, PhoneticLesson};
 
 const D1: &[PhoneticItem] = &[
-    PhoneticItem { symbol: "/iː/", example: "see", example_ipa: "/siː/", hint: "长元音" },
+    PhoneticItem { symbol: "/i:/", example: "see", example_ipa: "/si:/", hint: "长元音" },
     PhoneticItem { symbol: "/ɪ/", example: "sit", example_ipa: "/sɪt/", hint: "短元音" },
     PhoneticItem { symbol: "/e/", example: "bed", example_ipa: "/bed/", hint: "短元音" },
 ];
 const D2: &[PhoneticItem] = &[
     PhoneticItem { symbol: "/æ/", example: "cat", example_ipa: "/kæt/", hint: "短元音" },
     PhoneticItem { symbol: "/ʌ/", example: "cup", example_ipa: "/kʌp/", hint: "短元音" },
-    PhoneticItem { symbol: "/ɑː/", example: "car", example_ipa: "/kɑːr/", hint: "长元音" },
+    PhoneticItem { symbol: "/ɑ:/", example: "car", example_ipa: "/kɑ:r/", hint: "长元音" },
 ];
 const D3: &[PhoneticItem] = &[
-    PhoneticItem { symbol: "/ɔː/", example: "law", example_ipa: "/lɔː/", hint: "长元音" },
+    PhoneticItem { symbol: "/ɔ:/", example: "law", example_ipa: "/lɔ:/", hint: "长元音" },
     PhoneticItem { symbol: "/ʊ/", example: "book", example_ipa: "/bʊk/", hint: "短元音" },
-    PhoneticItem { symbol: "/uː/", example: "food", example_ipa: "/fuːd/", hint: "长元音" },
+    PhoneticItem { symbol: "/u:/", example: "food", example_ipa: "/fu:d/", hint: "长元音" },
 ];
 const D4: &[PhoneticItem] = &[
-    PhoneticItem { symbol: "/ɜːr/", example: "bird", example_ipa: "/bɜːrd/", hint: "卷舌元音" },
-    PhoneticItem { symbol: "/ər/", example: "teacher", example_ipa: "/ˈtiːtʃər/", hint: "弱读卷舌音" },
+    PhoneticItem { symbol: "/ɜ:r/", example: "bird", example_ipa: "/bɜ:rd/", hint: "卷舌元音" },
+    PhoneticItem { symbol: "/ər/", example: "teacher", example_ipa: "/ˈti:tʃər/", hint: "弱读卷舌音" },
     PhoneticItem { symbol: "/ə/", example: "about", example_ipa: "/əˈbaʊt/", hint: "弱读央元音" },
 ];
 const D5: &[PhoneticItem] = &[
