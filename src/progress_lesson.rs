@@ -1,3 +1,4 @@
+use crate::course::STAGE_ASSESSMENT_PREFIX;
 use crate::progress_data::{LessonRecord, ReviewRecord};
 use crate::progress_store::ProgressStore;
 use crate::scheduler::{current_day, due_day, REVIEW_OFFSETS_DAYS};
@@ -20,6 +21,10 @@ impl ProgressStore {
             first_attempt_accuracy,
             completed_day,
         });
+
+        if lesson_id.starts_with(STAGE_ASSESSMENT_PREFIX) {
+            return self.save();
+        }
 
         for step in 0..REVIEW_OFFSETS_DAYS.len() {
             let exists = self
