@@ -29,7 +29,9 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
     for stage in &course.stages {
         let generated_stage = stage.id != "foundation-words";
         for lesson in &stage.lessons {
-            if generated_stage {
+            if lesson.is_stage_assessment() {
+                validate_stage_assessment(lesson, &mut issues);
+            } else if generated_stage {
                 validate_lesson_shape(lesson, &mut issues);
             }
 
@@ -174,6 +176,38 @@ fn validate_lesson_shape(lesson: &Lesson, issues: &mut Vec<QualityIssue>) {
             lesson,
             "reading.questions",
             "every new entry must have one comprehension check",
+        ));
+    }
+}
+
+fn validate_stage_assessment(lesson: &Lesson, issues: &mut Vec<QualityIssue>) {
+    if !lesson.new_words.is_empty() || !lesson.sentences.is_empty() {
+        issues.push(issue(
+            lesson,
+            "assessment",
+            "a stage assessment cannot introduce new words or sentence drills",
+        ));
+    }
+
+    let reading_words = tokenize(&lesson.full_reading_text()).len();
+    if !(800..=1_150).contains(&reading_words) {
+        issues.push(issue(
+            lesson,
+            "reading",
+            &format!(
+                "stage final reading must contain 800 to 1150 learned words; found {reading_words}"
+            ),
+        ));
+    }
+
+    if !(15..=25).contains(&lesson.reading.questions.len()) {
+        issues.push(issue(
+            lesson,
+            "reading.questions",
+            &format!(
+                "stage final assessment must contain 15 to 25 questions; found {}",
+                lesson.reading.questions.len()
+            ),
         ));
     }
 }
