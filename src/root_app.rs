@@ -15,6 +15,7 @@ use crate::progress_store::ProgressStore;
 #[serde(default)]
 struct UiSettings {
     enable_soft_transparency: bool,
+    enable_hover_fade: bool,
     visible_opacity_percent: u8,
 }
 
@@ -22,6 +23,7 @@ impl Default for UiSettings {
     fn default() -> Self {
         Self {
             enable_soft_transparency: false,
+            enable_hover_fade: false,
             visible_opacity_percent: 90,
         }
     }
@@ -75,6 +77,7 @@ pub struct RootApp {
     allow_extra_new_units_today: bool,
     settings: UiSettings,
     show_window_settings: bool,
+    pointer_faded: bool,
 }
 
 impl RootApp {
@@ -84,7 +87,7 @@ impl RootApp {
     ) -> anyhow::Result<Self> {
         fonts::install(&context.egui_ctx);
         let settings = UiSettings::load();
-        apply_soft_transparency(&context.egui_ctx, &settings);
+        apply_soft_transparency(&context.egui_ctx, &settings, false);
         Ok(Self {
             ipa: IpaApp::load()?,
             vocabulary: LexiPathApp::new(context, course),
@@ -92,6 +95,7 @@ impl RootApp {
             allow_extra_new_units_today: false,
             settings,
             show_window_settings: false,
+            pointer_faded: false,
         })
     }
 
@@ -141,6 +145,10 @@ impl RootApp {
                 {
                     self.show_window_settings = !self.show_window_settings;
                 }
+                if self.pointer_faded {
+                    ui.separator();
+                    ui.label("鼠标已移出：界面已降到 5%。");
+                }
             });
             if self.show_window_settings {
                 ui.separator();
@@ -149,26 +157,43 @@ impl RootApp {
                         .checkbox(&mut self.settings.enable_soft_transparency, "弱化透明模式")
                         .changed();
                     changed |= ui
+                        .checkbox(&mut self.settings.enable_hover_fade, "鼠标移出淡隐 / 移入显示")
+                        .changed();
+                    changed |= ui
                         .add(
                             egui::Slider::new(&mut self.settings.visible_opacity_percent, 5..=100)
                                 .text("界面透明度 %"),
                         )
                         .changed();
                 });
-                ui.label("弱化版只调整界面淡化效果，不做鼠标移出隐藏，也不做点击穿透。");
+                ui.label("弱化版：鼠标移出后把界面降到 5%，鼠标移入后恢复到滑块透明度；不做点击穿透。");
             }
         });
         if changed {
-            apply_soft_transparency(context, &self.settings);
+            apply_soft_transparency(context, &self.settings, self.pointer_faded);
             if let Err(error) = self.settings.save() {
                 self.root_status = format!("窗口设置保存失败：{error:#}");
             }
+        }
+    }
+
+    fn update_pointer_fade(&mut self, context: &egui::Context) {
+        let faded = self.settings.enable_soft_transparency
+            && self.settings.enable_hover_fade
+            && context.input(|input| input.pointer.hover_pos().is_none());
+        if faded != self.pointer_faded {
+            self.pointer_faded = faded;
+            apply_soft_transparency(context, &self.settings, self.pointer_faded);
+        }
+        if self.settings.enable_soft_transparency && self.settings.enable_hover_fade {
+            context.request_repaint_after(std::time::Duration::from_millis(250));
         }
     }
 }
 
 impl eframe::App for RootApp {
     fn update(&mut self, context: &egui::Context, frame: &mut eframe::Frame) {
+        self.update_pointer_fade(context);
         self.show_window_settings(context);
 
         if let Some(ipa) = &mut self.ipa {
@@ -190,10 +215,14 @@ impl eframe::App for RootApp {
     }
 }
 
-fn apply_soft_transparency(context: &egui::Context, settings: &UiSettings) {
+fn apply_soft_transparency(context: &egui::Context, settings: &UiSettings, faded: bool) {
     let mut style = (*context.style()).clone();
     let alpha = if settings.enable_soft_transparency {
-        settings.alpha()
+        if faded {
+            13
+        } else {
+            settings.alpha()
+        }
     } else {
         255
     };
