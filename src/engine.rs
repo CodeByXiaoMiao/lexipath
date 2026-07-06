@@ -43,9 +43,14 @@ pub struct LearningSession {
 
 impl LearningSession {
     pub fn new(lesson: Lesson) -> Self {
+        let phase = if lesson.is_stage_assessment() {
+            Phase::Reading
+        } else {
+            Phase::LearnWords
+        };
         Self {
             lesson,
-            phase: Phase::LearnWords,
+            phase,
             learn_index: 0,
             played_word_audio: HashSet::new(),
             queue: VecDeque::new(),
@@ -271,7 +276,7 @@ fn rotated_options(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::course::CoursePack;
+    use crate::course::{CoursePack, Reading};
 
     fn recognition_session() -> LearningSession {
         let course = CoursePack::embedded().expect("course");
@@ -312,5 +317,25 @@ mod tests {
         let (options, _) = session.recognition_options().expect("options");
         let unique = options.iter().collect::<HashSet<_>>();
         assert_eq!(unique.len(), options.len());
+    }
+
+    #[test]
+    fn stage_assessment_starts_at_reading() {
+        let lesson = Lesson {
+            id: "stage-final-ogden-850".to_owned(),
+            title: "总结".to_owned(),
+            new_words: Vec::new(),
+            sentences: Vec::new(),
+            reading: Reading {
+                title: "总结阅读".to_owned(),
+                sentences: vec!["I am here.".to_owned()],
+                questions: vec![Question {
+                    prompt: "问题".to_owned(),
+                    options: vec!["I am here.".to_owned(), "You are here.".to_owned()],
+                    correct_index: 0,
+                }],
+            },
+        };
+        assert_eq!(LearningSession::new(lesson).phase(), Phase::Reading);
     }
 }
