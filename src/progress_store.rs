@@ -44,8 +44,16 @@ impl ProgressStore {
             }
         }
 
+        self.write_data(&merged)
+    }
+
+    pub fn save_exact(&self) -> anyhow::Result<()> {
+        self.write_data(&self.data)
+    }
+
+    fn write_data(&self, data: &ProgressData) -> anyhow::Result<()> {
         let temporary = self.path.with_extension("tmp");
-        fs::write(&temporary, serde_json::to_vec_pretty(&merged)?)?;
+        fs::write(&temporary, serde_json::to_vec_pretty(data)?)?;
         fs::rename(temporary, &self.path)?;
         Ok(())
     }
