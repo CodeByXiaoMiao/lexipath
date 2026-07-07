@@ -93,11 +93,11 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "highly" => ("highly important", "It is highly important.", "This is highly important."),
         "fully" => ("fully ready", "It is fully ready.", "This is fully ready."),
         "initially" => ("initially go out", "Initially, I go out.", "Initially, you come in."),
-        "thus" => ("thus", "This is true. Thus, I go.", "That is true. Thus, you come."),
+        "thus" => ("thus", "Thus, I go.", "Thus, you come."),
         "cruel" => ("a cruel person", "He is a cruel person.", "She is a cruel person."),
         "involved" => ("involved in this", "I am involved in this.", "You are involved in it."),
         "opposed" => ("opposed to this", "I am opposed to this.", "You are opposed to it."),
-        "depressed" => ("feel depressed", "I feel depressed.", "He feels depressed."),
+        "depressed" => ("am depressed", "I am depressed.", "He is depressed."),
         "agenda" => ("the agenda", "This is the agenda.", "I see the agenda."),
         "aspect" => ("an aspect of this", "This is an aspect of this.", "I see an aspect of it."),
         "extent" => ("the extent", "This is the extent.", "I know the extent."),
@@ -232,9 +232,9 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
     }
     if SAME_DEGREE_ADVERBS.contains(&word) || PROBABILITY_ADVERBS.contains(&word) {
         return Some(tuple(
-            &format!("{word} true"),
-            &format!("It is {word} true."),
-            &format!("This is {word} true."),
+            &format!("{word} the same"),
+            &format!("It is {word} the same."),
+            &format!("This is {word} the same."),
         ));
     }
     if BIG_DEGREE_ADVERBS.contains(&word) {
@@ -258,7 +258,7 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
     match word {
         "furthermore" => Some(tuple("furthermore", "I go out. Furthermore, you come in.", "You come in. Furthermore, I go out.")),
         "however" => Some(tuple("however", "I go out. However, you do not.", "You come in. However, I do not.")),
-        "indeed" => Some(tuple("indeed", "It is indeed true.", "This is indeed true.")),
+        "indeed" => Some(tuple("indeed", "It is indeed the same.", "This is indeed the same.")),
         "instead" => Some(tuple("instead", "I do not go. You go instead.", "You do not come. I come instead.")),
         "nevertheless" => Some(tuple("nevertheless", "I go out. Nevertheless, you do not.", "You come in. Nevertheless, I do not.")),
         "otherwise" => Some(tuple("otherwise", "I go out. Otherwise, you go out.", "You come in. Otherwise, I come in.")),
