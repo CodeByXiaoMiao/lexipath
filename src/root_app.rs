@@ -178,6 +178,8 @@ pub struct RootApp {
     allow_extra_new_units_today: bool,
     settings: UiSettings,
     show_window_settings: bool,
+    show_progress_settings: bool,
+    progress_lesson_number: usize,
     pointer_faded: bool,
     topmost_applied: bool,
     opacity: NativeOpacity,
@@ -191,13 +193,17 @@ impl RootApp {
         fonts::install(&context.egui_ctx);
         let settings = UiSettings::load();
         reset_normal_style(&context.egui_ctx);
+        let vocabulary = LexiPathApp::new(context, course);
+        let progress_lesson_number = vocabulary.current_lesson_number();
         Ok(Self {
             ipa: IpaApp::load()?,
-            vocabulary: LexiPathApp::new(context, course),
+            vocabulary,
             root_status: String::new(),
             allow_extra_new_units_today: false,
             settings,
             show_window_settings: false,
+            show_progress_settings: false,
+            progress_lesson_number,
             pointer_faded: false,
             topmost_applied: false,
             opacity: NativeOpacity::new(WINDOW_TITLE),
@@ -225,13 +231,11 @@ impl RootApp {
             ui.vertical_centered_justified(|ui| {
                 ui.heading("今日新课已完成");
                 ui.label("今天已经完成两个 6 词单元，共 12 个新词。");
-                ui.label("到期复习仍会优先开放；需要继续学习时，可以手动进入下一天。");
-                if ui.button("进入下一天").clicked() {
-                    self.allow_extra_new_units_today = true;
-                    self.root_status = "已进入下一天：本次运行会继续开放后续新课；到期复习仍会优先。".to_owned();
-                    context.request_repaint();
-                }
+                ui.label("到期复习仍会优先开放；可以手动进入下一天，也可以任意切换课程进度。");
+                ui.separator();
+                self.show_progress_controls(ui, context);
                 if !self.root_status.is_empty() {
+                    ui.separator();
                     ui.label(&self.root_status);
                 }
             });
@@ -250,8 +254,17 @@ impl RootApp {
                 {
                     self.show_window_settings = !self.show_window_settings;
                 }
+                if ui
+                    .small_button(if self.show_progress_settings { "收起进度设置" } else { "进度设置" })
+                    .clicked()
+                {
+                    self.show_progress_settings = !self.show_progress_settings;
+                    self.progress_lesson_number = self.vocabulary.current_lesson_number();
+                }
                 ui.separator();
                 ui.label("窗口保持置顶");
+                ui.separator();
+                ui.label(self.vocabulary.current_lesson_label());
                 if self.pointer_faded {
                     ui.separator();
                     ui.label("鼠标已移出：窗口已透明到 0%。");
@@ -275,6 +288,10 @@ impl RootApp {
                 });
                 ui.label("使用 Windows 原生窗口透明度：鼠标移出降到 0%，鼠标回到窗口原区域后恢复；不点击穿透。 ");
             }
+            if self.show_progress_settings {
+                ui.separator();
+                self.show_progress_controls(ui, context);
+            }
         });
         if changed {
             self.apply_window_alpha();
@@ -282,6 +299,51 @@ impl RootApp {
                 self.root_status = format!("窗口设置保存失败：{error:#}");
             }
         }
+    }
+
+    fn show_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
+        let total = self.vocabulary.lesson_count().max(1);
+        self.progress_lesson_number = self.progress_lesson_number.clamp(1, total);
+        ui.label(format!("当前：{}", self.vocabulary.current_lesson_label()));
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("进入下一天 / 继续后续新课").clicked() {
+                self.allow_extra_new_units_today = true;
+                self.vocabulary.continue_after_daily_limit();
+                self.progress_lesson_number = self.vocabulary.current_lesson_number();
+                self.root_status = "已手动进入下一天/后续新课。".to_owned();
+                context.request_repaint();
+            }
+            if ui.button("上一课").clicked() {
+                let result = self.vocabulary.jump_relative_lesson(-1);
+                self.apply_progress_change(result, context);
+            }
+            if ui.button("下一课").clicked() {
+                let result = self.vocabulary.jump_relative_lesson(1);
+                self.apply_progress_change(result, context);
+            }
+            ui.label("指定第");
+            ui.add(
+                egui::DragValue::new(&mut self.progress_lesson_number)
+                    .range(1..=total)
+                    .speed(1.0),
+            );
+            ui.label(format!("/ {total} 课"));
+            if ui.button("跳转").clicked() {
+                let result = self.vocabulary.jump_to_lesson_number(self.progress_lesson_number);
+                self.apply_progress_change(result, context);
+            }
+        });
+        ui.label("进度切换会立即保存到 data/progress.json；可向前或向后任意切换。已完成记录不会被清空。 ");
+    }
+
+    fn apply_progress_change(&mut self, result: Result<String, String>, context: &egui::Context) {
+        self.allow_extra_new_units_today = true;
+        self.progress_lesson_number = self.vocabulary.current_lesson_number();
+        self.root_status = match result {
+            Ok(message) => message,
+            Err(error) => error,
+        };
+        context.request_repaint();
     }
 
     fn update_pointer_fade(&mut self, context: &egui::Context) {
