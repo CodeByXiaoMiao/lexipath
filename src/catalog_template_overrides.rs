@@ -35,6 +35,23 @@ const SEQUENCE_ADVERBS: &[&str] = &[
     "afterwards", "eventually", "finally", "first", "firstly", "initially", "secondly",
 ];
 
+const PERSON_STATE_ADJECTIVES: &[&str] = &[
+    "able", "angry", "annoyed", "amazed", "armed", "busy", "calm", "careful",
+    "careless", "concerned", "confident", "conscious", "convinced", "cruel",
+    "dead", "delighted", "depressed", "determined", "disappointed", "divorced",
+    "dressed", "educated", "embarrassed", "engaged", "excited", "experienced",
+    "familiar", "frightened", "friendly", "guilty", "happy", "honest", "impressed",
+    "injured", "innocent", "interested", "lonely", "married", "nervous", "opposed",
+    "pleased", "polite", "poor", "prepared", "proud", "qualified", "relaxed",
+    "responsible", "retired", "rich", "rude", "sad", "satisfied", "scared", "serious",
+    "shocked", "single", "surprised", "talented", "tired", "unconscious", "unemployed",
+    "unhappy", "worried", "young",
+];
+
+const COMMON_COUNT_NOUNS: &[&str] = &[
+    "agenda", "blog", "girlfriend", "laptop", "theatre", "website",
+];
+
 pub fn normalize_display(word: &str) -> String {
     match word {
         "CORE" => "core".to_owned(),
@@ -50,6 +67,25 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
     let lower = word.to_ascii_lowercase();
 
     let fixed = match lower.as_str() {
+        // High-risk generated frames found during manual whole-course review.
+        "up" => ("go up", "I go up.", "You go up."),
+        "down" => ("go down", "I go down.", "You go down."),
+        "back" => ("go back", "I go back.", "You go back."),
+        "only" => ("only one", "I have only one.", "You have only one."),
+        "very" => ("very big", "It is very big.", "This is very big."),
+        "same" => ("the same", "It is the same.", "This is the same."),
+        "last" => ("the last book", "This is the last book.", "The last book is here."),
+        "kind" => ("a kind of book", "This is a kind of book.", "It is a kind of book."),
+        "likely" => ("likely", "It is likely.", "That is likely."),
+        "long term" => ("long term", "It is long term.", "This is long term."),
+        "tv" => ("watch TV", "I watch TV.", "You watch TV."),
+        "internet" => ("use the internet", "I use the internet.", "You use the internet."),
+        "dvd" => ("a DVD", "This is a DVD.", "I use a DVD."),
+        "cd" => ("a CD", "This is a CD.", "I use a CD."),
+        "data" => ("about data", "This is about data.", "I know about data."),
+        "planning" => ("about planning", "This is about planning.", "I know about planning."),
+        "funding" => ("about funding", "This is about funding.", "I know about funding."),
+
         // Plural and collective nouns.
         "clothes" => ("these clothes", "These are clothes.", "I see clothes."),
         "jeans" => ("these jeans", "These are jeans.", "I see jeans."),
@@ -84,7 +120,6 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "sorry" => ("am sorry", "I am sorry.", "You are sorry."),
         "born" => ("is born", "A boy is born.", "A girl is born."),
         "afraid" => ("am afraid", "I am afraid.", "You are afraid."),
-        "likely" => ("is likely", "It is likely.", "This is likely."),
         "alone" => ("am alone", "I am alone.", "You are alone."),
         "alive" => ("is alive", "He is alive.", "She is alive."),
         "asleep" => ("is asleep", "He is asleep.", "She is asleep."),
@@ -126,10 +161,37 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "offer" => ("offer him this", "I can offer him this.", "You can offer her this."),
         "pay" => ("pay him", "I can pay him.", "You can pay her."),
         "promise" => ("promise him this", "I can promise him this.", "You can promise her this."),
-        _ => return dynamic_adverb_template(&lower),
+        _ => {
+            return dynamic_person_adjective_template(&lower)
+                .or_else(|| dynamic_common_count_noun_template(word, &lower))
+                .or_else(|| dynamic_adverb_template(&lower));
+        }
     };
 
     Some(tuple(fixed.0, fixed.1, fixed.2))
+}
+
+fn dynamic_person_adjective_template(word: &str) -> Option<(String, String, String)> {
+    if PERSON_STATE_ADJECTIVES.contains(&word) {
+        return Some(tuple(
+            &format!("am {word}"),
+            &format!("I am {word}."),
+            &format!("You are {word}."),
+        ));
+    }
+    None
+}
+
+fn dynamic_common_count_noun_template(display: &str, lower: &str) -> Option<(String, String, String)> {
+    if COMMON_COUNT_NOUNS.contains(&lower) {
+        let article = indefinite_article(display);
+        return Some(tuple(
+            &format!("{article} {display}"),
+            &format!("This is {article} {display}."),
+            &format!("I have {article} {display}."),
+        ));
+    }
+    None
 }
 
 fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
@@ -189,6 +251,20 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
         "therefore" => Some(tuple("therefore", "You are here. Therefore, I go.", "I am here. Therefore, you come.")),
         "thus" => Some(tuple("thus", "I go. Thus, you go.", "You come. Thus, I come.")),
         _ => None,
+    }
+}
+
+fn indefinite_article(word: &str) -> &'static str {
+    let normalized = word.to_ascii_lowercase();
+    if matches!(normalized.as_str(), "hour" | "honest") {
+        return "an";
+    }
+    if matches!(normalized.as_str(), "university" | "user" | "use" | "euro") {
+        return "a";
+    }
+    match normalized.chars().find(|character| character.is_ascii_alphabetic()) {
+        Some('a' | 'e' | 'i' | 'o' | 'u') => "an",
+        _ => "a",
     }
 }
 
