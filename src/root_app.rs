@@ -304,13 +304,24 @@ impl RootApp {
     fn show_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
         let total = self.vocabulary.lesson_count().max(1);
         self.progress_lesson_number = self.progress_lesson_number.clamp(1, total);
-        ui.label(format!("当前：{}", self.vocabulary.current_lesson_label()));
+        ui.label(format!("当前词汇课：{}", self.vocabulary.current_lesson_label()));
         ui.horizontal_wrapped(|ui| {
             if ui.button("进入下一天 / 继续后续新课").clicked() {
-                self.allow_extra_new_units_today = true;
-                self.vocabulary.continue_after_daily_limit();
-                self.progress_lesson_number = self.vocabulary.current_lesson_number();
-                self.root_status = "已手动进入下一天/后续新课。".to_owned();
+                let mut handled_ipa = false;
+                if let Some(ipa) = self.ipa.as_mut() {
+                    if ipa.locked_today() {
+                        ipa.continue_after_daily_limit();
+                        handled_ipa = true;
+                    }
+                }
+                if handled_ipa {
+                    self.root_status = "已进入下一天音标课程。".to_owned();
+                } else {
+                    self.allow_extra_new_units_today = true;
+                    self.vocabulary.continue_after_daily_limit();
+                    self.progress_lesson_number = self.vocabulary.current_lesson_number();
+                    self.root_status = "已手动进入下一天/后续新课。".to_owned();
+                }
                 context.request_repaint();
             }
             if ui.button("上一课").clicked() {
@@ -333,16 +344,20 @@ impl RootApp {
                 self.apply_progress_change(result, context);
             }
         });
-        ui.label("进度切换会立即保存到 data/progress.json；可向前或向后任意切换。已完成记录不会被清空。 ");
+        ui.label("进度切换会立即保存到 data/progress.json；可向前或向后任意切换。跳转词汇课会跳过音标引导页。 ");
     }
 
     fn apply_progress_change(&mut self, result: Result<String, String>, context: &egui::Context) {
+        let success = result.is_ok();
         self.allow_extra_new_units_today = true;
         self.progress_lesson_number = self.vocabulary.current_lesson_number();
         self.root_status = match result {
             Ok(message) => message,
             Err(error) => error,
         };
+        if success {
+            self.ipa = None;
+        }
         context.request_repaint();
     }
 
