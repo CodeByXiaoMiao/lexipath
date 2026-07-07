@@ -4,7 +4,7 @@ use eframe::egui;
 
 use crate::audio::SystemSpeaker;
 use crate::catalog::CourseCatalog;
-use crate::course::CoursePack;
+use crate::course::{CoursePack, Lesson};
 use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
@@ -46,6 +46,85 @@ impl LexiPathApp {
         };
         app.load_next_available();
         app
+    }
+
+    pub fn lesson_count(&self) -> usize {
+        self.course.lesson_count()
+    }
+
+    pub fn current_lesson_number(&self) -> usize {
+        self.lesson_number_by_id(&self.session.lesson().id).unwrap_or(1)
+    }
+
+    pub fn current_lesson_label(&self) -> String {
+        let number = self.current_lesson_number();
+        format!("第 {number} / {} 课：{}", self.lesson_count(), self.session.lesson().title)
+    }
+
+    pub fn continue_after_daily_limit(&mut self) {
+        self.load_next_available();
+        self.status = "已手动进入下一天/后续新课；到期复习仍会优先。".to_owned();
+    }
+
+    pub fn jump_relative_lesson(&mut self, offset: isize) -> Result<String, String> {
+        let total = self.lesson_count();
+        if total == 0 {
+            return Err("课程为空，无法切换进度。".to_owned());
+        }
+        let current = self.current_lesson_number();
+        let target = if offset < 0 {
+            current.saturating_sub(offset.unsigned_abs())
+        } else {
+            current.saturating_add(offset as usize)
+        }
+        .clamp(1, total);
+        self.jump_to_lesson_number(target)
+    }
+
+    pub fn jump_to_lesson_number(&mut self, number: usize) -> Result<String, String> {
+        let total = self.lesson_count();
+        if total == 0 {
+            return Err("课程为空，无法切换进度。".to_owned());
+        }
+        let target = number.clamp(1, total);
+        let lesson = self
+            .lesson_by_number(target)
+            .ok_or_else(|| format!("找不到第 {target} 课。"))?
+            .clone();
+
+        if let Some(store) = &mut self.progress {
+            store.data.current_lesson_id = Some(lesson.id.clone());
+            store.data.course_complete = false;
+            store
+                .save()
+                .map_err(|error| format!("保存进度切换失败：{error}"))?;
+        }
+
+        self.session = LearningSession::new(lesson.clone());
+        self.active_review_id = None;
+        self.course_finished = false;
+        self.status = format!("已切换到第 {target} / {total} 课：{}。", lesson.title);
+        Ok(self.status.clone())
+    }
+
+    fn lesson_by_number(&self, number: usize) -> Option<&Lesson> {
+        if number == 0 {
+            return None;
+        }
+        self.course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .nth(number - 1)
+    }
+
+    fn lesson_number_by_id(&self, lesson_id: &str) -> Option<usize> {
+        self.course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .position(|lesson| lesson.id == lesson_id)
+            .map(|index| index + 1)
     }
 
     fn load_next_available(&mut self) {
