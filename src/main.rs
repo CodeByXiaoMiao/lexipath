@@ -17,6 +17,7 @@ mod course;
 mod course_finalize;
 mod course_finalize_file;
 mod daily_gate;
+mod display_text;
 mod embedded_course;
 mod engine;
 mod fonts;
