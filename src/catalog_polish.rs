@@ -189,24 +189,24 @@ fn fixed_template(word: &str) -> Option<Template> {
         "nothing" => ("see nothing", "I see nothing.", "You see nothing."),
         "tonight" => ("go tonight", "I go tonight.", "You come tonight."),
         "midnight" => ("at midnight", "It is midnight.", "I am here at midnight."),
-        "mum" => ("my mum", "She is my mum.", "I see my mum."),
+        "mum" => ("a mum", "She is a mum.", "I see a mum."),
         "daughter" => ("a daughter", "She is a daughter.", "I have a daughter."),
-        "uncle" => ("my uncle", "He is my uncle.", "I see my uncle."),
+        "uncle" => ("an uncle", "He is an uncle.", "I see an uncle."),
         "female" => ("female", "She is female.", "It is female."),
         "library" => ("go to a library", "I go to a library.", "You go to a library."),
-        "pain" => ("feel pain", "I feel pain.", "You feel pain."),
+        "pain" => ("pain", "This is pain.", "I know about pain."),
         "shake" => ("shake it", "I can shake it.", "You can shake it."),
         "middle" => ("the middle", "This is the middle.", "I see the middle."),
-        "heat" => ("heat", "This is heat.", "I feel heat."),
+        "heat" => ("heat", "This is heat.", "I know about heat."),
         "sun" => ("the sun", "This is the sun.", "I see the sun."),
-        "lip" => ("my lip", "This is my lip.", "I touch my lip."),
+        "lip" => ("a lip", "This is a lip.", "I see a lip."),
         "birth" => ("birth", "This is birth.", "I know about birth."),
         "breath" => ("a breath", "I take a breath.", "You take a breath."),
-        "noise" => ("noise", "This is noise.", "I hear noise."),
+        "noise" => ("noise", "This is noise.", "I know about noise."),
         "fold" => ("fold it", "I can fold it.", "You can fold it."),
         "period" => ("a period of time", "This is a period of time.", "I see a period of time."),
         "type" => ("a type of book", "This is a type of book.", "I see a type of book."),
-        "routine" => ("a routine", "This is my routine.", "You have a routine."),
+        "routine" => ("a routine", "This is a routine.", "You have a routine."),
         _ => return None,
     };
     Some(make(values.0, values.1, values.2))
@@ -585,5 +585,13 @@ mod tests {
     fn expanded_mass_nouns_are_not_given_articles() {
         let template = template_for("blood", "n. 血液");
         assert_eq!(template.first, "This is blood.");
+    }
+
+    #[test]
+    fn fixed_body_and_family_templates_do_not_use_late_pronouns() {
+        let mum = template_for("mum", "n. 妈妈");
+        assert_eq!(mum.first, "She is a mum.");
+        let lip = template_for("lip", "n. 嘴唇");
+        assert_eq!(lip.first, "This is a lip.");
     }
 }
