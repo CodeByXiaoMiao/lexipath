@@ -1,6 +1,7 @@
 use eframe::egui;
 
 use crate::audio::SystemSpeaker;
+use crate::display_text::safe_ipa;
 use crate::phonetics_catalog;
 use crate::phonetics_engine::{PhoneticPhase, PhoneticSession};
 use crate::progress_store::ProgressStore;
@@ -117,11 +118,11 @@ impl IpaApp {
         let Some(item) = self.session.current_item().cloned() else {
             return;
         };
-        ui.heading(egui::RichText::new(item.symbol).size(42.0));
+        ui.heading(egui::RichText::new(safe_ipa(item.symbol)).size(42.0));
         ui.label(item.hint);
         ui.add_space(12.0);
         ui.label(egui::RichText::new(item.example).size(28.0));
-        ui.label(egui::RichText::new(item.example_ipa).size(21.0));
+        ui.label(egui::RichText::new(safe_ipa(item.example_ipa)).size(21.0));
         if ui.button("▶ 播放英文示例").clicked() {
             match self.speaker.speak(item.example) {
                 Ok(()) => {
@@ -164,7 +165,7 @@ impl IpaApp {
 
         for (index, option) in options.into_iter().enumerate() {
             if ui
-                .add_enabled(self.session.audio_played(), egui::Button::new(option))
+                .add_enabled(self.session.audio_played(), egui::Button::new(safe_ipa(option)))
                 .clicked()
             {
                 self.status = if self.session.answer(index, correct_index) {
