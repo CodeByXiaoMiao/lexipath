@@ -122,6 +122,26 @@ impl NativeOpacity {
         self.current_alpha = Some(alpha);
     }
 
+    fn cursor_inside_window(&mut self) -> Option<bool> {
+        let hwnd = self.hwnd();
+        if hwnd.is_null() {
+            return None;
+        }
+        let mut rect = windows_sys::Win32::Foundation::RECT {
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        };
+        let mut point = windows_sys::Win32::Foundation::POINT { x: 0, y: 0 };
+        let has_rect = unsafe { windows_sys::Win32::UI::WindowsAndMessaging::GetWindowRect(hwnd, &mut rect) } != 0;
+        let has_point = unsafe { windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut point) } != 0;
+        if !has_rect || !has_point {
+            return None;
+        }
+        Some(point.x >= rect.left && point.x < rect.right && point.y >= rect.top && point.y < rect.bottom)
+    }
+
     fn hwnd(&mut self) -> windows_sys::Win32::Foundation::HWND {
         if self.hwnd.is_null() {
             self.hwnd = unsafe {
@@ -145,6 +165,10 @@ impl NativeOpacity {
     }
 
     fn set_alpha(&mut self, _alpha: u8) {}
+
+    fn cursor_inside_window(&mut self) -> Option<bool> {
+        None
+    }
 }
 
 pub struct RootApp {
@@ -249,7 +273,7 @@ impl RootApp {
                         )
                         .changed();
                 });
-                ui.label("这版使用 Windows 原生窗口透明度：整窗按滑块透明，移出降到 0%，移入恢复；不点击穿透。 ");
+                ui.label("使用 Windows 原生窗口透明度：鼠标移出降到 0%，鼠标回到窗口原区域后恢复；不点击穿透。 ");
             }
         });
         if changed {
@@ -261,15 +285,19 @@ impl RootApp {
     }
 
     fn update_pointer_fade(&mut self, context: &egui::Context) {
+        let cursor_inside = self
+            .opacity
+            .cursor_inside_window()
+            .unwrap_or_else(|| context.input(|input| input.pointer.hover_pos().is_some()));
         let faded = self.settings.enable_soft_transparency
             && self.settings.enable_hover_fade
-            && context.input(|input| input.pointer.hover_pos().is_none());
+            && !cursor_inside;
         if faded != self.pointer_faded {
             self.pointer_faded = faded;
             self.apply_window_alpha();
         }
         if self.settings.enable_soft_transparency && self.settings.enable_hover_fade {
-            context.request_repaint_after(std::time::Duration::from_millis(250));
+            context.request_repaint_after(std::time::Duration::from_millis(120));
         }
     }
 
