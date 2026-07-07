@@ -81,19 +81,19 @@ fn template_for(word: &str, meaning: &str) -> Template {
                 make(
                     word,
                     &format!("These are {word}."),
-                    &format!("I have {word}."),
+                    &format!("I see {word}."),
                 )
             } else {
                 make(
                     word,
                     &format!("This is {word}."),
-                    &format!("I have {word}."),
+                    &format!("I know about {word}."),
                 )
             }
         }
         LexicalClass::TransitiveVerb => make(
-            &format!("{word} this"),
-            &format!("I can {word} this."),
+            &format!("{word} it"),
+            &format!("I can {word} it."),
             &format!("You can {word} it."),
         ),
         LexicalClass::IntransitiveVerb => make(
@@ -132,6 +132,7 @@ fn fixed_template(word: &str) -> Option<Template> {
         "have" => ("have a book", "I have a book.", "You have a book."),
         "say" => ("say this", "I can say this.", "You can say it."),
         "may" => ("may go", "I may go.", "You may come."),
+        "might" => ("might go", "I might go.", "You might come."),
         "will" => ("will go", "I will go.", "You will come."),
         "would" => ("would go", "I would go.", "You would come."),
         "could" => ("could go", "I could go.", "You could come."),
@@ -185,6 +186,27 @@ fn fixed_template(word: &str) -> Option<Template> {
         "despite" => ("despite this", "I go despite this.", "You come despite it."),
         "towards" => ("towards me", "You come towards me.", "I go towards you."),
         "thanks" => ("say thanks", "I say thanks.", "You say thanks."),
+        "nothing" => ("see nothing", "I see nothing.", "You see nothing."),
+        "tonight" => ("go tonight", "I go tonight.", "You come tonight."),
+        "midnight" => ("at midnight", "It is midnight.", "I am here at midnight."),
+        "mum" => ("my mum", "She is my mum.", "I see my mum."),
+        "daughter" => ("a daughter", "She is a daughter.", "I have a daughter."),
+        "uncle" => ("my uncle", "He is my uncle.", "I see my uncle."),
+        "female" => ("female", "She is female.", "It is female."),
+        "library" => ("go to a library", "I go to a library.", "You go to a library."),
+        "pain" => ("feel pain", "I feel pain.", "You feel pain."),
+        "shake" => ("shake it", "I can shake it.", "You can shake it."),
+        "middle" => ("the middle", "This is the middle.", "I see the middle."),
+        "heat" => ("heat", "This is heat.", "I feel heat."),
+        "sun" => ("the sun", "This is the sun.", "I see the sun."),
+        "lip" => ("my lip", "This is my lip.", "I touch my lip."),
+        "birth" => ("birth", "This is birth.", "I know about birth."),
+        "breath" => ("a breath", "I take a breath.", "You take a breath."),
+        "noise" => ("noise", "This is noise.", "I hear noise."),
+        "fold" => ("fold it", "I can fold it.", "You can fold it."),
+        "period" => ("a period of time", "This is a period of time.", "I see a period of time."),
+        "type" => ("a type of book", "This is a type of book.", "I see a type of book."),
+        "routine" => ("a routine", "This is my routine.", "You have a routine."),
         _ => return None,
     };
     Some(make(values.0, values.1, values.2))
@@ -255,6 +277,12 @@ fn apply_lexicon_override(word: &mut WordItem) {
         "path" => Some(("/pæθ/", "n. 小路；路径")),
         "logical" => Some(("/ˈlɑːdʒɪkl/", "adj. 合乎逻辑的")),
         "resist" => Some(("/rɪˈzɪst/", "vt. 抵抗；忍住")),
+        "us" => Some(("/ʌs/", "pron. 我们；咱们")),
+        "read" => Some(("/riːd/", "v. 阅读；读")),
+        "neat" => Some(("/niːt/", "adj. 整洁的；利落的")),
+        "statue" => Some(("/ˈstætʃuː/", "n. 雕像")),
+        "employ" => Some(("/ɪmˈplɔɪ/", "vt. 雇用；使用")),
+        "elect" => Some(("/ɪˈlekt/", "vt. 选举；推选")),
         _ => None,
     }) else {
         return;
@@ -285,7 +313,7 @@ fn clean_display_word(value: &str) -> String {
 
 fn indefinite_article(word: &str) -> &'static str {
     let normalized = word.to_ascii_lowercase();
-    if matches!(normalized.as_str(), "hour" | "honest") {
+    if matches!(normalized.as_str(), "hour" | "honest" | "honour") {
         return "an";
     }
     if matches!(normalized.as_str(), "university" | "user" | "use" | "euro") {
@@ -326,57 +354,166 @@ fn is_no_article_noun(word: &str) -> bool {
     is_plural_noun(word)
         || matches!(
             word,
-            "advice"
+            "access"
+                | "advice"
                 | "air"
+                | "alcohol"
+                | "anger"
                 | "art"
+                | "beef"
+                | "beer"
+                | "biology"
+                | "blood"
+                | "brass"
                 | "bread"
                 | "business"
+                | "butter"
+                | "cancer"
+                | "cash"
+                | "chalk"
+                | "chemistry"
+                | "climate"
                 | "coffee"
+                | "conduct"
+                | "cooking"
+                | "cotton"
+                | "damage"
+                | "dancing"
                 | "data"
+                | "death"
+                | "dirt"
+                | "economy"
                 | "education"
                 | "energy"
+                | "engineering"
+                | "enthusiasm"
                 | "equipment"
+                | "evil"
+                | "feedback"
+                | "folk"
                 | "food"
+                | "fun"
+                | "fur"
                 | "furniture"
+                | "gas"
+                | "geography"
+                | "gold"
+                | "grass"
+                | "ground"
                 | "health"
+                | "hockey"
                 | "homework"
+                | "honour"
+                | "housing"
+                | "ice"
+                | "ink"
                 | "information"
+                | "jazz"
+                | "jewellery"
+                | "juice"
                 | "knowledge"
+                | "labour"
+                | "laughter"
+                | "leather"
+                | "linen"
+                | "literature"
                 | "luggage"
+                | "mail"
+                | "marketing"
+                | "mathematics"
                 | "meat"
+                | "medicine"
                 | "media"
                 | "milk"
                 | "money"
+                | "mud"
                 | "music"
                 | "news"
+                | "oil"
                 | "paper"
+                | "petrol"
+                | "plastic"
+                | "poetry"
                 | "police"
+                | "privacy"
+                | "produce"
                 | "research"
                 | "rice"
+                | "rubbish"
+                | "rugby"
                 | "salt"
+                | "sand"
+                | "silk"
+                | "smoke"
+                | "soap"
+                | "soccer"
                 | "space"
+                | "steel"
+                | "steam"
+                | "stress"
+                | "stuff"
                 | "sugar"
+                | "sympathy"
                 | "tea"
+                | "tennis"
+                | "thunder"
                 | "traffic"
+                | "underwear"
+                | "violence"
+                | "waste"
                 | "water"
+                | "wax"
                 | "weather"
+                | "wildlife"
+                | "wood"
+                | "wool"
                 | "work"
         )
 }
 
 fn is_plural_noun(word: &str) -> bool {
+    if matches!(
+        word,
+        "analysis"
+            | "apparatus"
+            | "basis"
+            | "boss"
+            | "brass"
+            | "business"
+            | "canvas"
+            | "campus"
+            | "class"
+            | "crisis"
+            | "dress"
+            | "emphasis"
+            | "gas"
+            | "glass"
+            | "grass"
+            | "guess"
+            | "kiss"
+            | "loss"
+            | "mass"
+            | "mess"
+            | "news"
+            | "press"
+            | "process"
+            | "status"
+            | "stress"
+            | "success"
+            | "tennis"
+            | "virus"
+    ) {
+        return false;
+    }
+    if word.ends_with("ss") || word.ends_with("us") || word.ends_with("is") || word.ends_with("ics") {
+        return false;
+    }
     word.ends_with('s')
         && !matches!(
             word,
-            "business"
-                | "class"
-                | "dress"
-                | "glass"
-                | "means"
-                | "news"
+            "means"
                 | "series"
                 | "species"
-                | "success"
         )
 }
 
@@ -406,6 +543,20 @@ mod tests {
     }
 
     #[test]
+    fn repairs_known_bad_dictionary_senses() {
+        let mut word = WordItem {
+            id: "us".to_owned(),
+            text: "us".to_owned(),
+            ipa: "bad".to_owned(),
+            meaning: "pron. 我们\n[经] 美国".to_owned(),
+            phrase: String::new(),
+            example: String::new(),
+        };
+        apply_lexicon_override(&mut word);
+        assert_eq!(word.meaning, "pron. 我们；咱们");
+    }
+
+    #[test]
     fn calendar_words_use_natural_frames() {
         let template = template_for("Friday", "n. 星期五");
         assert_eq!(template.first, "It is Friday.");
@@ -414,12 +565,25 @@ mod tests {
     #[test]
     fn transitive_verbs_receive_an_object() {
         let template = template_for("accept", "vt. 接受");
-        assert_eq!(template.first, "I can accept this.");
+        assert_eq!(template.first, "I can accept it.");
     }
 
     #[test]
     fn mass_nouns_do_not_receive_an_indefinite_article() {
         let template = template_for("information", "n. 信息");
         assert_eq!(template.first, "This is information.");
+        assert_eq!(template.second, "I know about information.");
+    }
+
+    #[test]
+    fn singular_words_ending_in_s_are_not_treated_as_plurals() {
+        let template = template_for("process", "n. 过程");
+        assert_eq!(template.first, "This is a process.");
+    }
+
+    #[test]
+    fn expanded_mass_nouns_are_not_given_articles() {
+        let template = template_for("blood", "n. 血液");
+        assert_eq!(template.first, "This is blood.");
     }
 }
