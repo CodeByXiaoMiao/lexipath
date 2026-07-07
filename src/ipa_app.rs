@@ -41,10 +41,36 @@ impl IpaApp {
         }))
     }
 
+    pub fn load_at_day_number(day_number: usize) -> anyhow::Result<Self> {
+        let lessons = phonetics_catalog::lessons();
+        let mut store = ProgressStore::open()?;
+        let target = day_number.clamp(1, lessons.len().max(1));
+        store.set_ipa_current_day_number(target, lessons.len())?;
+        let day_index = target.saturating_sub(1);
+        let session = PhoneticSession::new(lessons[day_index].clone());
+        Ok(Self {
+            lessons,
+            day_index,
+            session,
+            store,
+            speaker: SystemSpeaker,
+            status: format!("已切换到第 {target} 天音标课程。"),
+            locked_today: false,
+        })
+    }
+
+    pub fn total_day_count() -> usize {
+        phonetics_catalog::lessons().len()
+    }
+
+    pub fn current_day_number(&self) -> usize {
+        self.day_index + 1
+    }
+
     pub fn current_label(&self) -> String {
         format!(
             "当前音标：第 {} / {} 天：{}",
-            self.day_index + 1,
+            self.current_day_number(),
             self.lessons.len(),
             self.session.lesson().title
         )
@@ -60,6 +86,37 @@ impl IpaApp {
         self.status = "已手动进入下一天音标课程。".to_owned();
     }
 
+    pub fn jump_relative_day(&mut self, offset: isize) -> Result<String, String> {
+        let total = self.lessons.len();
+        if total == 0 {
+            return Err("音标课程为空，无法切换。".to_owned());
+        }
+        let current = self.current_day_number();
+        let target = if offset < 0 {
+            current.saturating_sub(offset.unsigned_abs())
+        } else {
+            current.saturating_add(offset as usize)
+        }
+        .clamp(1, total);
+        self.jump_to_day_number(target)
+    }
+
+    pub fn jump_to_day_number(&mut self, day_number: usize) -> Result<String, String> {
+        let total = self.lessons.len();
+        if total == 0 {
+            return Err("音标课程为空，无法切换。".to_owned());
+        }
+        let target = day_number.clamp(1, total);
+        self.store
+            .set_ipa_current_day_number(target, total)
+            .map_err(|error| format!("保存音标进度失败：{error}"))?;
+        self.day_index = target - 1;
+        self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
+        self.locked_today = false;
+        self.status = format!("已切换到第 {target} / {total} 天音标：{}。", self.session.lesson().title);
+        Ok(self.status.clone())
+    }
+
     pub fn update(&mut self, context: &egui::Context) -> bool {
         if self.locked_today && !self.store.ipa_completed_today() {
             self.locked_today = false;
@@ -73,7 +130,7 @@ impl IpaApp {
             ui.horizontal(|ui| {
                 ui.strong("LexiPath IPA");
                 ui.separator();
-                ui.label(format!("第 {} / {} 天", self.day_index + 1, self.lessons.len()));
+                ui.label(format!("第 {} / {} 天", self.current_day_number(), self.lessons.len()));
                 ui.separator();
                 ui.label(self.session.lesson().title);
             });
