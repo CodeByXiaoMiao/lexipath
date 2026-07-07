@@ -71,7 +71,7 @@ pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, S
     let lower = word.to_ascii_lowercase();
     let meaning_lower = meaning.trim().to_ascii_lowercase();
 
-    if let Some(template) = fixed_semantic_template(word, &lower) {
+    if let Some(template) = fixed_semantic_template(&lower) {
         return Some(template);
     }
     if CARDINAL_NUMBERS.contains(&lower.as_str()) {
@@ -161,7 +161,7 @@ pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, S
     None
 }
 
-fn fixed_semantic_template(word: &str, lower: &str) -> Option<(String, String, String)> {
+fn fixed_semantic_template(lower: &str) -> Option<(String, String, String)> {
     let values = match lower {
         "belong" => ("belong to me", "It belongs to me.", "This belongs to you."),
         "occur" => ("can occur", "A change can occur.", "This can occur."),
@@ -172,11 +172,11 @@ fn fixed_semantic_template(word: &str, lower: &str) -> Option<(String, String, S
         "think" => ("think about this", "I can think about this.", "You can think about it."),
         "spend" => ("spend money", "I spend money.", "You spend money."),
         "serve" => ("serve food", "I serve food.", "You serve food."),
-        "involve" => ("involves this", "This involves work.", "It involves time."),
+        "involve" => ("involve work", "I can involve work.", "You can involve work."),
         "realize" => ("realize this", "I realize this.", "You realize it."),
         "affect" => ("affect me", "This can affect me.", "It can affect you."),
         "except" => ("except Monday", "I go every day except Monday.", "You come every day except Monday."),
-        "relate" => ("relate to this", "This relates to me.", "It relates to you."),
+        "relate" => ("relate to this", "I can relate to this.", "You can relate to it."),
         "reflect" => ("reflect light", "It can reflect light.", "This can reflect light."),
         "admit" => ("admit this", "I admit this.", "You admit it."),
         "lay" => ("lay it down", "I can lay it down.", "You can lay it down."),
@@ -185,7 +185,7 @@ fn fixed_semantic_template(word: &str, lower: &str) -> Option<(String, String, S
         "contribute" => ("contribute to this", "I contribute to this.", "You contribute to it."),
         "surround" => ("surround this", "This can surround it.", "It can surround this."),
         "found" => ("found a school", "I can found a school.", "You can found a school."),
-        "warm" => ("warm today", "It is warm today.", "This is warm today."),
+        "warm" => ("warm", "It is warm.", "This is warm."),
         "best" => ("the best", "It is the best.", "This is the best."),
         "maybe" => ("maybe the same", "Maybe it is the same.", "Maybe this is the same."),
         "else" => ("something else", "This is something else.", "I see something else."),
@@ -299,5 +299,13 @@ mod tests {
     fn seasons_use_the_in_controlled_frames() {
         let template = semantic_template("summer", "n. 夏天").expect("template");
         assert_eq!(template.1, "I go in the summer.");
+    }
+
+    #[test]
+    fn verb_templates_keep_the_target_base_form() {
+        let involve = semantic_template("involve", "vt. 涉及").expect("template");
+        assert_eq!(involve.1, "I can involve work.");
+        let relate = semantic_template("relate", "vi. 有关").expect("template");
+        assert_eq!(relate.1, "I can relate to this.");
     }
 }
