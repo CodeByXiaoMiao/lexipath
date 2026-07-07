@@ -179,7 +179,8 @@ pub struct RootApp {
     settings: UiSettings,
     show_window_settings: bool,
     show_progress_settings: bool,
-    progress_lesson_number: usize,
+    ipa_progress_day_number: usize,
+    vocabulary_progress_lesson_number: usize,
     pointer_faded: bool,
     topmost_applied: bool,
     opacity: NativeOpacity,
@@ -193,17 +194,23 @@ impl RootApp {
         fonts::install(&context.egui_ctx);
         let settings = UiSettings::load();
         reset_normal_style(&context.egui_ctx);
+        let ipa = IpaApp::load()?;
+        let ipa_progress_day_number = ipa
+            .as_ref()
+            .map(IpaApp::current_day_number)
+            .unwrap_or_else(|| IpaApp::total_day_count().max(1));
         let vocabulary = LexiPathApp::new(context, course);
-        let progress_lesson_number = vocabulary.current_lesson_number();
+        let vocabulary_progress_lesson_number = vocabulary.current_lesson_number();
         Ok(Self {
-            ipa: IpaApp::load()?,
+            ipa,
             vocabulary,
             root_status: String::new(),
             allow_extra_new_units_today: false,
             settings,
             show_window_settings: false,
             show_progress_settings: false,
-            progress_lesson_number,
+            ipa_progress_day_number,
+            vocabulary_progress_lesson_number,
             pointer_faded: false,
             topmost_applied: false,
             opacity: NativeOpacity::new(WINDOW_TITLE),
@@ -267,7 +274,7 @@ impl RootApp {
                     .clicked()
                 {
                     self.show_progress_settings = !self.show_progress_settings;
-                    self.progress_lesson_number = self.vocabulary.current_lesson_number();
+                    self.refresh_progress_inputs();
                 }
                 ui.separator();
                 ui.label("窗口保持置顶");
@@ -309,57 +316,140 @@ impl RootApp {
         }
     }
 
+    fn refresh_progress_inputs(&mut self) {
+        self.ipa_progress_day_number = self
+            .ipa
+            .as_ref()
+            .map(IpaApp::current_day_number)
+            .unwrap_or(self.ipa_progress_day_number)
+            .clamp(1, IpaApp::total_day_count().max(1));
+        self.vocabulary_progress_lesson_number = self.vocabulary.current_lesson_number();
+    }
+
     fn show_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
-        let total = self.vocabulary.lesson_count().max(1);
-        self.progress_lesson_number = self.progress_lesson_number.clamp(1, total);
-        ui.label(self.active_progress_label());
-        ui.label(format!("词汇跳转目标：{}", self.vocabulary.current_lesson_label()));
+        self.show_ipa_progress_controls(ui, context);
+        ui.separator();
+        self.show_vocabulary_progress_controls(ui, context);
+    }
+
+    fn show_ipa_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
+        let total = IpaApp::total_day_count().max(1);
+        self.ipa_progress_day_number = self.ipa_progress_day_number.clamp(1, total);
+        ui.strong("音标进度");
+        ui.label(
+            self.ipa
+                .as_ref()
+                .map(IpaApp::current_label)
+                .unwrap_or_else(|| "当前音标：已完成或未打开音标模块".to_owned()),
+        );
         ui.horizontal_wrapped(|ui| {
-            if ui.button("进入下一天 / 继续后续新课").clicked() {
-                let mut handled_ipa = false;
-                if let Some(ipa) = self.ipa.as_mut() {
-                    if ipa.locked_today() {
-                        ipa.continue_after_daily_limit();
-                        handled_ipa = true;
-                    }
-                }
-                if handled_ipa {
-                    self.root_status = "已进入下一天音标课程。".to_owned();
+            if ui.button("进入下一天音标").clicked() {
+                let result = if let Some(ipa) = self.ipa.as_mut() {
+                    ipa.continue_after_daily_limit();
+                    Ok(ipa.current_label())
                 } else {
-                    self.allow_extra_new_units_today = true;
-                    self.vocabulary.continue_after_daily_limit();
-                    self.progress_lesson_number = self.vocabulary.current_lesson_number();
-                    self.root_status = "已手动进入下一天/后续新课。".to_owned();
-                }
+                    self.activate_ipa_day(self.ipa_progress_day_number)
+                };
+                self.apply_ipa_change(result, context);
+            }
+            if ui.button("上一天音标").clicked() {
+                let target = self.ipa_progress_day_number.saturating_sub(1).clamp(1, total);
+                self.ipa_progress_day_number = target;
+                let result = self.activate_ipa_day(target);
+                self.apply_ipa_change(result, context);
+            }
+            if ui.button("下一天音标").clicked() {
+                let target = self.ipa_progress_day_number.saturating_add(1).clamp(1, total);
+                self.ipa_progress_day_number = target;
+                let result = self.activate_ipa_day(target);
+                self.apply_ipa_change(result, context);
+            }
+            ui.label("指定第");
+            ui.add(
+                egui::DragValue::new(&mut self.ipa_progress_day_number)
+                    .range(1..=total)
+                    .speed(1.0),
+            );
+            ui.label(format!("/ {total} 天"));
+            if ui.button("跳转音标").clicked() {
+                let result = self.activate_ipa_day(self.ipa_progress_day_number);
+                self.apply_ipa_change(result, context);
+            }
+        });
+        ui.label("音标跳转只管理 14 天音标模块，不会改变词汇课进度。 ");
+    }
+
+    fn show_vocabulary_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
+        let total = self.vocabulary.lesson_count().max(1);
+        self.vocabulary_progress_lesson_number = self.vocabulary_progress_lesson_number.clamp(1, total);
+        ui.strong("词汇进度");
+        ui.label(format!("当前词汇课：{}", self.vocabulary.current_lesson_label()));
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("进入下一天词汇 / 继续后续新课").clicked() {
+                self.allow_extra_new_units_today = true;
+                self.vocabulary.continue_after_daily_limit();
+                self.vocabulary_progress_lesson_number = self.vocabulary.current_lesson_number();
+                self.root_status = "已手动进入下一天词汇/后续新课。".to_owned();
                 context.request_repaint();
             }
             if ui.button("上一课").clicked() {
                 let result = self.vocabulary.jump_relative_lesson(-1);
-                self.apply_progress_change(result, context);
+                self.apply_vocabulary_change(result, context);
             }
             if ui.button("下一课").clicked() {
                 let result = self.vocabulary.jump_relative_lesson(1);
-                self.apply_progress_change(result, context);
+                self.apply_vocabulary_change(result, context);
             }
             ui.label("指定第");
             ui.add(
-                egui::DragValue::new(&mut self.progress_lesson_number)
+                egui::DragValue::new(&mut self.vocabulary_progress_lesson_number)
                     .range(1..=total)
                     .speed(1.0),
             );
             ui.label(format!("/ {total} 课"));
             if ui.button("跳转词汇课").clicked() {
-                let result = self.vocabulary.jump_to_lesson_number(self.progress_lesson_number);
-                self.apply_progress_change(result, context);
+                let result = self
+                    .vocabulary
+                    .jump_to_lesson_number(self.vocabulary_progress_lesson_number);
+                self.apply_vocabulary_change(result, context);
             }
         });
-        ui.label("音标天数和词汇课数是两套独立进度；跳转词汇课会关闭音标页并保存到 data/progress.json。 ");
+        ui.label("词汇跳转只管理词汇课程；跳转词汇课会关闭音标页并保存到 data/progress.json。 ");
     }
 
-    fn apply_progress_change(&mut self, result: Result<String, String>, context: &egui::Context) {
+    fn activate_ipa_day(&mut self, day_number: usize) -> Result<String, String> {
+        if let Some(ipa) = self.ipa.as_mut() {
+            ipa.jump_to_day_number(day_number)
+        } else {
+            match IpaApp::load_at_day_number(day_number) {
+                Ok(ipa) => {
+                    let message = ipa.current_label();
+                    self.ipa_progress_day_number = ipa.current_day_number();
+                    self.ipa = Some(ipa);
+                    Ok(message)
+                }
+                Err(error) => Err(format!("切换音标进度失败：{error}")),
+            }
+        }
+    }
+
+    fn apply_ipa_change(&mut self, result: Result<String, String>, context: &egui::Context) {
+        self.ipa_progress_day_number = self
+            .ipa
+            .as_ref()
+            .map(IpaApp::current_day_number)
+            .unwrap_or(self.ipa_progress_day_number);
+        self.root_status = match result {
+            Ok(message) => message,
+            Err(error) => error,
+        };
+        context.request_repaint();
+    }
+
+    fn apply_vocabulary_change(&mut self, result: Result<String, String>, context: &egui::Context) {
         let success = result.is_ok();
         self.allow_extra_new_units_today = true;
-        self.progress_lesson_number = self.vocabulary.current_lesson_number();
+        self.vocabulary_progress_lesson_number = self.vocabulary.current_lesson_number();
         self.root_status = match result {
             Ok(message) => message,
             Err(error) => error,
