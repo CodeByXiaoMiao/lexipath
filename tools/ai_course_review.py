@@ -15,7 +15,7 @@ from typing import Any
 ENDPOINT = "https://models.github.ai/inference/chat/completions"
 API_VERSION = "2026-03-10"
 DEFAULT_MODEL = "openai/gpt-4.1-mini"
-BATCH_SIZE = 20
+BATCH_SIZE = 5
 
 SYSTEM_PROMPT = """You are a strict English curriculum reviewer for Chinese beginner and intermediate learners.
 The material is controlled English: short and repetitive sentences are intentionally allowed.
