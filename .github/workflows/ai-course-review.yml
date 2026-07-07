@@ -88,7 +88,7 @@ jobs:
             Select-Object -Skip 1 |
             Add-Content ../sources/ecdict/ecdict.csv -Encoding utf8
 
-      - name: Generate finalized course
+      - name: Generate complete raw course
         working-directory: lexipath
         run: >-
           cargo run --release --
@@ -96,12 +96,20 @@ jobs:
           --ogden ../sources/ogden/word-lists/basic-english-850.txt
           --word-list ../sources/oxford/package.txt
           --dictionary ../sources/ecdict/ecdict.csv
+          --output raw-course.json
+
+      - name: Finalize course for review
+        working-directory: lexipath
+        run: >-
+          cargo run --release --
+          --finalize-catalog
+          --input raw-course.json
           --output course.json
 
-      - name: Review every lesson with AI
+      - name: Review every finalized lesson with AI
         working-directory: lexipath
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: python tools/ai_course_review.py course.json
 
       - name: Upload AI review report
