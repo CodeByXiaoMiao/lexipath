@@ -22,34 +22,34 @@ const SAME_DEGREE_ADVERBS: &[&str] = &[
 ];
 
 const PROBABILITY_ADVERBS: &[&str] = &[
-    "apparently", "certainly", "definitely", "maybe", "perhaps", "possibly",
-    "probably", "surely",
+    "apparently", "certainly", "definitely", "perhaps", "possibly", "probably",
+    "surely",
 ];
 
 const BIG_DEGREE_ADVERBS: &[&str] = &[
-    "absolutely", "especially", "extremely", "fully", "highly", "increasingly",
-    "incredibly", "particularly", "slightly", "too",
+    "absolutely", "especially", "extremely", "increasingly", "incredibly",
+    "particularly", "slightly", "too",
 ];
 
 const SEQUENCE_ADVERBS: &[&str] = &[
-    "afterwards", "eventually", "finally", "first", "firstly", "initially", "secondly",
+    "afterwards", "eventually", "finally", "first", "firstly", "secondly",
 ];
 
 const PERSON_STATE_ADJECTIVES: &[&str] = &[
     "able", "angry", "annoyed", "amazed", "armed", "busy", "calm", "careful",
-    "careless", "concerned", "confident", "conscious", "convinced", "cruel",
-    "dead", "delighted", "depressed", "determined", "disappointed", "divorced",
-    "dressed", "educated", "embarrassed", "engaged", "excited", "experienced",
-    "familiar", "frightened", "friendly", "guilty", "happy", "honest", "impressed",
-    "injured", "innocent", "interested", "lonely", "married", "nervous", "opposed",
-    "pleased", "polite", "poor", "prepared", "proud", "qualified", "relaxed",
-    "responsible", "retired", "rich", "rude", "sad", "satisfied", "scared", "serious",
-    "shocked", "single", "surprised", "talented", "tired", "unconscious", "unemployed",
-    "unhappy", "worried", "young",
+    "careless", "concerned", "confident", "conscious", "convinced", "dead",
+    "delighted", "determined", "disappointed", "divorced", "dressed", "educated",
+    "embarrassed", "engaged", "excited", "experienced", "familiar", "frightened",
+    "friendly", "guilty", "happy", "honest", "impressed", "injured", "innocent",
+    "interested", "lonely", "married", "nervous", "pleased", "polite", "poor",
+    "prepared", "proud", "qualified", "relaxed", "responsible", "retired", "rich",
+    "rude", "sad", "satisfied", "scared", "serious", "shocked", "single",
+    "surprised", "talented", "tired", "unconscious", "unemployed", "unhappy",
+    "worried", "young",
 ];
 
 const COMMON_COUNT_NOUNS: &[&str] = &[
-    "agenda", "blog", "girlfriend", "laptop", "theatre", "website",
+    "blog", "girlfriend", "laptop", "theatre", "website",
 ];
 
 pub fn normalize_display(word: &str) -> String {
@@ -82,9 +82,25 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "internet" => ("use the internet", "I use the internet.", "You use the internet."),
         "dvd" => ("a DVD", "This is a DVD.", "I use a DVD."),
         "cd" => ("a CD", "This is a CD.", "I use a CD."),
-        "data" => ("about data", "This is about data.", "I know about data."),
-        "planning" => ("about planning", "This is about planning.", "I know about planning."),
-        "funding" => ("about funding", "This is about funding.", "I know about funding."),
+        "data" => ("know about data", "I know about data.", "You know about data."),
+        "planning" => ("know about planning", "I know about planning.", "You know about planning."),
+        "funding" => ("know about funding", "I know about funding.", "You know about funding."),
+        "certain" => ("am certain", "I am certain.", "You are certain."),
+        "police" => ("see the police", "I see the police.", "You see the police."),
+        "none" => ("see none", "I see none.", "You see none."),
+        "neither" => ("neither one", "Neither one is here.", "I see neither one."),
+        "maybe" => ("maybe the same", "Maybe it is the same.", "Maybe this is the same."),
+        "highly" => ("highly important", "It is highly important.", "This is highly important."),
+        "fully" => ("fully ready", "It is fully ready.", "This is fully ready."),
+        "initially" => ("initially go out", "Initially, I go out.", "Initially, you come in."),
+        "thus" => ("thus", "This is true. Thus, I go.", "That is true. Thus, you come."),
+        "cruel" => ("a cruel person", "He is a cruel person.", "She is a cruel person."),
+        "involved" => ("involved in this", "I am involved in this.", "You are involved in it."),
+        "opposed" => ("opposed to this", "I am opposed to this.", "You are opposed to it."),
+        "depressed" => ("feel depressed", "I feel depressed.", "He feels depressed."),
+        "agenda" => ("the agenda", "This is the agenda.", "I see the agenda."),
+        "aspect" => ("an aspect of this", "This is an aspect of this.", "I see an aspect of it."),
+        "extent" => ("the extent", "This is the extent.", "I know the extent."),
 
         // Plural and collective nouns.
         "clothes" => ("these clothes", "These are clothes.", "I see clothes."),
@@ -92,7 +108,6 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "pants" => ("these pants", "These are pants.", "I see pants."),
         "goods" => ("these goods", "These are goods.", "I see goods."),
         "arms" => ("these arms", "These are arms.", "I see arms."),
-        "police" => ("the police", "The police are here.", "I see the police."),
         "people" => ("these people", "These are people.", "I see people."),
         "trousers" => ("these trousers", "These are trousers.", "I see trousers."),
         "means" => ("a means", "This is a means.", "It is a means."),
@@ -109,7 +124,6 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "many" => ("many books", "I have many books.", "You see many books."),
         "much" => ("much food", "I do not have much food.", "You do not have much food."),
         "little" => ("a little food", "I have a little food.", "You have a little food."),
-        "certain" => ("a certain book", "This is a certain book.", "I see a certain book."),
         "various" => ("various books", "I see various books.", "You have various books."),
         "whole" => ("the whole book", "I see the whole book.", "You have the whole book."),
         "according" => ("according to", "This is according to the book.", "It is according to the word."),
@@ -147,7 +161,7 @@ pub fn reviewed_template(word: &str) -> Option<(String, String, String)> {
         "inspire" => ("inspire him", "I can inspire him.", "You can inspire her."),
         "accuse" => ("accuse him", "I can accuse him.", "You can accuse her."),
         "accompany" => ("accompany him", "I can accompany him.", "You can accompany her."),
-        "offend" => ("offend him", "I can offend him.", "You can offend her."),
+        "offend" => ("offend him", "I offend him.", "You offend her."),
         "bother" => ("bother him", "I can bother him.", "You can bother her."),
         "owe" => ("owe him", "I owe him.", "You owe her."),
         "thank" => ("thank him", "I can thank him.", "You can thank her."),
@@ -204,9 +218,9 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
     }
     if FREQUENCY_ADVERBS.contains(&word) {
         return Some(tuple(
-            &format!("{word} go"),
-            &format!("I {word} go."),
-            &format!("You {word} come."),
+            &format!("{word} go out"),
+            &format!("I {word} go out."),
+            &format!("You {word} come in."),
         ));
     }
     if DIRECTION_ADVERBS.contains(&word) {
@@ -218,16 +232,16 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
     }
     if SAME_DEGREE_ADVERBS.contains(&word) || PROBABILITY_ADVERBS.contains(&word) {
         return Some(tuple(
-            &format!("{word} the same"),
-            &format!("It is {word} the same."),
-            &format!("This is {word} the same."),
+            &format!("{word} true"),
+            &format!("It is {word} true."),
+            &format!("This is {word} true."),
         ));
     }
     if BIG_DEGREE_ADVERBS.contains(&word) {
         return Some(tuple(
-            &format!("{word} big"),
-            &format!("It is {word} big."),
-            &format!("This is {word} big."),
+            &format!("{word} important"),
+            &format!("It is {word} important."),
+            &format!("This is {word} important."),
         ));
     }
     if SEQUENCE_ADVERBS.contains(&word) {
@@ -236,20 +250,19 @@ fn dynamic_adverb_template(word: &str) -> Option<(String, String, String)> {
             first.make_ascii_uppercase();
         }
         return Some(tuple(
-            &format!("{word} go"),
-            &format!("{capitalized}, I go."),
-            &format!("{capitalized}, you come."),
+            &format!("{word} go out"),
+            &format!("{capitalized}, I go out."),
+            &format!("{capitalized}, you come in."),
         ));
     }
     match word {
-        "furthermore" => Some(tuple("furthermore", "I go. Furthermore, you come.", "You come. Furthermore, I go.")),
-        "however" => Some(tuple("however", "I go. However, you do not.", "You come. However, I do not.")),
-        "indeed" => Some(tuple("indeed", "It is indeed the same.", "This is indeed the same.")),
+        "furthermore" => Some(tuple("furthermore", "I go out. Furthermore, you come in.", "You come in. Furthermore, I go out.")),
+        "however" => Some(tuple("however", "I go out. However, you do not.", "You come in. However, I do not.")),
+        "indeed" => Some(tuple("indeed", "It is indeed true.", "This is indeed true.")),
         "instead" => Some(tuple("instead", "I do not go. You go instead.", "You do not come. I come instead.")),
-        "nevertheless" => Some(tuple("nevertheless", "I go. Nevertheless, you do not.", "You come. Nevertheless, I do not.")),
-        "otherwise" => Some(tuple("otherwise", "I go. Otherwise, you go.", "You come. Otherwise, I come.")),
+        "nevertheless" => Some(tuple("nevertheless", "I go out. Nevertheless, you do not.", "You come in. Nevertheless, I do not.")),
+        "otherwise" => Some(tuple("otherwise", "I go out. Otherwise, you go out.", "You come in. Otherwise, I come in.")),
         "therefore" => Some(tuple("therefore", "You are here. Therefore, I go.", "I am here. Therefore, you come.")),
-        "thus" => Some(tuple("thus", "I go. Thus, you go.", "You come. Thus, I come.")),
         _ => None,
     }
 }
