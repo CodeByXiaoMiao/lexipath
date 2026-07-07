@@ -32,12 +32,22 @@ impl IpaApp {
             store,
             speaker: SystemSpeaker,
             status: if locked_today {
-                "今日音标课程已完成，下一课将在明天开放。".to_owned()
+                "今日音标课程已完成，可以手动进入下一天。".to_owned()
             } else {
                 "每个示例必须先播放，测试最终 100% 才能完成今天课程。".to_owned()
             },
             locked_today,
         }))
+    }
+
+    pub fn locked_today(&self) -> bool {
+        self.locked_today
+    }
+
+    pub fn continue_after_daily_limit(&mut self) {
+        self.locked_today = false;
+        self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
+        self.status = "已手动进入下一天音标课程。".to_owned();
     }
 
     pub fn update(&mut self, context: &egui::Context) -> bool {
@@ -67,7 +77,10 @@ impl IpaApp {
             ui.vertical_centered_justified(|ui| {
                 if self.locked_today {
                     ui.heading("今日音标学习已完成");
-                    ui.label("固定计划每天只开放一课音标，明天继续下一课。");
+                    ui.label("固定计划每天只开放一课音标；需要继续测试时，可以手动进入下一天。");
+                    if ui.button("进入下一天音标").clicked() {
+                        self.continue_after_daily_limit();
+                    }
                     return;
                 }
 
@@ -89,7 +102,7 @@ impl IpaApp {
                                     PhoneticSession::new(self.lessons[self.day_index].clone());
                                 self.locked_today = true;
                                 self.status =
-                                    "今日音标课程已完成，下一课将在明天开放。".to_owned();
+                                    "今日音标课程已完成，可以手动进入下一天。".to_owned();
                             }
                         }
                     }
