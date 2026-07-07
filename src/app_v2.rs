@@ -5,6 +5,7 @@ use eframe::egui;
 use crate::audio::SystemSpeaker;
 use crate::catalog::CourseCatalog;
 use crate::course::{CoursePack, Lesson};
+use crate::display_text::safe_ipa;
 use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
@@ -62,6 +63,12 @@ impl LexiPathApp {
     }
 
     pub fn continue_after_daily_limit(&mut self) {
+        if let Some(store) = &mut self.progress {
+            if let Err(error) = store.enable_manual_new_units_today() {
+                self.status = format!("保存手动进入下一天失败：{error}");
+                return;
+            }
+        }
         self.load_next_available();
         self.status = "已手动进入下一天/后续新课；到期复习仍会优先。".to_owned();
     }
@@ -96,7 +103,7 @@ impl LexiPathApp {
             store.data.current_lesson_id = Some(lesson.id.clone());
             store.data.course_complete = false;
             store
-                .save()
+                .enable_manual_new_units_today()
                 .map_err(|error| format!("保存进度切换失败：{error}"))?;
         }
 
@@ -224,7 +231,7 @@ impl LexiPathApp {
             return;
         };
         ui.heading(&word.text);
-        ui.label(egui::RichText::new(&word.ipa).size(22.0));
+        ui.label(egui::RichText::new(safe_ipa(&word.ipa)).size(22.0));
         ui.label(egui::RichText::new(&word.meaning).size(20.0));
         ui.separator();
         if ui.button("▶ 播放单词").clicked() {
