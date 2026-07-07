@@ -10,6 +10,17 @@ impl ProgressStore {
         self.data.ipa_last_completed_day == Some(current_day())
     }
 
+    pub fn set_ipa_current_day_number(
+        &mut self,
+        day_number: usize,
+        total_days: usize,
+    ) -> anyhow::Result<()> {
+        let target = day_number.clamp(1, total_days.max(1));
+        self.data.ipa_completed_days = target.saturating_sub(1);
+        self.data.ipa_last_completed_day = None;
+        self.save_exact()
+    }
+
     pub fn complete_ipa_day(&mut self, total_days: usize) -> anyhow::Result<()> {
         self.data.ipa_completed_days = self
             .data
