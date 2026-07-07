@@ -210,6 +210,14 @@ impl RootApp {
         })
     }
 
+    fn active_progress_label(&self) -> String {
+        if let Some(ipa) = &self.ipa {
+            ipa.current_label()
+        } else {
+            format!("当前词汇课：{}", self.vocabulary.current_lesson_label())
+        }
+    }
+
     fn vocabulary_locked_today(&self) -> bool {
         if self.allow_extra_new_units_today {
             return false;
@@ -264,7 +272,7 @@ impl RootApp {
                 ui.separator();
                 ui.label("窗口保持置顶");
                 ui.separator();
-                ui.label(self.vocabulary.current_lesson_label());
+                ui.label(self.active_progress_label());
                 if self.pointer_faded {
                     ui.separator();
                     ui.label("鼠标已移出：窗口已透明到 0%。");
@@ -304,7 +312,8 @@ impl RootApp {
     fn show_progress_controls(&mut self, ui: &mut egui::Ui, context: &egui::Context) {
         let total = self.vocabulary.lesson_count().max(1);
         self.progress_lesson_number = self.progress_lesson_number.clamp(1, total);
-        ui.label(format!("当前词汇课：{}", self.vocabulary.current_lesson_label()));
+        ui.label(self.active_progress_label());
+        ui.label(format!("词汇跳转目标：{}", self.vocabulary.current_lesson_label()));
         ui.horizontal_wrapped(|ui| {
             if ui.button("进入下一天 / 继续后续新课").clicked() {
                 let mut handled_ipa = false;
@@ -339,12 +348,12 @@ impl RootApp {
                     .speed(1.0),
             );
             ui.label(format!("/ {total} 课"));
-            if ui.button("跳转").clicked() {
+            if ui.button("跳转词汇课").clicked() {
                 let result = self.vocabulary.jump_to_lesson_number(self.progress_lesson_number);
                 self.apply_progress_change(result, context);
             }
         });
-        ui.label("进度切换会立即保存到 data/progress.json；可向前或向后任意切换。跳转词汇课会跳过音标引导页。 ");
+        ui.label("音标天数和词汇课数是两套独立进度；跳转词汇课会关闭音标页并保存到 data/progress.json。 ");
     }
 
     fn apply_progress_change(&mut self, result: Result<String, String>, context: &egui::Context) {
