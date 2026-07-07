@@ -41,6 +41,15 @@ impl IpaApp {
         }))
     }
 
+    pub fn current_label(&self) -> String {
+        format!(
+            "当前音标：第 {} / {} 天：{}",
+            self.day_index + 1,
+            self.lessons.len(),
+            self.session.lesson().title
+        )
+    }
+
     pub fn locked_today(&self) -> bool {
         self.locked_today
     }
@@ -64,7 +73,7 @@ impl IpaApp {
             ui.horizontal(|ui| {
                 ui.strong("LexiPath IPA");
                 ui.separator();
-                ui.label(format!("第 {} / 14 天", self.day_index + 1));
+                ui.label(format!("第 {} / {} 天", self.day_index + 1, self.lessons.len()));
                 ui.separator();
                 ui.label(self.session.lesson().title);
             });
