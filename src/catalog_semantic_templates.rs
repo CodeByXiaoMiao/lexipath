@@ -1,17 +1,17 @@
 const ABSTRACT_OR_MASS_NOUNS: &[&str] = &[
     "access", "advice", "advertising", "agriculture", "air", "alcohol", "anger",
     "anxiety", "architecture", "art", "attention", "authority", "beauty", "behavior",
-    "bread", "business", "care", "charity", "clothing", "coal", "coffee",
-    "communication", "competition", "confidence", "construction", "courage", "culture",
-    "damage", "data", "death", "democracy", "destruction", "development", "digestion",
-    "direction", "discussion", "driving", "education", "electricity", "employment",
-    "energy", "equipment", "evidence", "experience", "fiction", "fishing", "food",
-    "freedom", "fun", "furniture", "growth", "happiness", "health", "hearing", "history",
-    "homework", "honesty", "hope", "importance", "independence", "information",
-    "insurance", "intelligence", "knowledge", "language", "leadership", "learning", "life",
-    "love", "luck", "luggage", "management", "material", "mathematics", "meat", "media",
-    "metal", "milk", "money", "motion", "music", "nature", "news", "observation",
-    "parking", "peace", "permission", "physics", "planning", "pleasure", "politics",
+    "bread", "business", "care", "charity", "clothing", "coal", "coffee", "communication",
+    "competition", "confidence", "construction", "courage", "culture", "damage", "data",
+    "death", "democracy", "destruction", "development", "digestion", "direction",
+    "discussion", "driving", "education", "electricity", "employment", "energy",
+    "equipment", "evidence", "experience", "fiction", "fishing", "food", "freedom", "fun",
+    "furniture", "growth", "hair", "happiness", "health", "hearing", "history", "homework",
+    "honesty", "hope", "humour", "humor", "importance", "independence", "information",
+    "insurance", "intelligence", "knowledge", "language", "land", "leadership", "learning",
+    "life", "love", "luck", "luggage", "management", "material", "mathematics", "meat",
+    "media", "metal", "milk", "money", "motion", "music", "nature", "news", "observation",
+    "oil", "parking", "peace", "permission", "physics", "planning", "pleasure", "politics",
     "pollution", "poverty", "power", "practice", "pressure", "progress", "punishment",
     "quality", "reality", "reading", "research", "respect", "rice", "safety", "sailing",
     "salt", "science", "security", "singing", "skiing", "sleep", "smoking", "society",
@@ -26,6 +26,31 @@ const EVENT_SUBJECT_VERBS: &[&str] = &[
     "improve", "increase", "occur", "pass", "remain", "rise", "spread", "start", "stop",
     "succeed",
 ];
+
+const PERSON_OBJECT_VERBS: &[&str] = &[
+    "accept", "accompany", "accuse", "admire", "advise", "annoy", "ask", "bother",
+    "call", "convince", "educate", "encourage", "forgive", "greet", "help", "inform",
+    "inspire", "invite", "join", "meet", "miss", "offend", "persuade", "phone", "promise",
+    "remind", "support", "teach", "thank", "trust", "warn",
+];
+
+const HUMAN_STATE_ADJECTIVES: &[&str] = &[
+    "able", "afraid", "alive", "alone", "angry", "ashamed", "asleep", "awake", "aware",
+    "bored", "busy", "calm", "certain", "comfortable", "confident", "confused", "conscious",
+    "delighted", "depressed", "disappointed", "eager", "embarrassed", "enthusiastic",
+    "excited", "free", "frightened", "glad", "guilty", "happy", "ill", "interested",
+    "involved", "jealous", "lonely", "married", "nervous", "pleased", "proud", "ready",
+    "relaxed", "retired", "sad", "satisfied", "scared", "shocked", "sick", "sorry",
+    "surprised", "tired", "unable", "unconscious", "unemployed", "unhappy", "upset",
+    "willing", "worried",
+];
+
+const TIME_PERIOD_NOUNS: &[&str] = &[
+    "spring", "summer", "autumn", "fall", "winter", "morning", "afternoon", "evening",
+    "night", "today", "tomorrow", "yesterday", "weekend",
+];
+
+const DIRECTION_NOUNS: &[&str] = &["north", "south", "east", "west"];
 
 const CARDINAL_NUMBERS: &[&str] = &[
     "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
@@ -42,6 +67,7 @@ const ORDINAL_NUMBERS: &[&str] = &[
 
 pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, String)> {
     let lower = word.to_ascii_lowercase();
+    let meaning_lower = meaning.trim().to_ascii_lowercase();
 
     if CARDINAL_NUMBERS.contains(&lower.as_str()) {
         return Some(tuple(
@@ -59,6 +85,34 @@ pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, S
         ));
     }
 
+    if DIRECTION_NOUNS.contains(&lower.as_str()) {
+        return Some(tuple(
+            &format!("go {word}"),
+            &format!("I go {word}."),
+            &format!("You go {word}."),
+        ));
+    }
+
+    if TIME_PERIOD_NOUNS.contains(&lower.as_str()) {
+        return Some(tuple(
+            &format!("in {word}"),
+            &format!("I go in {word}."),
+            &format!("You come in {word}."),
+        ));
+    }
+
+    if lower == "based" {
+        return Some(tuple(
+            "based on this",
+            "It is based on this.",
+            "This is based on it.",
+        ));
+    }
+
+    if lower == "used" {
+        return Some(tuple("used this", "I used this.", "You used it."));
+    }
+
     if EVENT_SUBJECT_VERBS.contains(&lower.as_str()) {
         return Some(tuple(
             &format!("can {word}"),
@@ -67,9 +121,24 @@ pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, S
         ));
     }
 
-    if meaning.trim().to_ascii_lowercase().starts_with("n.")
-        && (ABSTRACT_OR_MASS_NOUNS.contains(&lower.as_str())
-            || looks_abstract(&lower))
+    if PERSON_OBJECT_VERBS.contains(&lower.as_str()) {
+        return Some(tuple(
+            &format!("{word} him"),
+            &format!("I can {word} him."),
+            &format!("You can {word} her."),
+        ));
+    }
+
+    if is_human_state_adjective(&lower, &meaning_lower) {
+        return Some(tuple(
+            &format!("am {word}"),
+            &format!("I am {word}."),
+            &format!("You are {word}."),
+        ));
+    }
+
+    if meaning_lower.starts_with("n.")
+        && (ABSTRACT_OR_MASS_NOUNS.contains(&lower.as_str()) || looks_abstract(&lower))
     {
         return Some(tuple(
             &format!("about {word}"),
@@ -81,10 +150,17 @@ pub fn semantic_template(word: &str, meaning: &str) -> Option<(String, String, S
     None
 }
 
+fn is_human_state_adjective(word: &str, meaning: &str) -> bool {
+    (meaning.starts_with("adj.") || meaning.starts_with("a."))
+        && (HUMAN_STATE_ADJECTIVES.contains(&word)
+            || word.ends_with("ed")
+            || word.ends_with("ing"))
+}
+
 fn looks_abstract(word: &str) -> bool {
     [
-        "tion", "sion", "ment", "ness", "ity", "ance", "ence", "ship", "ism",
-        "hood", "dom",
+        "tion", "sion", "ment", "ness", "ity", "ance", "ence", "ship", "ism", "hood",
+        "dom",
     ]
     .iter()
     .any(|suffix| word.ends_with(suffix))
@@ -115,5 +191,23 @@ mod tests {
     fn event_verbs_use_an_event_subject() {
         let template = semantic_template("happen", "vi. 发生").expect("template");
         assert_eq!(template.1, "It can happen.");
+    }
+
+    #[test]
+    fn human_state_adjectives_use_people() {
+        let template = semantic_template("able", "adj. 能够的").expect("template");
+        assert_eq!(template.1, "I am able.");
+    }
+
+    #[test]
+    fn compass_words_use_direction_contexts() {
+        let template = semantic_template("south", "n. 南方").expect("template");
+        assert_eq!(template.1, "I go south.");
+    }
+
+    #[test]
+    fn based_receives_required_preposition() {
+        let template = semantic_template("based", "v. 以……为基础").expect("template");
+        assert_eq!(template.1, "It is based on this.");
     }
 }
