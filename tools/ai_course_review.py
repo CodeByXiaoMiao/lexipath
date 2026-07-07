@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import time
+import traceback
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -160,12 +161,20 @@ def write_reports(
     model: str,
     lesson_count: int,
     issues: list[dict[str, str]],
+    *,
+    completed_batches: int,
+    total_batches: int,
+    review_error: str | None = None,
 ) -> None:
     errors = [item for item in issues if item["severity"] == "error"]
     warnings = [item for item in issues if item["severity"] == "warning"]
     payload = {
         "model": model,
         "lessons_reviewed": lesson_count,
+        "completed_batches": completed_batches,
+        "total_batches": total_batches,
+        "complete": completed_batches == total_batches and review_error is None,
+        "review_error": review_error,
         "error_count": len(errors),
         "warning_count": len(warnings),
         "issues": issues,
@@ -178,11 +187,18 @@ def write_reports(
         "# LexiPath AI Course Review",
         "",
         f"- Model: `{model}`",
-        f"- Lessons reviewed: {lesson_count}",
+        f"- Lessons in course: {lesson_count}",
+        f"- Batches completed: {completed_batches}/{total_batches}",
+        f"- Complete: {payload['complete']}",
         f"- Errors: {len(errors)}",
         f"- Warnings: {len(warnings)}",
         "",
     ]
+    if review_error:
+        lines.extend(["## Review process error", "", "```", review_error, "```", ""])
+    if issues:
+        lines.append("## Issues")
+        lines.append("")
     for item in issues:
         label = "ERROR" if item["severity"] == "error" else "WARNING"
         word = f" — `{item['word']}`" if item["word"] else ""
@@ -204,14 +220,50 @@ def main() -> int:
     valid_ids = {str(lesson["lesson_id"]) for lesson in lessons}
     all_issues: list[dict[str, str]] = []
     total_batches = (len(lessons) + BATCH_SIZE - 1) // BATCH_SIZE
+    completed_batches = 0
 
-    for batch_number, batch in chunks(lessons, BATCH_SIZE):
-        print(f"AI review batch {batch_number}/{total_batches}", flush=True)
-        response = request_review(token, args.model, batch)
-        all_issues.extend(validate_issues(response["issues"], valid_ids))
-        time.sleep(1)
+    try:
+        write_reports(
+            args.report_json,
+            args.report_md,
+            args.model,
+            len(lessons),
+            all_issues,
+            completed_batches=0,
+            total_batches=total_batches,
+        )
+        for batch_number, batch in chunks(lessons, BATCH_SIZE):
+            print(f"AI review batch {batch_number}/{total_batches}", flush=True)
+            response = request_review(token, args.model, batch)
+            all_issues.extend(validate_issues(response["issues"], valid_ids))
+            completed_batches = batch_number
+            write_reports(
+                args.report_json,
+                args.report_md,
+                args.model,
+                len(lessons),
+                all_issues,
+                completed_batches=completed_batches,
+                total_batches=total_batches,
+            )
+            time.sleep(1)
+    except Exception as error:  # noqa: BLE001 - CI must preserve the partial report.
+        review_error = "".join(
+            traceback.format_exception_only(type(error), error)
+        ).strip()
+        print(review_error, file=sys.stderr)
+        write_reports(
+            args.report_json,
+            args.report_md,
+            args.model,
+            len(lessons),
+            all_issues,
+            completed_batches=completed_batches,
+            total_batches=total_batches,
+            review_error=review_error,
+        )
+        return 1
 
-    write_reports(args.report_json, args.report_md, args.model, len(lessons), all_issues)
     errors = [item for item in all_issues if item["severity"] == "error"]
     warnings = [item for item in all_issues if item["severity"] == "warning"]
     print(
