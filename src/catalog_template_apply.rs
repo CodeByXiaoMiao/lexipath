@@ -1,4 +1,5 @@
 use crate::catalog_core_meanings::core_sense_template;
+use crate::catalog_final_review_templates::final_review_template;
 use crate::catalog_function_templates::function_template;
 use crate::catalog_semantic_templates::semantic_template;
 use crate::catalog_template_overrides::{normalize_display, reviewed_template};
@@ -19,6 +20,13 @@ pub fn apply_reviewed_templates(course: &mut CoursePack) {
                     core_sense_template(&display)
                 {
                     word.meaning = meaning;
+                    Some((phrase, first, second))
+                } else if let Some((meaning, phrase, first, second)) =
+                    final_review_template(&display)
+                {
+                    if let Some(meaning) = meaning {
+                        word.meaning = meaning;
+                    }
                     Some((phrase, first, second))
                 } else {
                     function_template(&display)
@@ -126,6 +134,17 @@ mod tests {
         let lesson = &course.stages[0].lessons[0];
         assert_eq!(lesson.new_words[0].example, "I am awake.");
         assert_eq!(lesson.reading.sentences[1], "You are awake.");
+    }
+
+    #[test]
+    fn final_review_template_can_replace_meaning_and_contexts() {
+        let mut course = one_word_course("download", "n. 卸载");
+        polish_generated_content(&mut course);
+        apply_reviewed_templates(&mut course);
+
+        let word = &course.stages[0].lessons[0].new_words[0];
+        assert_eq!(word.meaning, "v. 下载");
+        assert_eq!(word.example, "I can download it.");
     }
 
     #[test]
