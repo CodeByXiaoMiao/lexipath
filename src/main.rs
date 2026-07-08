@@ -5,6 +5,7 @@ mod audio;
 mod catalog;
 mod catalog_core_meanings;
 mod catalog_daily;
+mod catalog_final_review_templates;
 mod catalog_function_templates;
 mod catalog_import;
 mod catalog_load;
