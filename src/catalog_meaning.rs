@@ -20,7 +20,7 @@ pub fn normalize_learner_meaning(
     phrase: &str,
     example: &str,
 ) -> String {
-    let class = infer_target_class(word, meaning, phrase, example);
+    let inferred_class = infer_target_class(word, meaning, phrase, example);
     let normalized = meaning.replace("\\n", "\n");
     let lines = normalized
         .lines()
@@ -28,6 +28,7 @@ pub fn normalize_learner_meaning(
         .map(|line| line.trim().to_owned())
         .filter(|line| !line.is_empty())
         .collect::<Vec<_>>();
+    let class = normalized_single_class(meaning, &lines).unwrap_or(inferred_class);
 
     let selected = lines
         .iter()
@@ -53,6 +54,21 @@ pub fn learner_gloss(meaning: &str) -> &str {
         .map(|(_, gloss)| gloss.trim())
         .filter(|gloss| !gloss.is_empty())
         .unwrap_or(meaning)
+}
+
+fn normalized_single_class(original: &str, lines: &[String]) -> Option<TargetClass> {
+    let trimmed = original.trim();
+    if lines.len() != 1
+        || trimmed.contains("\\n")
+        || trimmed.contains('\n')
+        || trimmed.contains('[')
+        || trimmed.contains(']')
+        || trimmed.contains(',')
+        || trimmed.contains('，')
+    {
+        return None;
+    }
+    line_class(&lines[0])
 }
 
 fn infer_target_class(word: &str, meaning: &str, phrase: &str, example: &str) -> TargetClass {
@@ -281,6 +297,24 @@ mod tests {
             "This is a colour.",
         );
         assert_eq!(result, "n. 颜色");
+    }
+
+    #[test]
+    fn keeps_curated_part_of_speech_across_repeated_finalization() {
+        let first = normalize_learner_meaning(
+            "latest",
+            "adj. 最新的",
+            "the latest one",
+            "This is the latest one.",
+        );
+        let second = normalize_learner_meaning(
+            "latest",
+            &first,
+            "the latest one",
+            "This is the latest one.",
+        );
+        assert_eq!(first, "adj. 最新的");
+        assert_eq!(second, first);
     }
 
     #[test]
