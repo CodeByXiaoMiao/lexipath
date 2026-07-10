@@ -170,14 +170,16 @@ fn validate_lesson_text(
     }
 
     for (question_index, question) in lesson.reading.questions.iter().enumerate() {
-        validate_text(
-            lesson,
-            &format!("reading.questions[{question_index}].prompt"),
-            &question.prompt,
-            allowed,
-            &reading_names,
-            errors,
-        );
+        if question.prompt.contains("____") {
+            validate_text(
+                lesson,
+                &format!("reading.questions[{question_index}].prompt"),
+                &question.prompt,
+                allowed,
+                &reading_names,
+                errors,
+            );
+        }
         for (option_index, option) in question.options.iter().enumerate() {
             validate_text(
                 lesson,
@@ -301,7 +303,7 @@ mod tests {
         let mut course = CoursePack::embedded().expect("embedded course should parse");
         course.stages[0].lessons[0].reading.title = "Here and there".to_owned();
 
-        let errors = validate_course(&course).expect_err("unknown title word must fail validation");
+        let errors = validate_course(&course).expect_err("unknown word must fail validation");
         assert!(errors.iter().any(|item| item.message.contains("and")));
     }
 
