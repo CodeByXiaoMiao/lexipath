@@ -44,6 +44,7 @@ mod root_app;
 mod scheduler;
 mod shell;
 mod stage_assessment;
+mod translation;
 mod validator;
 
 use root_app::RootApp;
