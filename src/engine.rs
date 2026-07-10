@@ -116,19 +116,23 @@ impl LearningSession {
                 }
             })
             .collect();
-        Some(rotated_options(options, current, current + 1))
+        Some(stable_options(
+            options,
+            current,
+            option_seed(&self.lesson.id, "recognition", current),
+        ))
     }
 
     pub fn listening_options(&self) -> Option<(Vec<String>, usize)> {
         let current = self.current_mastery_index()?;
-        Some(rotated_options(
+        Some(stable_options(
             self.lesson
                 .new_words
                 .iter()
                 .map(|word| word.text.clone())
                 .collect(),
             current,
-            current + 2,
+            option_seed(&self.lesson.id, "listening", current),
         ))
     }
 
@@ -139,14 +143,14 @@ impl LearningSession {
 
     pub fn sentence_options(&self) -> Option<(Vec<String>, usize)> {
         let current = self.current_mastery_index()?;
-        Some(rotated_options(
+        Some(stable_options(
             self.lesson
                 .sentences
                 .iter()
                 .map(|item| item.meaning.clone())
                 .collect(),
             current,
-            current + 1,
+            option_seed(&self.lesson.id, "sentences", current),
         ))
     }
 
@@ -155,21 +159,27 @@ impl LearningSession {
             return QuestionLookup(None);
         };
         if let Some(question) = self.lesson.reading.questions.get(index) {
-            return QuestionLookup(Some(question.clone()));
+            return QuestionLookup(Some(stable_question(
+                question.clone(),
+                option_seed(&self.lesson.id, "comprehension", index),
+            )));
         }
         let Some(sentence) = self.lesson.sentences.get(index) else {
             return QuestionLookup(None);
         };
-        QuestionLookup(Some(Question {
-            prompt: format!("请选择与中文含义对应的句子：{}", sentence.meaning),
-            options: self
-                .lesson
-                .sentences
-                .iter()
-                .map(|item| item.text.clone())
-                .collect(),
-            correct_index: index,
-        }))
+        QuestionLookup(Some(stable_question(
+            Question {
+                prompt: format!("请选择与中文含义对应的句子：{}", sentence.meaning),
+                options: self
+                    .lesson
+                    .sentences
+                    .iter()
+                    .map(|item| item.text.clone())
+                    .collect(),
+                correct_index: index,
+            },
+            option_seed(&self.lesson.id, "comprehension-fallback", index),
+        )))
     }
 
     pub fn mark_current_audio_played(&mut self) {
@@ -259,18 +269,48 @@ impl LearningSession {
     }
 }
 
-fn rotated_options(
-    mut options: Vec<String>,
+fn stable_question(mut question: Question, seed: u64) -> Question {
+    let (options, correct_index) = stable_options(question.options, question.correct_index, seed);
+    question.options = options;
+    question.correct_index = correct_index;
+    question
+}
+
+fn stable_options(
+    options: Vec<String>,
     correct_source_index: usize,
-    rotation: usize,
+    mut state: u64,
 ) -> (Vec<String>, usize) {
     if options.is_empty() {
         return (options, 0);
     }
-    let len = options.len();
-    options.rotate_left(rotation % len);
-    let correct_value_index = (correct_source_index + len - (rotation % len)) % len;
-    (options, correct_value_index)
+    let mut indexed = options.into_iter().enumerate().collect::<Vec<_>>();
+    for upper in (1..indexed.len()).rev() {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state = state.wrapping_mul(0x2545_f491_4f6c_dd1d);
+        let swap_with = state as usize % (upper + 1);
+        indexed.swap(upper, swap_with);
+    }
+    let correct_index = indexed
+        .iter()
+        .position(|(source, _)| *source == correct_source_index)
+        .unwrap_or(0);
+    let options = indexed.into_iter().map(|(_, value)| value).collect();
+    (options, correct_index)
+}
+
+fn option_seed(lesson_id: &str, phase: &str, item_index: usize) -> u64 {
+    stable_hash(lesson_id)
+        ^ stable_hash(phase).rotate_left(17)
+        ^ (item_index as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+}
+
+fn stable_hash(value: &str) -> u64 {
+    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01b3)
+    })
 }
 
 #[cfg(test)]
