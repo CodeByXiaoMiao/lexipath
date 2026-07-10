@@ -17,8 +17,19 @@ impl ProgressStore {
             fs::create_dir_all(parent)?;
         }
         let data = if path.exists() {
-            let text = fs::read_to_string(&path)?;
-            serde_json::from_str(&text).context("failed to read progress data")?
+            match fs::read_to_string(&path)
+                .ok()
+                .and_then(|text| serde_json::from_str::<ProgressData>(&text).ok())
+            {
+                Some(data) => data,
+                None => {
+                    let backup = path.with_extension("json.bak");
+                    let text = fs::read_to_string(&backup)
+                        .context("failed to read progress data and backup")?;
+                    serde_json::from_str(&text)
+                        .context("failed to parse progress data and backup")?
+                }
+            }
         } else {
             ProgressData::default()
         };
@@ -44,8 +55,21 @@ impl ProgressStore {
             }
         }
 
+        self.write_data(&merged)
+    }
+
+    pub fn save_exact(&self) -> anyhow::Result<()> {
+        self.write_data(&self.data)
+    }
+
+    fn write_data(&self, data: &ProgressData) -> anyhow::Result<()> {
         let temporary = self.path.with_extension("tmp");
-        fs::write(&temporary, serde_json::to_vec_pretty(&merged)?)?;
+        let backup = self.path.with_extension("json.bak");
+        fs::write(&temporary, serde_json::to_vec_pretty(data)?)?;
+        if self.path.exists() {
+            fs::copy(&self.path, &backup)?;
+            fs::remove_file(&self.path)?;
+        }
         fs::rename(temporary, &self.path)?;
         Ok(())
     }

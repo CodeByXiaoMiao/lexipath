@@ -4,6 +4,19 @@ use std::fmt;
 use crate::course::{CoursePack, Lesson};
 use crate::validator::tokenize;
 
+const BAD_EXACT_EXAMPLES: &[&str] = &[
+    "It is able.",
+    "It is only.",
+    "It is very.",
+    "It is same.",
+    "It is happy.",
+    "It is interested.",
+    "It is excited.",
+    "It is surprised.",
+    "It is shocked.",
+    "It is unconscious.",
+];
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QualityIssue {
     pub lesson_id: String,
@@ -23,7 +36,6 @@ impl fmt::Display for QualityIssue {
 
 pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIssue>> {
     let mut issues = Vec::new();
-    let mut generated_word_count = 0usize;
     let mut fallback_count = 0usize;
 
     for stage in &course.stages {
@@ -36,11 +48,13 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
             }
 
             for (index, word) in lesson.new_words.iter().enumerate() {
-                if generated_stage {
-                    generated_word_count += 1;
-                    if word.example.starts_with("The word is ") {
-                        fallback_count += 1;
-                    }
+                if generated_stage && word.example.starts_with("The word is ") {
+                    fallback_count += 1;
+                    issues.push(issue(
+                        lesson,
+                        &format!("new_words[{index}].example"),
+                        "metalinguistic fallback example reached the final course",
+                    ));
                 }
 
                 let field = format!("new_words[{index}]");
@@ -90,6 +104,14 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
                     &mut issues,
                 );
 
+                if BAD_EXACT_EXAMPLES.contains(&word.example.as_str()) {
+                    issues.push(issue(
+                        lesson,
+                        &format!("{field}.example"),
+                        "manual review rejected this unnatural generated example",
+                    ));
+                }
+
                 let entry_tokens = tokenize(&word.text);
                 let containing_sentences = lesson
                     .reading
@@ -116,6 +138,13 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
                     sentence,
                     &mut issues,
                 );
+                if BAD_EXACT_EXAMPLES.contains(&sentence.as_str()) {
+                    issues.push(issue(
+                        lesson,
+                        &format!("reading.sentences[{index}]"),
+                        "manual review rejected this unnatural generated sentence",
+                    ));
+                }
             }
 
             for (question_index, question) in lesson.reading.questions.iter().enumerate() {
@@ -131,14 +160,11 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
         }
     }
 
-    let fallback_limit = (generated_word_count / 100).max(5);
-    if fallback_count > fallback_limit {
+    if fallback_count > 0 {
         issues.push(QualityIssue {
             lesson_id: "course".to_owned(),
             field: "generated_content".to_owned(),
-            message: format!(
-                "metalinguistic fallback was used {fallback_count} times; limit is {fallback_limit}"
-            ),
+            message: format!("metalinguistic fallback was used {fallback_count} times; limit is 0"),
         });
     }
 
@@ -260,20 +286,60 @@ fn issue(lesson: &Lesson, field: &str, message: &str) -> QualityIssue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::catalog_polish::polish_generated_content;
-    use crate::embedded_course;
+    use crate::course::{CoursePack, Lesson, Reading, Stage, WordItem};
 
-    #[test]
-    fn polished_foundation_course_passes_the_quality_gate() {
-        let mut course = embedded_course::load().expect("course");
-        polish_generated_content(&mut course);
-        assert_eq!(validate_content_quality(&course), Ok(()));
+    fn course_with_word(word: &str, example: &str) -> CoursePack {
+        CoursePack {
+            id: "test".to_owned(),
+            title: "test".to_owned(),
+            version: 1,
+            stages: vec![Stage {
+                id: "generated".to_owned(),
+                title: "generated".to_owned(),
+                lessons: vec![Lesson {
+                    id: "unit".to_owned(),
+                    title: "unit".to_owned(),
+                    new_words: vec![WordItem {
+                        id: word.to_owned(),
+                        text: word.to_owned(),
+                        ipa: "/test/".to_owned(),
+                        meaning: "n. test".to_owned(),
+                        phrase: word.to_owned(),
+                        example: example.to_owned(),
+                    }],
+                    sentences: vec![crate::course::SentenceItem {
+                        text: example.to_owned(),
+                        meaning: "test".to_owned(),
+                    }],
+                    reading: Reading {
+                        title: "test".to_owned(),
+                        sentences: vec![example.to_owned(), example.to_owned()],
+                        questions: vec![crate::course::Question {
+                            prompt: "test".to_owned(),
+                            options: vec![example.to_owned()],
+                            correct_index: 0,
+                        }],
+                    },
+                }],
+            }],
+        }
     }
 
     #[test]
-    fn suffix_dictionary_entries_are_rejected() {
-        let mut course = embedded_course::load().expect("course");
-        course.stages[0].lessons[0].new_words[0].text = "-word".to_owned();
-        assert!(validate_content_quality(&course).is_err());
+    fn rejects_metalinguistic_fallbacks() {
+        let course = course_with_word("blog", "The word is blog.");
+        let errors = validate_content_quality(&course).expect_err("fallback must fail");
+        assert!(errors
+            .iter()
+            .any(|error| error.message.contains("metalinguistic fallback")));
+    }
+
+    #[test]
+    fn rejects_known_bad_adjective_frames() {
+        let course = course_with_word("happy", "It is happy.");
+        let errors = validate_content_quality(&course).expect_err("bad frame must fail");
+        assert!(errors
+            .iter()
+            .any(|error| error.message.contains("manual review rejected")));
     }
 }

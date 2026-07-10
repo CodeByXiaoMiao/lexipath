@@ -1,6 +1,7 @@
 use eframe::egui;
 
 use crate::audio::SystemSpeaker;
+use crate::display_text::safe_ipa;
 use crate::phonetics_catalog;
 use crate::phonetics_engine::{PhoneticPhase, PhoneticSession};
 use crate::progress_store::ProgressStore;
@@ -19,10 +20,14 @@ impl IpaApp {
     pub fn load() -> anyhow::Result<Option<Self>> {
         let lessons = phonetics_catalog::lessons();
         let store = ProgressStore::open()?;
-        let day_index = store.ipa_completed_days();
-        if day_index >= lessons.len() {
+        if store.ipa_completed_days() >= lessons.len()
+            && store.data.ipa_active_day_number.is_none()
+        {
             return Ok(None);
         }
+        let day_index = store
+            .ipa_current_day_number(lessons.len())
+            .saturating_sub(1);
         let locked_today = store.ipa_completed_today();
         let session = PhoneticSession::new(lessons[day_index].clone());
         Ok(Some(Self {
@@ -32,12 +37,91 @@ impl IpaApp {
             store,
             speaker: SystemSpeaker,
             status: if locked_today {
-                "今日音标课程已完成，下一课将在明天开放。".to_owned()
+                "今日音标课程已完成，可以手动进入下一天。".to_owned()
             } else {
                 "每个示例必须先播放，测试最终 100% 才能完成今天课程。".to_owned()
             },
             locked_today,
         }))
+    }
+
+    pub fn load_at_day_number(day_number: usize) -> anyhow::Result<Self> {
+        let lessons = phonetics_catalog::lessons();
+        let mut store = ProgressStore::open()?;
+        let target = day_number.clamp(1, lessons.len().max(1));
+        store.set_ipa_current_day_number(target, lessons.len())?;
+        let day_index = target.saturating_sub(1);
+        let session = PhoneticSession::new(lessons[day_index].clone());
+        Ok(Self {
+            lessons,
+            day_index,
+            session,
+            store,
+            speaker: SystemSpeaker,
+            status: format!("已切换到第 {target} 天音标课程。"),
+            locked_today: false,
+        })
+    }
+
+    pub fn total_day_count() -> usize {
+        phonetics_catalog::lessons().len()
+    }
+
+    pub fn current_day_number(&self) -> usize {
+        self.day_index + 1
+    }
+
+    pub fn current_label(&self) -> String {
+        format!(
+            "当前音标：第 {} / {} 天：{}",
+            self.current_day_number(),
+            self.lessons.len(),
+            self.session.lesson().title
+        )
+    }
+
+    pub fn locked_today(&self) -> bool {
+        self.locked_today
+    }
+
+    pub fn continue_after_daily_limit(&mut self) {
+        self.locked_today = false;
+        self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
+        self.status = "已手动进入下一天音标课程。".to_owned();
+    }
+
+    pub fn jump_relative_day(&mut self, offset: isize) -> Result<String, String> {
+        let total = self.lessons.len();
+        if total == 0 {
+            return Err("音标课程为空，无法切换。".to_owned());
+        }
+        let current = self.current_day_number();
+        let target = if offset < 0 {
+            current.saturating_sub(offset.unsigned_abs())
+        } else {
+            current.saturating_add(offset as usize)
+        }
+        .clamp(1, total);
+        self.jump_to_day_number(target)
+    }
+
+    pub fn jump_to_day_number(&mut self, day_number: usize) -> Result<String, String> {
+        let total = self.lessons.len();
+        if total == 0 {
+            return Err("音标课程为空，无法切换。".to_owned());
+        }
+        let target = day_number.clamp(1, total);
+        self.store
+            .set_ipa_current_day_number(target, total)
+            .map_err(|error| format!("保存音标进度失败：{error}"))?;
+        self.day_index = target - 1;
+        self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
+        self.locked_today = false;
+        self.status = format!(
+            "已切换到第 {target} / {total} 天音标：{}。",
+            self.session.lesson().title
+        );
+        Ok(self.status.clone())
     }
 
     pub fn update(&mut self, context: &egui::Context) -> bool {
@@ -53,7 +137,11 @@ impl IpaApp {
             ui.horizontal(|ui| {
                 ui.strong("LexiPath IPA");
                 ui.separator();
-                ui.label(format!("第 {} / 14 天", self.day_index + 1));
+                ui.label(format!(
+                    "第 {} / {} 天",
+                    self.current_day_number(),
+                    self.lessons.len()
+                ));
                 ui.separator();
                 ui.label(self.session.lesson().title);
             });
@@ -67,7 +155,10 @@ impl IpaApp {
             ui.vertical_centered_justified(|ui| {
                 if self.locked_today {
                     ui.heading("今日音标学习已完成");
-                    ui.label("固定计划每天只开放一课音标，明天继续下一课。");
+                    ui.label("固定计划每天只开放一课音标；需要继续测试时，可以手动进入下一天。");
+                    if ui.button("进入下一天音标").clicked() {
+                        self.continue_after_daily_limit();
+                    }
                     return;
                 }
 
@@ -77,7 +168,11 @@ impl IpaApp {
                     PhoneticPhase::Complete => {
                         ui.heading("本日音标测试最终正确率 100%");
                         if ui.button("完成今天课程").clicked() {
-                            if let Err(error) = self.store.complete_ipa_day(self.lessons.len()) {
+                            let completed_day = self.current_day_number();
+                            let total_days = self.lessons.len();
+                            if let Err(error) =
+                                self.store.complete_ipa_day(completed_day, total_days)
+                            {
                                 self.status = format!("保存音标进度失败：{error}");
                                 return;
                             }
@@ -89,7 +184,7 @@ impl IpaApp {
                                     PhoneticSession::new(self.lessons[self.day_index].clone());
                                 self.locked_today = true;
                                 self.status =
-                                    "今日音标课程已完成，下一课将在明天开放。".to_owned();
+                                    "今日音标课程已完成，可以手动进入下一天。".to_owned();
                             }
                         }
                     }
@@ -104,11 +199,11 @@ impl IpaApp {
         let Some(item) = self.session.current_item().cloned() else {
             return;
         };
-        ui.heading(egui::RichText::new(item.symbol).size(42.0));
+        ui.heading(egui::RichText::new(safe_ipa(item.symbol)).size(42.0));
         ui.label(item.hint);
         ui.add_space(12.0);
         ui.label(egui::RichText::new(item.example).size(28.0));
-        ui.label(egui::RichText::new(item.example_ipa).size(21.0));
+        ui.label(egui::RichText::new(safe_ipa(item.example_ipa)).size(21.0));
         if ui.button("▶ 播放英文示例").clicked() {
             match self.speaker.speak(item.example) {
                 Ok(()) => {
@@ -151,7 +246,10 @@ impl IpaApp {
 
         for (index, option) in options.into_iter().enumerate() {
             if ui
-                .add_enabled(self.session.audio_played(), egui::Button::new(option))
+                .add_enabled(
+                    self.session.audio_played(),
+                    egui::Button::new(safe_ipa(&option)),
+                )
                 .clicked()
             {
                 self.status = if self.session.answer(index, correct_index) {

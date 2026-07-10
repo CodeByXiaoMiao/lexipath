@@ -21,11 +21,15 @@ pub struct ProgressData {
     #[serde(default)]
     pub ipa_completed_days: usize,
     #[serde(default)]
+    pub ipa_active_day_number: Option<usize>,
+    #[serde(default)]
     pub ipa_last_completed_day: Option<i64>,
     #[serde(default)]
     pub learning_day: Option<i64>,
     #[serde(default)]
     pub new_units_completed_today: usize,
+    #[serde(default)]
+    pub manual_new_units_override_day: Option<i64>,
     #[serde(default)]
     pub current_lesson_id: Option<String>,
     #[serde(default)]
