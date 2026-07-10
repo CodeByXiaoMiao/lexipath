@@ -55,9 +55,10 @@ pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
     let mut issues = Vec::new();
     let field = format!("lesson {} / curated_story", lesson.id);
 
-    if lesson.reading.title != story.title || lesson.reading.sentences != story.sentences
-    {
-        issues.push(format!("{field}: finalized reading does not match its curated asset"));
+    if lesson.reading.title != story.title || lesson.reading.sentences != story.sentences {
+        issues.push(format!(
+            "{field}: finalized reading does not match its curated asset"
+        ));
     }
 
     validate_characters(story, &field, &mut issues);
@@ -67,11 +68,8 @@ pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
     let reading_tokens = tokenize(&lesson.full_reading_text());
     for word in &lesson.new_words {
         let entry_tokens = tokenize(&word.text);
-        let count = sequence_count(
-            &reading_tokens,
-            &entry_tokens,
-            infer_morph_class(&word.text, &word.meaning, &word.phrase, &word.example),
-        );
+        let class = infer_morph_class(&word.text, &word.meaning, &word.phrase, &word.example);
+        let count = sequence_count(&reading_tokens, &entry_tokens, class);
         if count < 2 {
             issues.push(format!(
                 "{field}: target '{}' must appear at least twice including controlled inflections; found {count}",
@@ -81,13 +79,7 @@ pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
         let separate_sentences = story
             .sentences
             .iter()
-            .filter(|sentence| {
-                sequence_count(
-                    &tokenize(sentence),
-                    &entry_tokens,
-                    infer_morph_class(&word.text, &word.meaning, &word.phrase, &word.example),
-                ) > 0
-            })
+            .filter(|sentence| sequence_count(&tokenize(sentence), &entry_tokens, class) > 0)
             .count();
         if separate_sentences < 2 {
             issues.push(format!(
@@ -133,16 +125,22 @@ fn stories() -> &'static HashMap<String, StoryAsset> {
 
 fn validate_characters(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
     if story.characters.is_empty() || story.characters.len() > 4 {
-        issues.push(format!("{field}.characters: expected one to four named characters"));
+        issues.push(format!(
+            "{field}.characters: expected one to four named characters"
+        ));
     }
     let mut seen = HashSet::new();
     for name in &story.characters {
         let lower = name.to_ascii_lowercase();
         if !ALLOWED_CHARACTER_NAMES.contains(&lower.as_str()) {
-            issues.push(format!("{field}.characters: unsupported character name '{name}'"));
+            issues.push(format!(
+                "{field}.characters: unsupported character name '{name}'"
+            ));
         }
         if !seen.insert(lower.clone()) {
-            issues.push(format!("{field}.characters: duplicate character name '{name}'"));
+            issues.push(format!(
+                "{field}.characters: duplicate character name '{name}'"
+            ));
         }
         let appearances = story
             .sentences
@@ -172,18 +170,24 @@ fn validate_arc(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
         || arc.attempt_sentences.iter().any(|index| *index >= len)
         || arc.reveal_sentence.is_some_and(|index| index >= len)
     {
-        issues.push(format!("{field}.arc: sentence index is outside the story"));
+        issues.push(format!(
+            "{field}.arc: sentence index is outside the story"
+        ));
         return;
     }
     if arc.attempt_sentences.len() < 2 {
-        issues.push(format!("{field}.arc: at least two attempts are required"));
+        issues.push(format!(
+            "{field}.arc: at least two attempts are required"
+        ));
     }
     if !(arc.setup_sentence <= arc.goal_sentence
         && arc.goal_sentence < arc.problem_sentence
         && arc.problem_sentence < arc.turn_sentence
         && arc.turn_sentence < arc.resolution_sentence)
     {
-        issues.push(format!("{field}.arc: narrative events are not in chronological order"));
+        issues.push(format!(
+            "{field}.arc: narrative events are not in chronological order"
+        ));
     }
     if arc
         .attempt_sentences
@@ -210,7 +214,10 @@ fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
         "B1" => (14, 22, 6),
         "B2" => (16, 26, 7),
         _ => {
-            issues.push(format!("{field}.level: unsupported level '{}'", story.level));
+            issues.push(format!(
+                "{field}.level: unsupported level '{}'",
+                story.level
+            ));
             (10, 26, 4)
         }
     };
@@ -244,14 +251,14 @@ fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
     }
 
     let connectors = [
-        "after", "although", "because", "before", "but", "however", "if", "so",
-        "then", "though", "when", "while",
+        "after", "although", "because", "before", "but", "however", "if", "so", "then",
+        "though", "when", "while",
     ];
     let story_tokens = story
         .sentences
         .iter()
         .flat_map(|sentence| tokenize(sentence))
-        .collect::<HashSet_<_>>();
+        .collect::<HashSet<_>>();
     let connector_count = connectors
         .iter()
         .filter(|connector| story_tokens.contains(**connector))
