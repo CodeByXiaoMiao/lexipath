@@ -50,6 +50,12 @@ fn context_repair(word: &str) -> Option<ContextRepair> {
             first: "I have one minute.",
             second: "You have one minute.",
         },
+        "mine" => ContextRepair {
+            meaning: Some("pron. 我的"),
+            phrase: "is mine",
+            first: "This book is mine.",
+            second: "The book is mine.",
+        },
         "trip" => ContextRepair {
             meaning: None,
             phrase: "go on a trip",
