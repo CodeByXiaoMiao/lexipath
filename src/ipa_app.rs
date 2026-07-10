@@ -20,10 +20,14 @@ impl IpaApp {
     pub fn load() -> anyhow::Result<Option<Self>> {
         let lessons = phonetics_catalog::lessons();
         let store = ProgressStore::open()?;
-        let day_index = store.ipa_completed_days();
-        if day_index >= lessons.len() {
+        if store.ipa_completed_days() >= lessons.len()
+            && store.data.ipa_active_day_number.is_none()
+        {
             return Ok(None);
         }
+        let day_index = store
+            .ipa_current_day_number(lessons.len())
+            .saturating_sub(1);
         let locked_today = store.ipa_completed_today();
         let session = PhoneticSession::new(lessons[day_index].clone());
         Ok(Some(Self {
@@ -113,7 +117,10 @@ impl IpaApp {
         self.day_index = target - 1;
         self.session = PhoneticSession::new(self.lessons[self.day_index].clone());
         self.locked_today = false;
-        self.status = format!("已切换到第 {target} / {total} 天音标：{}。", self.session.lesson().title);
+        self.status = format!(
+            "已切换到第 {target} / {total} 天音标：{}。",
+            self.session.lesson().title
+        );
         Ok(self.status.clone())
     }
 
@@ -130,7 +137,11 @@ impl IpaApp {
             ui.horizontal(|ui| {
                 ui.strong("LexiPath IPA");
                 ui.separator();
-                ui.label(format!("第 {} / {} 天", self.current_day_number(), self.lessons.len()));
+                ui.label(format!(
+                    "第 {} / {} 天",
+                    self.current_day_number(),
+                    self.lessons.len()
+                ));
                 ui.separator();
                 ui.label(self.session.lesson().title);
             });
@@ -157,7 +168,11 @@ impl IpaApp {
                     PhoneticPhase::Complete => {
                         ui.heading("本日音标测试最终正确率 100%");
                         if ui.button("完成今天课程").clicked() {
-                            if let Err(error) = self.store.complete_ipa_day(self.lessons.len()) {
+                            let completed_day = self.current_day_number();
+                            let total_days = self.lessons.len();
+                            if let Err(error) =
+                                self.store.complete_ipa_day(completed_day, total_days)
+                            {
                                 self.status = format!("保存音标进度失败：{error}");
                                 return;
                             }
@@ -231,7 +246,10 @@ impl IpaApp {
 
         for (index, option) in options.into_iter().enumerate() {
             if ui
-                .add_enabled(self.session.audio_played(), egui::Button::new(safe_ipa(&option)))
+                .add_enabled(
+                    self.session.audio_played(),
+                    egui::Button::new(safe_ipa(&option)),
+                )
                 .clicked()
             {
                 self.status = if self.session.answer(index, correct_index) {
