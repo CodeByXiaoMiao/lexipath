@@ -242,12 +242,26 @@ impl LexiPathApp {
             self.speak(&word.text);
             self.session.mark_word_audio_played();
         }
+        let phrase_translation = self
+            .translations
+            .sentence(self.session.lesson(), &word.phrase)
+            .trim_end_matches(|character| {
+                matches!(character, '。' | '！' | '？' | '.' | '!' | '?')
+            })
+            .to_owned();
         ui.horizontal_wrapped(|ui| {
             ui.label(format!("词组：{}", word.phrase));
             if ui.small_button("▶").clicked() {
                 self.speak(&word.phrase);
             }
         });
+        ui.label(
+            egui::RichText::new(format!("中文：{phrase_translation}"))
+                .size(17.0)
+                .weak(),
+        );
+        ui.add_space(3.0);
+
         let example_translation = self.translations.sentence(self.session.lesson(), &word.example);
         ui.horizontal_wrapped(|ui| {
             ui.label(format!("例句：{}", word.example));
