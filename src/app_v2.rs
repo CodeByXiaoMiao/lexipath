@@ -9,6 +9,7 @@ use crate::display_text::safe_ipa;
 use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
+use crate::translation::TranslationGuide;
 use crate::validator::tokenize;
 
 pub struct LexiPathApp {
@@ -17,6 +18,7 @@ pub struct LexiPathApp {
     active_review_id: Option<u64>,
     progress: Option<ProgressStore>,
     speaker: SystemSpeaker,
+    translations: TranslationGuide,
     status: String,
     course_finished: bool,
 }
@@ -24,6 +26,7 @@ pub struct LexiPathApp {
 impl LexiPathApp {
     pub fn new(context: &eframe::CreationContext<'_>, course: CoursePack) -> Self {
         install_windows_font(&context.egui_ctx);
+        let translations = TranslationGuide::new(&course);
         let first = course
             .first_lesson()
             .expect("validated course must contain a lesson")
@@ -42,6 +45,7 @@ impl LexiPathApp {
             active_review_id: None,
             progress,
             speaker: SystemSpeaker,
+            translations,
             status: "按固定顺序完成学习。到期复习优先于新课。".to_owned(),
             course_finished: false,
         };
@@ -244,12 +248,18 @@ impl LexiPathApp {
                 self.speak(&word.phrase);
             }
         });
+        let example_translation = self.translations.sentence(self.session.lesson(), &word.example);
         ui.horizontal_wrapped(|ui| {
             ui.label(format!("例句：{}", word.example));
             if ui.small_button("▶").clicked() {
                 self.speak(&word.example);
             }
         });
+        ui.label(
+            egui::RichText::new(format!("中文：{example_translation}"))
+                .size(17.0)
+                .weak(),
+        );
         let enabled = self.session.can_advance_word();
         if ui
             .add_enabled(enabled, egui::Button::new("继续"))
@@ -344,12 +354,17 @@ impl LexiPathApp {
                         }
                         ui.strong(format!("第 {} 段", index / 12 + 1));
                     }
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(egui::RichText::new(sentence).size(19.0));
-                        if ui.small_button("▶").clicked() {
-                            self.speak(sentence);
-                        }
+                    let translation = self.translations.sentence(&lesson, sentence);
+                    ui.vertical(|ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(egui::RichText::new(sentence).size(19.0));
+                            if ui.small_button("▶").clicked() {
+                                self.speak(sentence);
+                            }
+                        });
+                        ui.label(egui::RichText::new(translation).size(16.0).weak());
                     });
+                    ui.add_space(5.0);
                 }
             });
 
