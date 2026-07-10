@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import time
+import traceback
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -14,7 +15,13 @@ from typing import Any
 ENDPOINT = "https://models.github.ai/inference/chat/completions"
 API_VERSION = "2026-03-10"
 DEFAULT_MODEL = "openai/gpt-4.1-mini"
-BATCH_SIZE = 20
+BATCH_SIZE = int(os.environ.get("AI_REVIEW_BATCH_SIZE", "5"))
+BATCH_PAUSE_SECONDS = int(os.environ.get("AI_REVIEW_BATCH_PAUSE_SECONDS", "45"))
+RATE_LIMIT_WAIT_SECONDS = int(os.environ.get("AI_REVIEW_RATE_LIMIT_WAIT_SECONDS", "900"))
+MAX_RATE_LIMIT_RETRIES_PER_BATCH = int(
+    os.environ.get("AI_REVIEW_MAX_RATE_LIMIT_RETRIES_PER_BATCH", "12")
+)
+MAX_TRANSIENT_RETRIES = int(os.environ.get("AI_REVIEW_MAX_TRANSIENT_RETRIES", "5"))
 
 SYSTEM_PROMPT = """You are a strict English curriculum reviewer for Chinese beginner and intermediate learners.
 The material is controlled English: short and repetitive sentences are intentionally allowed.
@@ -81,6 +88,17 @@ def chunks(items: list[dict[str, Any]], size: int):
         yield index // size + 1, items[index : index + size]
 
 
+def retry_after_seconds(headers: Any) -> int | None:
+    value = headers.get("Retry-After") if headers else None
+    if not value:
+        return None
+    try:
+        seconds = int(str(value).strip())
+    except ValueError:
+        return None
+    return max(1, min(seconds, 3600))
+
+
 def request_review(token: str, model: str, batch: list[dict[str, Any]]) -> dict[str, Any]:
     payload = {
         "model": model,
@@ -109,7 +127,9 @@ def request_review(token: str, model: str, batch: list[dict[str, Any]]) -> dict[
         },
     )
 
-    for attempt in range(5):
+    transient_attempt = 0
+    rate_limit_retries = 0
+    while True:
         try:
             with urllib.request.urlopen(request, timeout=180) as response:
                 body = json.loads(response.read().decode("utf-8"))
@@ -121,15 +141,51 @@ def request_review(token: str, model: str, batch: list[dict[str, Any]]) -> dict[
                 raise ValueError("model response has no issues array")
             return result
         except urllib.error.HTTPError as error:
-            if error.code not in {408, 429, 500, 502, 503, 504} or attempt == 4:
-                details = error.read().decode("utf-8", errors="replace")
-                raise RuntimeError(f"GitHub Models HTTP {error.code}: {details}") from error
+            details = error.read().decode("utf-8", errors="replace")
+            if error.code == 429:
+                rate_limit_retries += 1
+                if rate_limit_retries > MAX_RATE_LIMIT_RETRIES_PER_BATCH:
+                    raise RuntimeError(
+                        f"GitHub Models HTTP 429 after {MAX_RATE_LIMIT_RETRIES_PER_BATCH} waits: {details}"
+                    ) from error
+                wait_seconds = retry_after_seconds(error.headers)
+                if wait_seconds is None:
+                    wait_seconds = min(RATE_LIMIT_WAIT_SECONDS * rate_limit_retries, 3600)
+                print(
+                    "GitHub Models rate limited this batch; "
+                    f"waiting {wait_seconds}s before retry "
+                    f"{rate_limit_retries}/{MAX_RATE_LIMIT_RETRIES_PER_BATCH}.",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                time.sleep(wait_seconds)
+                continue
+            if error.code in {408, 500, 502, 503, 504}:
+                transient_attempt += 1
+                if transient_attempt >= MAX_TRANSIENT_RETRIES:
+                    raise RuntimeError(f"GitHub Models HTTP {error.code}: {details}") from error
+                wait_seconds = min(2 ** transient_attempt, 60)
+                print(
+                    f"GitHub Models HTTP {error.code}; waiting {wait_seconds}s before retry "
+                    f"{transient_attempt}/{MAX_TRANSIENT_RETRIES}.",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                time.sleep(wait_seconds)
+                continue
+            raise RuntimeError(f"GitHub Models HTTP {error.code}: {details}") from error
         except (urllib.error.URLError, TimeoutError) as error:
-            if attempt == 4:
+            transient_attempt += 1
+            if transient_attempt >= MAX_TRANSIENT_RETRIES:
                 raise RuntimeError(f"GitHub Models request failed: {error}") from error
-        time.sleep(2 ** attempt)
-
-    raise RuntimeError("GitHub Models request failed after retries")
+            wait_seconds = min(2 ** transient_attempt, 60)
+            print(
+                f"GitHub Models request failed; waiting {wait_seconds}s before retry "
+                f"{transient_attempt}/{MAX_TRANSIENT_RETRIES}: {error}",
+                file=sys.stderr,
+                flush=True,
+            )
+            time.sleep(wait_seconds)
 
 
 def validate_issues(
@@ -160,12 +216,22 @@ def write_reports(
     model: str,
     lesson_count: int,
     issues: list[dict[str, str]],
+    *,
+    completed_batches: int,
+    total_batches: int,
+    review_error: str | None = None,
 ) -> None:
     errors = [item for item in issues if item["severity"] == "error"]
     warnings = [item for item in issues if item["severity"] == "warning"]
     payload = {
         "model": model,
+        "batch_size": BATCH_SIZE,
+        "batch_pause_seconds": BATCH_PAUSE_SECONDS,
         "lessons_reviewed": lesson_count,
+        "completed_batches": completed_batches,
+        "total_batches": total_batches,
+        "complete": completed_batches == total_batches and review_error is None,
+        "review_error": review_error,
         "error_count": len(errors),
         "warning_count": len(warnings),
         "issues": issues,
@@ -178,11 +244,20 @@ def write_reports(
         "# LexiPath AI Course Review",
         "",
         f"- Model: `{model}`",
-        f"- Lessons reviewed: {lesson_count}",
+        f"- Batch size: {BATCH_SIZE}",
+        f"- Pause between batches: {BATCH_PAUSE_SECONDS}s",
+        f"- Lessons in course: {lesson_count}",
+        f"- Batches completed: {completed_batches}/{total_batches}",
+        f"- Complete: {payload['complete']}",
         f"- Errors: {len(errors)}",
         f"- Warnings: {len(warnings)}",
         "",
     ]
+    if review_error:
+        lines.extend(["## Review process error", "", "```", review_error, "```", ""])
+    if issues:
+        lines.append("## Issues")
+        lines.append("")
     for item in issues:
         label = "ERROR" if item["severity"] == "error" else "WARNING"
         word = f" — `{item['word']}`" if item["word"] else ""
@@ -204,14 +279,51 @@ def main() -> int:
     valid_ids = {str(lesson["lesson_id"]) for lesson in lessons}
     all_issues: list[dict[str, str]] = []
     total_batches = (len(lessons) + BATCH_SIZE - 1) // BATCH_SIZE
+    completed_batches = 0
 
-    for batch_number, batch in chunks(lessons, BATCH_SIZE):
-        print(f"AI review batch {batch_number}/{total_batches}", flush=True)
-        response = request_review(token, args.model, batch)
-        all_issues.extend(validate_issues(response["issues"], valid_ids))
-        time.sleep(1)
+    try:
+        write_reports(
+            args.report_json,
+            args.report_md,
+            args.model,
+            len(lessons),
+            all_issues,
+            completed_batches=0,
+            total_batches=total_batches,
+        )
+        for batch_number, batch in chunks(lessons, BATCH_SIZE):
+            print(f"AI review batch {batch_number}/{total_batches}", flush=True)
+            response = request_review(token, args.model, batch)
+            all_issues.extend(validate_issues(response["issues"], valid_ids))
+            completed_batches = batch_number
+            write_reports(
+                args.report_json,
+                args.report_md,
+                args.model,
+                len(lessons),
+                all_issues,
+                completed_batches=completed_batches,
+                total_batches=total_batches,
+            )
+            if batch_number < total_batches:
+                time.sleep(BATCH_PAUSE_SECONDS)
+    except Exception as error:  # noqa: BLE001 - CI must preserve the partial report.
+        review_error = "".join(
+            traceback.format_exception_only(type(error), error)
+        ).strip()
+        print(review_error, file=sys.stderr)
+        write_reports(
+            args.report_json,
+            args.report_md,
+            args.model,
+            len(lessons),
+            all_issues,
+            completed_batches=completed_batches,
+            total_batches=total_batches,
+            review_error=review_error,
+        )
+        return 1
 
-    write_reports(args.report_json, args.report_md, args.model, len(lessons), all_issues)
     errors = [item for item in all_issues if item["severity"] == "error"]
     warnings = [item for item in all_issues if item["severity"] == "warning"]
     print(

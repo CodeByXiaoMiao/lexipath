@@ -4,11 +4,12 @@ use eframe::egui;
 
 use crate::audio::SystemSpeaker;
 use crate::catalog::CourseCatalog;
-use crate::course::CoursePack;
+use crate::course::{CoursePack, Lesson};
+use crate::display_text::safe_ipa;
 use crate::engine::{LearningSession, Phase};
 use crate::practice::due_practice_session;
 use crate::progress_store::ProgressStore;
-use crate::shell::DesktopShell;
+use crate::translation::TranslationGuide;
 use crate::validator::tokenize;
 
 pub struct LexiPathApp {
@@ -17,15 +18,15 @@ pub struct LexiPathApp {
     active_review_id: Option<u64>,
     progress: Option<ProgressStore>,
     speaker: SystemSpeaker,
-    shell: DesktopShell,
+    translations: TranslationGuide,
     status: String,
-    compact: bool,
     course_finished: bool,
 }
 
 impl LexiPathApp {
     pub fn new(context: &eframe::CreationContext<'_>, course: CoursePack) -> Self {
         install_windows_font(&context.egui_ctx);
+        let translations = TranslationGuide::new(&course);
         let first = course
             .first_lesson()
             .expect("validated course must contain a lesson")
@@ -44,13 +45,97 @@ impl LexiPathApp {
             active_review_id: None,
             progress,
             speaker: SystemSpeaker,
-            shell: DesktopShell::new(),
+            translations,
             status: "按固定顺序完成学习。到期复习优先于新课。".to_owned(),
-            compact: false,
             course_finished: false,
         };
         app.load_next_available();
         app
+    }
+
+    pub fn lesson_count(&self) -> usize {
+        self.course.lesson_count()
+    }
+
+    pub fn current_lesson_number(&self) -> usize {
+        self.lesson_number_by_id(&self.session.lesson().id).unwrap_or(1)
+    }
+
+    pub fn current_lesson_label(&self) -> String {
+        let number = self.current_lesson_number();
+        format!("第 {number} / {} 课：{}", self.lesson_count(), self.session.lesson().title)
+    }
+
+    pub fn continue_after_daily_limit(&mut self) {
+        if let Some(store) = &mut self.progress {
+            if let Err(error) = store.enable_manual_new_units_today() {
+                self.status = format!("保存手动进入下一天失败：{error}");
+                return;
+            }
+        }
+        self.load_next_available();
+        self.status = "已手动进入下一天/后续新课；到期复习仍会优先。".to_owned();
+    }
+
+    pub fn jump_relative_lesson(&mut self, offset: isize) -> Result<String, String> {
+        let total = self.lesson_count();
+        if total == 0 {
+            return Err("课程为空，无法切换进度。".to_owned());
+        }
+        let current = self.current_lesson_number();
+        let target = if offset < 0 {
+            current.saturating_sub(offset.unsigned_abs())
+        } else {
+            current.saturating_add(offset as usize)
+        }
+        .clamp(1, total);
+        self.jump_to_lesson_number(target)
+    }
+
+    pub fn jump_to_lesson_number(&mut self, number: usize) -> Result<String, String> {
+        let total = self.lesson_count();
+        if total == 0 {
+            return Err("课程为空，无法切换进度。".to_owned());
+        }
+        let target = number.clamp(1, total);
+        let lesson = self
+            .lesson_by_number(target)
+            .ok_or_else(|| format!("找不到第 {target} 课。"))?
+            .clone();
+
+        if let Some(store) = &mut self.progress {
+            store.data.current_lesson_id = Some(lesson.id.clone());
+            store.data.course_complete = false;
+            store
+                .enable_manual_new_units_today()
+                .map_err(|error| format!("保存进度切换失败：{error}"))?;
+        }
+
+        self.session = LearningSession::new(lesson.clone());
+        self.active_review_id = None;
+        self.course_finished = false;
+        self.status = format!("已切换到第 {target} / {total} 课：{}。", lesson.title);
+        Ok(self.status.clone())
+    }
+
+    fn lesson_by_number(&self, number: usize) -> Option<&Lesson> {
+        if number == 0 {
+            return None;
+        }
+        self.course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .nth(number - 1)
+    }
+
+    fn lesson_number_by_id(&self, lesson_id: &str) -> Option<usize> {
+        self.course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .position(|lesson| lesson.id == lesson_id)
+            .map(|index| index + 1)
     }
 
     fn load_next_available(&mut self) {
@@ -150,27 +235,45 @@ impl LexiPathApp {
             return;
         };
         ui.heading(&word.text);
-        ui.label(egui::RichText::new(&word.ipa).size(22.0));
+        ui.label(egui::RichText::new(safe_ipa(&word.ipa)).size(22.0));
         ui.label(egui::RichText::new(&word.meaning).size(20.0));
         ui.separator();
         if ui.button("▶ 播放单词").clicked() {
             self.speak(&word.text);
             self.session.mark_word_audio_played();
         }
-        if !self.compact {
-            ui.horizontal_wrapped(|ui| {
-                ui.label(format!("词组：{}", word.phrase));
-                if ui.small_button("▶").clicked() {
-                    self.speak(&word.phrase);
-                }
-            });
-            ui.horizontal_wrapped(|ui| {
-                ui.label(format!("例句：{}", word.example));
-                if ui.small_button("▶").clicked() {
-                    self.speak(&word.example);
-                }
-            });
-        }
+        let phrase_translation = self
+            .translations
+            .sentence(self.session.lesson(), &word.phrase)
+            .trim_end_matches(|character| {
+                matches!(character, '。' | '！' | '？' | '.' | '!' | '?')
+            })
+            .to_owned();
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("词组：{}", word.phrase));
+            if ui.small_button("▶").clicked() {
+                self.speak(&word.phrase);
+            }
+        });
+        ui.label(
+            egui::RichText::new(format!("中文：{phrase_translation}"))
+                .size(17.0)
+                .weak(),
+        );
+        ui.add_space(3.0);
+
+        let example_translation = self.translations.sentence(self.session.lesson(), &word.example);
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("例句：{}", word.example));
+            if ui.small_button("▶").clicked() {
+                self.speak(&word.example);
+            }
+        });
+        ui.label(
+            egui::RichText::new(format!("中文：{example_translation}"))
+                .size(17.0)
+                .weak(),
+        );
         let enabled = self.session.can_advance_word();
         if ui
             .add_enabled(enabled, egui::Button::new("继续"))
@@ -265,12 +368,17 @@ impl LexiPathApp {
                         }
                         ui.strong(format!("第 {} 段", index / 12 + 1));
                     }
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(egui::RichText::new(sentence).size(19.0));
-                        if ui.small_button("▶").clicked() {
-                            self.speak(sentence);
-                        }
+                    let translation = self.translations.sentence(&lesson, sentence);
+                    ui.vertical(|ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(egui::RichText::new(sentence).size(19.0));
+                            if ui.small_button("▶").clicked() {
+                                self.speak(sentence);
+                            }
+                        });
+                        ui.label(egui::RichText::new(translation).size(16.0).weak());
                     });
+                    ui.add_space(5.0);
                 }
             });
 
@@ -318,7 +426,10 @@ impl LexiPathApp {
                     self.status = if result.correct {
                         "正确。".to_owned()
                     } else {
-                        "错误，本题会重新出现，不能带错通过。".to_owned()
+                        format!(
+                            "错误：你选择了「{}」。正确答案是「{}」。本题会重新出现，不能带错通过。",
+                            option, question.options[question.correct_index]
+                        )
                     };
                 }
             });
@@ -332,16 +443,20 @@ impl LexiPathApp {
         correct_index: usize,
         enabled: bool,
     ) {
+        let correct_text = options.get(correct_index).cloned().unwrap_or_default();
         for (index, option) in options.into_iter().enumerate() {
             if ui
-                .add_enabled(enabled, egui::Button::new(option))
+                .add_enabled(enabled, egui::Button::new(&option))
                 .clicked()
             {
                 let result = self.session.answer_current(index, correct_index);
                 self.status = if result.correct {
                     "正确。".to_owned()
                 } else {
-                    "错误，该项目仍留在待掌握队列。".to_owned()
+                    format!(
+                        "错误：你选择了「{}」。正确答案是「{}」。该项目仍留在待掌握队列。",
+                        option, correct_text
+                    )
                 };
             }
         }
@@ -375,25 +490,10 @@ impl LexiPathApp {
         ui.heading("当前计划已完成");
         ui.label("没有到期复习。未来复习到期后，重新打开软件即可继续。");
     }
-
-    fn apply_compact_mode(&mut self, context: &egui::Context) {
-        self.compact = !self.compact;
-        let size = if self.compact {
-            egui::vec2(380.0, 240.0)
-        } else {
-            egui::vec2(620.0, 520.0)
-        };
-        context.send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
-        context.send_viewport_cmd(egui::ViewportCommand::Focus);
-    }
 }
 
 impl eframe::App for LexiPathApp {
     fn update(&mut self, context: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.shell.compact_toggle_requested() {
-            self.apply_compact_mode(context);
-        }
-
         egui::TopBottomPanel::top("header").show(context, |ui| {
             ui.horizontal_wrapped(|ui| {
                 ui.strong(&self.course.title);
@@ -407,12 +507,6 @@ impl eframe::App for LexiPathApp {
                         self.course.lesson_count()
                     ));
                     ui.label(format!("到期复习 {}", store.due_count()));
-                }
-                if ui
-                    .small_button(if self.compact { "展开" } else { "紧凑" })
-                    .clicked()
-                {
-                    self.apply_compact_mode(context);
                 }
             });
         });

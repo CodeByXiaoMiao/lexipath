@@ -98,7 +98,7 @@ jobs:
             Select-Object -Skip 1 |
             Add-Content ../sources/ecdict/ecdict.csv -Encoding utf8
 
-      - name: Generate complete catalog
+      - name: Generate complete raw catalog
         working-directory: lexipath
         shell: pwsh
         run: |
@@ -107,7 +107,17 @@ jobs:
             --ogden ../sources/ogden/word-lists/basic-english-850.txt `
             --word-list ../sources/oxford/package.txt `
             --dictionary ../sources/ecdict/ecdict.csv `
-            --output course.json 2>&1 | Tee-Object -FilePath course-generation.log
+            --output raw-course.json 2>&1 | Tee-Object -FilePath course-generation.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Finalize complete catalog
+        working-directory: lexipath
+        shell: pwsh
+        run: |
+          & cargo run --release -- `
+            --finalize-catalog `
+            --input raw-course.json `
+            --output course.json 2>&1 | Tee-Object -FilePath course-finalization.log
           exit $LASTEXITCODE
 
       - name: Upload course generation log
@@ -118,6 +128,7 @@ jobs:
           path: |
             lexipath/dictionary-repair.log
             lexipath/course-generation.log
+            lexipath/course-finalization.log
           if-no-files-found: warn
 
       - name: Run tests

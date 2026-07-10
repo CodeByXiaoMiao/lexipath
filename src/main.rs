@@ -5,6 +5,10 @@ mod audio;
 mod catalog;
 mod catalog_core_meanings;
 mod catalog_daily;
+mod catalog_context_repairs;
+mod catalog_final_review_templates;
+mod catalog_formalize;
+mod catalog_meaning;
 mod catalog_function_templates;
 mod catalog_import;
 mod catalog_load;
@@ -12,11 +16,14 @@ mod catalog_polish;
 mod catalog_quality;
 mod catalog_repair;
 mod catalog_semantic_templates;
+mod catalog_stories;
 mod catalog_template_overrides;
 mod course;
 mod course_finalize;
 mod course_finalize_file;
+mod controlled_english;
 mod daily_gate;
+mod display_text;
 mod embedded_course;
 mod engine;
 mod fonts;
@@ -37,6 +44,7 @@ mod root_app;
 mod scheduler;
 mod shell;
 mod stage_assessment;
+mod translation;
 mod validator;
 
 use root_app::RootApp;
@@ -80,7 +88,7 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "Reference",
+        "LexiPath",
         options,
         Box::new(move |context| {
             RootApp::new(context, course)

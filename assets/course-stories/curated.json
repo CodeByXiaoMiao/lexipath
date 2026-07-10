@@ -1,0 +1,40 @@
+[
+  {
+    "lesson_id": "a1-unit-047",
+    "title": "假日旅途中的意外帮助",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom is a young writer, and Anna is an adult.",
+      "Before a holiday trip, Anna gives Tom some advice about the weather.",
+      "Tom says that his bag is ready, but his warm coat is still at home.",
+      "When they arrive at the station, the sky is dark and the rain begins.",
+      "Anna sits on a chair while Tom wants to find a place to buy a coat.",
+      "A second adult is waiting near the door with a large bag.",
+      "The adult sees Tom and puts a coat on the chair.",
+      "You may use it during the trip.",
+      "Tom remembers the advice from Anna and feels sorry because he did not listen.",
+      "On the train, the adult tells them that he is also a writer.",
+      "They talk about the village, the river, and a story with a strange end.",
+      "When the train is at the village, the rain is over and their holiday can begin.",
+      "That night, Tom writes about the trip, the chair, and the advice that can help him.",
+      "Anna reads the story and says that the new writer can use better advice next time."
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 1,
+      "problem_sentence": 2,
+      "attempt_sentences": [
+        4,
+        5,
+        6
+      ],
+      "turn_sentence": 7,
+      "reveal_sentence": 9,
+      "resolution_sentence": 13
+    }
+  }
+]
