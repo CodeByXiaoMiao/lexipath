@@ -251,10 +251,10 @@ fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
         .sentences
         .iter()
         .flat_map(|sentence| tokenize(sentence))
-        .collect::<HashSet<_>>();
+        .collect::<HashSet_<_>>();
     let connector_count = connectors
         .iter()
-        .filter(|connector| story_tokens.contains(*connector))
+        .filter(|connector| story_tokens.contains(**connector))
         .count();
     if connector_count < min_connectors {
         issues.push(format!(
