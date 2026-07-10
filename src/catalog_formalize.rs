@@ -5,7 +5,7 @@ use crate::catalog_meaning::{learner_gloss, normalize_learner_meaning};
 use crate::course::{CoursePack, Lesson, Question};
 use crate::validator::tokenize;
 
-const MICRO_READING_TITLE: &str = "本课微情境阅读";
+const CONTROLLED_CONTEXT_TITLE: &str = "本课受控语境与完形练习";
 
 pub fn formalize_generated_lessons(course: &mut CoursePack) {
     for stage in &mut course.stages {
@@ -18,15 +18,18 @@ pub fn formalize_generated_lessons(course: &mut CoursePack) {
             }
 
             apply_context_repairs(lesson);
-            for word in &mut lesson.new_words {
+            for (index, word) in lesson.new_words.iter_mut().enumerate() {
                 word.meaning = normalize_learner_meaning(
                     &word.text,
                     &word.meaning,
                     &word.phrase,
                     &word.example,
                 );
+                if let Some(sentence) = lesson.sentences.get_mut(index) {
+                    sentence.meaning = word.meaning.clone();
+                }
             }
-            lesson.reading.title = MICRO_READING_TITLE.to_owned();
+            lesson.reading.title = CONTROLLED_CONTEXT_TITLE.to_owned();
             lesson.reading.questions = build_cloze_questions(lesson);
         }
     }
@@ -64,9 +67,9 @@ fn validate_lesson(
     learned_tokens: &HashSet<String>,
     issues: &mut Vec<String>,
 ) {
-    if lesson.reading.title != MICRO_READING_TITLE {
+    if lesson.reading.title != CONTROLLED_CONTEXT_TITLE {
         issues.push(format!(
-            "lesson {} / reading.title: expected formal micro-context reading title",
+            "lesson {} / reading.title: expected controlled-context practice title",
             lesson.id
         ));
     }
@@ -87,6 +90,20 @@ fn validate_lesson(
 
     for (index, word) in lesson.new_words.iter().enumerate() {
         validate_meaning(&lesson.id, index, &word.meaning, issues);
+        if let Some(sentence) = lesson.sentences.get(index) {
+            if sentence.meaning != word.meaning {
+                issues.push(format!(
+                    "lesson {} / sentences[{index}].meaning: does not match the normalized target meaning",
+                    lesson.id
+                ));
+            }
+        }
+        if word.example.contains("say \"") && !word.meaning.starts_with("interj. ") {
+            issues.push(format!(
+                "lesson {} / new_words[{index}].example: non-interjection uses a metalinguistic quotation",
+                lesson.id
+            ));
+        }
         let Some(question) = lesson.reading.questions.get(index) else {
             continue;
         };
