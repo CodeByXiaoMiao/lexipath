@@ -18,8 +18,12 @@ A wrong item returns to the pending mastery queue. Correct items are removed. Th
 
 For each lesson, the allowed English vocabulary is exactly:
 
-- every word completed in earlier lessons; and
-- every new word introduced by the current lesson.
+- every word completed in earlier lessons;
+- every new word introduced by the current lesson;
+- ordinary controlled inflections of learned nouns and verbs; and
+- story character names explicitly declared from the fixed proper-name list.
+
+Inflections do not introduce a new lexical entry. Learning `plan` as a verb can permit `plans`, `planned`, and `planning`, but never an unrelated form such as `planet`. Declared character names are valid only inside that lesson's reading and question prompts and never count as learned vocabulary.
 
 The validator checks all learner-facing English in:
 
@@ -39,3 +43,11 @@ Every English word, phrase, example, sentence, reading sentence, complete readin
 ## Extension boundary
 
 The engine is reusable, but the product is not a user-configurable course platform. Future official stages such as Oxford 5000 or technical reading are added as validated course data that follows the same fixed workflow and rules.
+
+## Curated narrative contract
+
+Normal generated units may use the controlled-context fallback, but official story units are static assets in `assets/course-stories/curated.json`.
+
+Every curated story is required to declare a setup, goal, problem, at least two attempts, a turn, an optional reveal, and a resolution. The deterministic validator also checks sentence-count limits by CEFR level, target-word coverage, exact-form coverage, named-character use, connector variety, repeated sentence openings, duplicate sentences, and the cumulative vocabulary whitelist.
+
+AI can create candidate stories offline through `tools/generate_course_stories.py`. AI is not called by the desktop program or by the release workflow.

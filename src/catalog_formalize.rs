@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::catalog_context_repairs::apply_context_repairs;
 use crate::catalog_meaning::{learner_gloss, normalize_learner_meaning};
+use crate::catalog_stories::{apply_curated_story, has_curated_story, validate_curated_story};
 use crate::course::{CoursePack, Lesson, Question};
 use crate::validator::tokenize;
 
@@ -29,26 +30,24 @@ pub fn formalize_generated_lessons(course: &mut CoursePack) {
                     sentence.meaning = word.meaning.clone();
                 }
             }
-            lesson.reading.title = CONTROLLED_CONTEXT_TITLE.to_owned();
+            if !apply_curated_story(lesson) {
+                lesson.reading.title = CONTROLLED_CONTEXT_TITLE.to_owned();
+            }
             lesson.reading.questions = build_cloze_questions(lesson);
         }
     }
 }
 
 pub fn validate_formalized_course(course: &CoursePack) -> anyhow::Result<()> {
-    let mut learned_tokens = HashSet::<String>::new();
     let mut issues = Vec::<String>::new();
 
     for stage in &course.stages {
         for lesson in &stage.lessons {
-            for word in &lesson.new_words {
-                learned_tokens.extend(tokenize(&word.text));
-            }
             if stage.id == "foundation-words" || lesson.is_stage_assessment() {
                 continue;
             }
 
-            validate_lesson(lesson, &learned_tokens, &mut issues);
+            validate_lesson(lesson, &mut issues);
         }
     }
 
@@ -62,12 +61,10 @@ pub fn validate_formalized_course(course: &CoursePack) -> anyhow::Result<()> {
     }
 }
 
-fn validate_lesson(
-    lesson: &Lesson,
-    learned_tokens: &HashSet<String>,
-    issues: &mut Vec<String>,
-) {
-    if lesson.reading.title != CONTROLLED_CONTEXT_TITLE {
+fn validate_lesson(lesson: &Lesson, issues: &mut Vec<String>) {
+    if has_curated_story(&lesson.id) {
+        issues.extend(validate_curated_story(lesson));
+    } else if lesson.reading.title != CONTROLLED_CONTEXT_TITLE {
         issues.push(format!(
             "lesson {} / reading.title: expected controlled-context practice title",
             lesson.id
@@ -114,19 +111,6 @@ fn validate_lesson(
         }
         if contains_sequence(&tokenize(&question.prompt), &tokenize(&word.text)) {
             issues.push(format!("{field}: prompt leaks target entry '{}'", word.text));
-        }
-
-        let unknown = tokenize(&question.prompt)
-            .into_iter()
-            .filter(|token| !learned_tokens.contains(token))
-            .collect::<HashSet<_>>();
-        if !unknown.is_empty() {
-            let mut unknown = unknown.into_iter().collect::<Vec<_>>();
-            unknown.sort();
-            issues.push(format!(
-                "{field}: prompt contains words outside the learned whitelist: {}",
-                unknown.join(", ")
-            ));
         }
 
         let actual_options = question
@@ -206,13 +190,32 @@ fn build_cloze_questions(lesson: &Lesson) -> Vec<Question> {
                 prompt: format!(
                     "根据“{}”完成句子：{}",
                     learner_gloss(&word.meaning),
-                    cloze_sentence(&word.example, &word.text)
+                    cloze_sentence(question_source_sentence(lesson, word, index), &word.text)
                 ),
                 options,
                 correct_index,
             }
         })
         .collect()
+}
+
+fn question_source_sentence<'a>(
+    lesson: &'a Lesson,
+    word: &'a crate::course::WordItem,
+    index: usize,
+) -> &'a str {
+    let entry_tokens = tokenize(&word.text);
+    let matches = lesson
+        .reading
+        .sentences
+        .iter()
+        .filter(|sentence| contains_sequence(&tokenize(sentence), &entry_tokens))
+        .collect::<Vec<_>>();
+    if matches.is_empty() {
+        &word.example
+    } else {
+        matches[index % matches.len()].as_str()
+    }
 }
 
 fn cloze_sentence(sentence: &str, entry: &str) -> String {
