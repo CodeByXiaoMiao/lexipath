@@ -79,18 +79,37 @@ impl PhoneticSession {
 
     pub fn test_options(&self) -> Option<(Vec<String>, usize)> {
         let current = *self.queue.front()?;
-        let mut options = self
-            .lesson
-            .items
-            .iter()
-            .map(|item| item.symbol.to_owned())
-            .collect::<Vec<_>>();
-        if options.is_empty() {
+        let option_count = self.lesson.items.len();
+        if option_count == 0 {
             return None;
         }
-        let rotation = (current + 1) % options.len();
-        options.rotate_left(rotation);
-        let correct_index = (current + options.len() - rotation) % options.len();
+
+        let correct_index = stable_correct_index(self.lesson.id, current, option_count);
+        let mut distractors = (0..option_count)
+            .filter(|index| *index != current)
+            .collect::<Vec<_>>();
+        stable_shuffle(
+            &mut distractors,
+            stable_seed(self.lesson.id, current, option_count),
+        );
+
+        let mut distractors = distractors.into_iter();
+        let option_indices = (0..option_count)
+            .map(|position| {
+                if position == correct_index {
+                    current
+                } else {
+                    distractors
+                        .next()
+                        .expect("every non-answer position must have a distractor")
+                }
+            })
+            .collect::<Vec<_>>();
+        let options = option_indices
+            .into_iter()
+            .map(|index| self.lesson.items[index].symbol.to_owned())
+            .collect();
+
         Some((options, correct_index))
     }
 
@@ -110,6 +129,34 @@ impl PhoneticSession {
             self.phase = PhoneticPhase::Complete;
         }
         correct
+    }
+}
+
+fn stable_correct_index(lesson_id: &str, current: usize, option_count: usize) -> usize {
+    let lesson_offset = stable_hash(lesson_id) as usize % option_count;
+    (lesson_offset + option_count - current % option_count) % option_count
+}
+
+fn stable_seed(lesson_id: &str, current: usize, option_count: usize) -> u64 {
+    stable_hash(lesson_id)
+        ^ (current as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+        ^ (option_count as u64).wrapping_mul(0xbf58_476d_1ce4_e5b9)
+}
+
+fn stable_hash(value: &str) -> u64 {
+    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+        (hash ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01b3)
+    })
+}
+
+fn stable_shuffle(values: &mut [usize], mut state: u64) {
+    for upper in (1..values.len()).rev() {
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state = state.wrapping_mul(0x2545_f491_4f6c_dd1d);
+        let swap_with = state as usize % (upper + 1);
+        values.swap(upper, swap_with);
     }
 }
 
@@ -140,5 +187,41 @@ mod tests {
         session.mark_audio_played();
         assert!(!session.answer((correct + 1) % count, correct));
         assert_eq!(session.phase(), PhoneticPhase::ListeningTest);
+    }
+
+    #[test]
+    fn test_options_stay_stable_while_the_question_is_visible() {
+        let lesson = phonetics_catalog::lessons().remove(0);
+        let count = lesson.items.len();
+        let mut session = PhoneticSession::new(lesson);
+        for _ in 0..count {
+            session.mark_audio_played();
+            session.advance_exposure();
+        }
+
+        assert_eq!(session.test_options(), session.test_options());
+    }
+
+    #[test]
+    fn correct_answers_cover_every_option_position_in_a_lesson() {
+        for lesson in phonetics_catalog::lessons() {
+            let count = lesson.items.len();
+            let mut session = PhoneticSession::new(lesson);
+            for _ in 0..count {
+                session.mark_audio_played();
+                session.advance_exposure();
+            }
+
+            let mut positions = HashSet::new();
+            while session.phase() == PhoneticPhase::ListeningTest {
+                let (_, correct_index) = session.test_options().expect("options");
+                positions.insert(correct_index);
+                session.mark_audio_played();
+                assert!(session.answer(correct_index, correct_index));
+            }
+
+            assert_eq!(positions.len(), count);
+            assert!(positions.iter().any(|position| *position + 1 != count));
+        }
     }
 }
