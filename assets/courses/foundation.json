@@ -1,0 +1,104 @@
+{
+  "id": "lexipath-foundation",
+  "title": "LexiPath Foundation",
+  "version": 1,
+  "stages": [
+    {
+      "id": "foundation-words",
+      "title": "基础词汇",
+      "lessons": [
+        {
+          "id": "foundation-001",
+          "title": "第一课",
+          "new_words": [
+            {
+              "id": "word-i",
+              "text": "I",
+              "ipa": "/aɪ/",
+              "meaning": "我",
+              "phrase": "I am",
+              "example": "I am here."
+            },
+            {
+              "id": "word-am",
+              "text": "am",
+              "ipa": "/æm/",
+              "meaning": "是",
+              "phrase": "I am",
+              "example": "I am here."
+            },
+            {
+              "id": "word-here",
+              "text": "here",
+              "ipa": "/hɪr/",
+              "meaning": "这里",
+              "phrase": "am here",
+              "example": "I am here."
+            },
+            {
+              "id": "word-you",
+              "text": "you",
+              "ipa": "/juː/",
+              "meaning": "你",
+              "phrase": "you are",
+              "example": "You are there."
+            },
+            {
+              "id": "word-are",
+              "text": "are",
+              "ipa": "/ɑːr/",
+              "meaning": "是",
+              "phrase": "you are",
+              "example": "You are there."
+            },
+            {
+              "id": "word-there",
+              "text": "there",
+              "ipa": "/ðer/",
+              "meaning": "那里",
+              "phrase": "are there",
+              "example": "You are there."
+            }
+          ],
+          "sentences": [
+            {
+              "text": "I am here.",
+              "meaning": "我在这里。"
+            },
+            {
+              "text": "You are there.",
+              "meaning": "你在那里。"
+            }
+          ],
+          "reading": {
+            "title": "I am here. You are there.",
+            "sentences": [
+              "I am here.",
+              "You are there.",
+              "I am here.",
+              "You are there."
+            ],
+            "questions": [
+              {
+                "prompt": "哪一句表示“我在这里”？",
+                "options": [
+                  "I am here.",
+                  "You are there."
+                ],
+                "correct_index": 0
+              },
+              {
+                "prompt": "哪一句表示“你在那里”？",
+                "options": [
+                  "I am here.",
+                  "You are there."
+                ],
+                "correct_index": 1
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

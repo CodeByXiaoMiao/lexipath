@@ -1,0 +1,53 @@
+name: Finalize source wiring
+
+on:
+  push:
+    branches: ["bootstrap/mvp"]
+    paths:
+      - ".github/workflows/finalize-source.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bootstrap/mvp
+          fetch-depth: 0
+
+      - name: Wire final modules
+        shell: python
+        run: |
+          from pathlib import Path
+
+          app = Path("src/app_v2.rs")
+          text = app.read_text(encoding="utf-8")
+          text = text.replace(
+              "use crate::engine::{LearningSession, Phase};\n",
+              "use crate::engine::{LearningSession, Phase};\nuse crate::practice::due_practice_session;\n",
+          )
+          text = text.replace(
+              "self.session = LearningSession::new(lesson.clone());\n                self.active_review_id = Some(review.id);",
+              "self.session = due_practice_session(lesson.clone());\n                self.active_review_id = Some(review.id);",
+          )
+          app.write_text(text, encoding="utf-8")
+
+          main = Path("src/main.rs")
+          text = main.read_text(encoding="utf-8")
+          if "mod daily_gate;" not in text:
+              text = text.replace("mod course;\n", "mod course;\nmod daily_gate;\n")
+          main.write_text(text, encoding="utf-8")
+
+      - name: Commit source wiring
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/app_v2.rs src/main.rs
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "fix: wire review mode and daily gate"
+          git push origin HEAD:bootstrap/mvp

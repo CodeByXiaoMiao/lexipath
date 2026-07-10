@@ -1,0 +1,144 @@
+name: Full course
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "Cargo.toml"
+      - ".github/workflows/full-course.yml"
+  push:
+    branches: ["bootstrap/**"]
+    paths:
+      - "src/**"
+      - "assets/**"
+      - "Cargo.toml"
+      - ".github/workflows/full-course.yml"
+
+jobs:
+  build-course:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout LexiPath
+        uses: actions/checkout@v4
+        with:
+          path: lexipath
+
+      - name: Upload source diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: lexipath-source
+          path: |
+            lexipath/Cargo.toml
+            lexipath/Cargo.lock
+            lexipath/src
+            lexipath/assets
+            lexipath/tools
+            lexipath/docs
+            lexipath/README.md
+          if-no-files-found: error
+
+      - name: Checkout Ogden word list
+        uses: actions/checkout@v4
+        with:
+          repository: ChristopherA/iambic-mnemonic
+          path: sources/ogden
+
+      - name: Checkout CEFR word list
+        uses: actions/checkout@v4
+        with:
+          repository: Kolia951/The_Oxford_3000_CEFR
+          path: sources/oxford
+
+      - name: Checkout ECDICT
+        uses: actions/checkout@v4
+        with:
+          repository: skywind3000/ECDICT
+          path: sources/ecdict
+
+      - name: Merge LexiPath dictionary supplements
+        shell: pwsh
+        run: |
+          $dictionary = "sources/ecdict/ecdict.csv"
+          $headers = (Get-Content $dictionary -TotalCount 1) -split ','
+          Get-ChildItem "lexipath/assets/*-entry.json" | ForEach-Object {
+            $entry = Get-Content $_.FullName -Raw | ConvertFrom-Json
+            $record = [ordered]@{}
+            foreach ($header in $headers) { $record[$header] = "" }
+            $record["word"] = $entry.word
+            $record["phonetic"] = $entry.phonetic
+            $record["translation"] = $entry.meaning
+            $record["pos"] = $entry.part_of_speech
+            $record["bnc"] = "900000"
+            $record["frq"] = "900000"
+            [pscustomobject]$record |
+              ConvertTo-Csv -NoTypeInformation |
+              Select-Object -Skip 1 |
+              Add-Content $dictionary -Encoding utf8
+          }
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Repair derived phonetics
+        working-directory: lexipath
+        shell: pwsh
+        run: |
+          & cargo run --release -- `
+            --repair-dictionary `
+            --ogden ../sources/ogden/word-lists/basic-english-850.txt `
+            --word-list ../sources/oxford/package.txt `
+            --input ../sources/ecdict/ecdict.csv `
+            --output dictionary-repairs.csv 2>&1 | Tee-Object -FilePath dictionary-repair.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-Content dictionary-repairs.csv |
+            Select-Object -Skip 1 |
+            Add-Content ../sources/ecdict/ecdict.csv -Encoding utf8
+
+      - name: Generate complete catalog
+        working-directory: lexipath
+        shell: pwsh
+        run: |
+          & cargo run --release -- `
+            --import-catalog `
+            --ogden ../sources/ogden/word-lists/basic-english-850.txt `
+            --word-list ../sources/oxford/package.txt `
+            --dictionary ../sources/ecdict/ecdict.csv `
+            --output course.json 2>&1 | Tee-Object -FilePath course-generation.log
+          exit $LASTEXITCODE
+
+      - name: Upload course generation log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-generation-log
+          path: |
+            lexipath/dictionary-repair.log
+            lexipath/course-generation.log
+          if-no-files-found: warn
+
+      - name: Run tests
+        working-directory: lexipath
+        run: cargo test --all-targets
+
+      - name: Build Windows application
+        working-directory: lexipath
+        run: cargo build --release
+
+      - name: Prepare portable folder
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path package/LexiPath | Out-Null
+          Copy-Item lexipath/target/release/lexipath.exe package/LexiPath/LexiPath.exe
+          Copy-Item lexipath/course.json package/LexiPath/course.json
+          Copy-Item lexipath/README.md package/LexiPath/README.md
+
+      - name: Upload portable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: LexiPath-Windows-x64
+          path: package/LexiPath
+          if-no-files-found: error
