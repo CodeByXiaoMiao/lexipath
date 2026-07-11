@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::catalog_meaning::learner_gloss;
+use crate::catalog_stories::curated_translation;
 use crate::course::{CoursePack, Lesson};
 
 #[derive(Debug, Clone, Default)]
@@ -317,29 +318,6 @@ fn common_lexicon() -> HashMap<String, String> {
     .collect()
 }
 
-fn curated_translation(lesson_id: &str, english: &str) -> Option<&'static str> {
-    if lesson_id != "a1-unit-047" {
-        return None;
-    }
-    Some(match english {
-        "Tom is a young writer, and Anna is an adult." => "汤姆是一名年轻作家，安娜是一位成年人。",
-        "Before a holiday trip, Anna gives Tom some advice about the weather." => "假日旅行前，安娜给了汤姆一些关于天气的建议。",
-        "Tom says that his bag is ready, but his warm coat is still at home." => "汤姆说他的包已经准备好了，但保暖外套还在家里。",
-        "When they arrive at the station, the sky is dark and the rain begins." => "他们到达车站时，天空变暗，雨也开始下了。",
-        "Anna sits on a chair while Tom wants to find a place to buy a coat." => "安娜坐在椅子上，汤姆则想找个地方买外套。",
-        "A second adult is waiting near the door with a large bag." => "另一位成年人提着一个大包，在门边等候。",
-        "The adult sees Tom and puts a coat on the chair." => "那位成年人看见汤姆，把一件外套放在椅子上。",
-        "You may use it during the trip." => "旅行期间你可以穿它。",
-        "Tom remembers the advice from Anna and feels sorry because he did not listen." => "汤姆想起安娜的建议，因为自己没有听从而感到后悔。",
-        "On the train, the adult tells them that he is also a writer." => "在火车上，那位成年人告诉他们，他也是一名作家。",
-        "They talk about the village, the river, and a story with a strange end." => "他们谈到村庄、河流，以及一个结局奇怪的故事。",
-        "When the train is at the village, the rain is over and their holiday can begin." => "火车到达村庄时，雨已经停了，他们的假期可以开始了。",
-        "That night, Tom writes about the trip, the chair, and the advice that can help him." => "那天晚上，汤姆写下了这次旅行、那把椅子和能够帮助他的建议。",
-        "Anna reads the story and says that the new writer can use better advice next time." => "安娜读完故事后说，这位新作家下次可以更好地听取建议。",
-        _ => return None,
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -351,5 +329,19 @@ mod tests {
         let lesson = course.first_lesson().expect("lesson");
         assert_eq!(guide.sentence(lesson, "I am here."), "我在这里。");
         assert_eq!(guide.translate_controlled("This is a book."), "这是一个书。");
+        let story_lesson = course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .find(|lesson| lesson.id == "a1-unit-047");
+        if let Some(story_lesson) = story_lesson {
+            assert_eq!(
+                guide.sentence(
+                    story_lesson,
+                    "Tom is a young writer, and Anna is an adult."
+                ),
+                "汤姆是一名年轻作家，安娜是一位成年人。"
+            );
+        }
     }
 }
