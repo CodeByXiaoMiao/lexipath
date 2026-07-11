@@ -4,7 +4,7 @@ use std::sync::OnceLock;
 use serde::Deserialize;
 
 use crate::controlled_english::{infer_morph_class, sequence_count, tokenize};
-use crate::course::Lesson;
+use crate::course::{CoursePack, Lesson};
 
 const ALLOWED_CHARACTER_NAMES: &[&str] = &[
     "alex", "anna", "ben", "emma", "jack", "leo", "lily", "lucy", "mia", "nina",
@@ -18,6 +18,7 @@ struct StoryAsset {
     level: String,
     characters: Vec<String>,
     sentences: Vec<String>,
+    translations: Vec<String>,
     arc: StoryArc,
 }
 
@@ -46,6 +47,44 @@ pub fn apply_curated_story(lesson: &mut Lesson) -> bool {
 
 pub fn has_curated_story(lesson_id: &str) -> bool {
     stories().contains_key(lesson_id)
+}
+
+pub fn curated_translation(lesson_id: &str, english: &str) -> Option<&'static str> {
+    let story = stories().get(lesson_id)?;
+    let index = story
+        .sentences
+        .iter()
+        .position(|sentence| sentence == english)?;
+    story.translations.get(index).map(String::as_str)
+}
+
+pub fn missing_story_ids(course: &CoursePack) -> Vec<String> {
+    course
+        .stages
+        .iter()
+        .filter(|stage| stage.id != "foundation-words")
+        .flat_map(|stage| stage.lessons.iter())
+        .filter(|lesson| !lesson.is_stage_assessment())
+        .filter(|lesson| !has_curated_story(&lesson.id))
+        .map(|lesson| lesson.id.clone())
+        .collect()
+}
+
+pub fn validate_story_bank_coverage(course: &CoursePack) -> anyhow::Result<()> {
+    let missing = missing_story_ids(course);
+    if missing.is_empty() {
+        Ok(())
+    } else {
+        anyhow::bail!(
+            "LLM reading bank is incomplete: {} lessons are missing; first items: {}",
+            missing.len(),
+            missing
+                .into_iter()
+                .take(20)
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
+    }
 }
 
 pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
@@ -228,6 +267,23 @@ fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
             story.sentences.len()
         ));
     }
+    if story.translations.len() != story.sentences.len() {
+        issues.push(format!(
+            "{field}.translations: expected one Chinese translation per sentence; found {} translations for {} sentences",
+            story.translations.len(),
+            story.sentences.len()
+        ));
+    }
+    for (index, translation) in story.translations.iter().enumerate() {
+        let has_chinese = translation
+            .chars()
+            .any(|character| ('\u{4e00}'..='\u{9fff}').contains(&character));
+        if translation.trim().is_empty() || !has_chinese {
+            issues.push(format!(
+                "{field}.translations[{index}]: expected a non-empty Chinese translation"
+            ));
+        }
+    }
 
     let mut normalized = HashSet::new();
     for sentence in &story.sentences {
@@ -283,5 +339,13 @@ mod tests {
             vec!["Tom".to_owned(), "Anna".to_owned()]
         );
         assert!(story.sentences.len() >= 10);
+        assert_eq!(story.sentences.len(), story.translations.len());
+        assert_eq!(
+            curated_translation(
+                "a1-unit-047",
+                "Tom is a young writer, and Anna is an adult."
+            ),
+            Some("汤姆是一名年轻作家，安娜是一位成年人。")
+        );
     }
 }
