@@ -11,7 +11,7 @@ pub fn safe_ipa(input: &str) -> String {
             'ɔ' | 'o' | 'ɞ' | 'ɵ' | 'ø' => output.push('o'),
             'ʌ' => output.push('u'),
             'ɜ' | 'ɝ' | 'ɚ' => output.push_str("er"),
-            'ə' | 'ɛ' | 'ɘ' | 'e' => output.push('e'),
+            'ə' | 'ә' | 'ɛ' | 'є' | 'ɘ' | 'e' => output.push('e'),
             'θ' => output.push_str("th"),
             'ð' => output.push_str("th"),
             'ʃ' | 'ɕ' | 'ç' => output.push_str("sh"),
@@ -33,4 +33,15 @@ pub fn safe_ipa(input: &str) -> String {
         }
     }
     output
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cyrillic_lookalikes_do_not_become_question_marks() {
+        assert_eq!(safe_ipa("/'fәuldiŋ/"), "/'feulding/");
+        assert_eq!(safe_ipa("/hєә/"), "/hee/");
+    }
 }
