@@ -4,15 +4,26 @@ mod catalog_template_apply;
 use crate::catalog_formalize::{formalize_generated_lessons, validate_formalized_course};
 use crate::catalog_polish::polish_generated_content;
 use crate::catalog_quality::validate_content_quality;
+use crate::catalog_stories::validate_story_bank_coverage;
 use crate::course::CoursePack;
 use crate::stage_assessment::append_required_stage_assessments;
 use crate::validator::validate_course;
 
 pub fn finalize_course(course: &mut CoursePack) -> anyhow::Result<()> {
+    finalize_course_with_options(course, false)
+}
+
+pub fn finalize_course_with_options(
+    course: &mut CoursePack,
+    require_llm_readings: bool,
+) -> anyhow::Result<()> {
     polish_generated_content(course);
     catalog_template_apply::apply_reviewed_templates(course);
     formalize_generated_lessons(course);
     append_required_stage_assessments(course);
+    if require_llm_readings {
+        validate_story_bank_coverage(course)?;
+    }
 
     validate_course(course).map_err(|errors| {
         anyhow::anyhow!(
