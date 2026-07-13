@@ -1,6 +1,7 @@
 #[path = "catalog_template_apply.rs"]
 mod catalog_template_apply;
 
+use crate::catalog_example_translations::validate_example_translation_bank;
 use crate::catalog_formalize::{formalize_generated_lessons, validate_formalized_course};
 use crate::catalog_polish::polish_generated_content;
 use crate::catalog_quality::validate_content_quality;
@@ -48,5 +49,6 @@ pub fn finalize_course_with_options(
         )
     })?;
     validate_formalized_course(course)?;
+    validate_example_translation_bank(course)?;
     Ok(())
 }
