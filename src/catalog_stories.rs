@@ -87,7 +87,7 @@ pub fn validate_story_bank_coverage(course: &CoursePack) -> anyhow::Result<()> {
     }
 }
 
-pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
+pub fn validate_curated_story(lesson: &Lesson, known_tokens: &HashSet<String>) -> Vec<String> {
     let Some(story) = stories().get(&lesson.id) else {
         return Vec::new();
     };
@@ -102,7 +102,7 @@ pub fn validate_curated_story(lesson: &Lesson) -> Vec<String> {
 
     validate_characters(story, &field, &mut issues);
     validate_arc(story, &field, &mut issues);
-    validate_shape(story, &field, &mut issues);
+    validate_shape(story, known_tokens, &field, &mut issues);
 
     let reading_tokens = tokenize(&lesson.full_reading_text());
     for word in &lesson.new_words {
@@ -246,7 +246,12 @@ fn validate_arc(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
     }
 }
 
-fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
+fn validate_shape(
+    story: &StoryAsset,
+    known_tokens: &HashSet<String>,
+    field: &str,
+    issues: &mut Vec<String>,
+) {
     let (min_sentences, max_sentences, min_connectors) = match story.level.as_str() {
         "A1" => (10, 16, 4),
         "A2" => (12, 18, 5),
@@ -319,9 +324,14 @@ fn validate_shape(story: &StoryAsset, field: &str, issues: &mut Vec<String>) {
         .iter()
         .filter(|connector| story_tokens.contains(**connector))
         .count();
-    if connector_count < min_connectors {
+    let available_connector_count = connectors
+        .iter()
+        .filter(|connector| known_tokens.contains(**connector))
+        .count();
+    let required_connectors = min_connectors.min(available_connector_count);
+    if connector_count < required_connectors {
         issues.push(format!(
-            "{field}.sentences: expected at least {min_connectors} different narrative connectors; found {connector_count}"
+            "{field}.sentences: expected at least {required_connectors} available narrative connectors; found {connector_count}"
         ));
     }
 }
