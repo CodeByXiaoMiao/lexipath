@@ -1,6 +1,7 @@
 use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
 use crate::catalog_reviewed_a2_templates::reviewed_a2_template;
 use crate::catalog_reviewed_b1_templates::reviewed_b1_template;
+use crate::catalog_reviewed_b2_templates::reviewed_b2_template;
 use crate::catalog_reviewed_stage_templates::reviewed_stage_template;
 use crate::course::CoursePack;
 
@@ -11,6 +12,7 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
             && stage.id != "oxford-a1"
             && stage.id != "oxford-a2"
             && stage.id != "oxford-b1"
+            && stage.id != "oxford-b2"
         {
             continue;
         }
@@ -22,6 +24,7 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
                     "oxford-a1" => reviewed_a1_template(&word.id),
                     "oxford-a2" => reviewed_a2_template(&word.id),
                     "oxford-b1" => reviewed_b1_template(&word.id),
+                    "oxford-b2" => reviewed_b2_template(&word.id),
                     _ => reviewed_stage_template(&word.text).map(
                         |(meaning, phrase, first, second)| {
                             (None, meaning, phrase, first, second)
@@ -175,6 +178,33 @@ mod tests {
         assert_eq!(
             lesson.reading.questions[0].options,
             vec!["I bought a set of tools.".to_owned()]
+        );
+    }
+
+    #[test]
+    fn applies_reviewed_b2_templates_by_stable_word_id() {
+        let mut course = one_word_course(
+            "oxford-b2",
+            "b2-satisfy",
+            "satisfy",
+            "I can satisfy it.",
+        );
+
+        apply_reviewed_stage_templates(&mut course);
+
+        let lesson = &course.stages[0].lessons[0];
+        assert_eq!(lesson.new_words[0].meaning, "v. 使满意；符合要求");
+        assert_eq!(
+            lesson.new_words[0].example,
+            "The plan should satisfy all the requirements."
+        );
+        assert_eq!(
+            lesson.reading.sentences[1],
+            "The result must satisfy the rules."
+        );
+        assert_eq!(
+            lesson.reading.questions[0].options,
+            vec!["The plan should satisfy all the requirements.".to_owned()]
         );
     }
 }
