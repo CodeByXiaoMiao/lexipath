@@ -18,6 +18,7 @@ mod catalog_quality;
 mod catalog_reviewed_a1_templates;
 mod catalog_reviewed_a2_templates;
 mod catalog_reviewed_b1_templates;
+mod catalog_reviewed_b2_templates;
 mod catalog_reviewed_stage_apply;
 mod catalog_reviewed_stage_templates;
 mod catalog_repair;
