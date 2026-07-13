@@ -31,6 +31,12 @@ const CORRECTION_FILES: &[&str] = &[
     include_str!("../assets/example-translations/review-corrections-b1-04.tsv"),
     include_str!("../assets/example-translations/review-corrections-b1-05.tsv"),
     include_str!("../assets/example-translations/review-corrections-b1-06.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-01.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-02.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-03.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-04.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-05.tsv"),
+    include_str!("../assets/example-translations/review-corrections-b2-06.tsv"),
 ];
 
 #[derive(Debug, Clone)]
