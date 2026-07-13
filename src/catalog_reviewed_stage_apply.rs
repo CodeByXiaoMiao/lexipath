@@ -1,3 +1,4 @@
+use crate::catalog_final_freeze_templates::final_freeze_template;
 use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
 use crate::catalog_reviewed_a2_templates::reviewed_a2_template;
 use crate::catalog_reviewed_b1_templates::reviewed_b1_template;
@@ -20,17 +21,19 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
         for lesson in &mut stage.lessons {
             let mut changed = false;
             for (index, word) in lesson.new_words.iter_mut().enumerate() {
-                let template = match stage.id.as_str() {
-                    "oxford-a1" => reviewed_a1_template(&word.id),
-                    "oxford-a2" => reviewed_a2_template(&word.id),
-                    "oxford-b1" => reviewed_b1_template(&word.id),
-                    "oxford-b2" => reviewed_b2_template(&word.id),
-                    _ => reviewed_stage_template(&word.text).map(
-                        |(meaning, phrase, first, second)| {
-                            (None, meaning, phrase, first, second)
-                        },
-                    ),
-                };
+                let template = final_freeze_template(&word.id).or_else(|| {
+                    match stage.id.as_str() {
+                        "oxford-a1" => reviewed_a1_template(&word.id),
+                        "oxford-a2" => reviewed_a2_template(&word.id),
+                        "oxford-b1" => reviewed_b1_template(&word.id),
+                        "oxford-b2" => reviewed_b2_template(&word.id),
+                        _ => reviewed_stage_template(&word.text).map(
+                            |(meaning, phrase, first, second)| {
+                                (None, meaning, phrase, first, second)
+                            },
+                        ),
+                    }
+                });
                 let Some((display, meaning, phrase, first, second)) = template else {
                     continue;
                 };
@@ -206,5 +209,18 @@ mod tests {
             lesson.reading.questions[0].options,
             vec!["The plan should satisfy all the requirements.".to_owned()]
         );
+    }
+
+    #[test]
+    fn final_freeze_overrides_stage_templates_by_stable_word_id() {
+        let mut course =
+            one_word_course("ogden-850", "ogden-voice", "voice", "This is a voice.");
+
+        apply_reviewed_stage_templates(&mut course);
+
+        let lesson = &course.stages[0].lessons[0];
+        assert_eq!(lesson.new_words[0].meaning, "n. 嗓音；人声");
+        assert_eq!(lesson.new_words[0].example, "The man's voice is clear.");
+        assert_eq!(lesson.reading.sentences[1], "I know this voice.");
     }
 }
