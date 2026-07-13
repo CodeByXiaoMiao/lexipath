@@ -23,7 +23,7 @@ REJECTED_ARTIFACTS = (
     "机器翻译",
     "（例句中文译文缺失）",
 )
-CORRECTION_FILE = "review-corrections.tsv"
+CORRECTION_PREFIX = "review-corrections"
 
 
 def fnv1a64(value: str) -> str:
@@ -62,7 +62,9 @@ def load_file(path: Path, expected_method: str) -> list[dict[str, str]]:
 
 def load_bank(directory: Path) -> list[dict[str, str]]:
     files = sorted(
-        path for path in directory.glob("*.tsv") if path.name != CORRECTION_FILE
+        path
+        for path in directory.glob("*.tsv")
+        if not path.name.startswith(CORRECTION_PREFIX)
     )
     if not files:
         raise ValueError(f"no translation bank TSV files found in {directory}")
@@ -78,8 +80,10 @@ def load_bank(directory: Path) -> list[dict[str, str]]:
             records.append(record)
 
     by_id = {record["word_id"]: record for record in records}
-    correction_path = directory / CORRECTION_FILE
-    if correction_path.exists():
+    for correction_path in sorted(
+        directory.glob(f"{CORRECTION_PREFIX}*.tsv"),
+        key=lambda path: (path.name != "review-corrections.tsv", path.name),
+    ):
         correction_ids: set[str] = set()
         for correction in load_file(correction_path, "direct-llm-correction"):
             word_id = correction["word_id"]
@@ -178,7 +182,16 @@ def main() -> int:
             print(f"... {len(issues) - 400} more issues", file=sys.stderr)
         return 1
 
-    correction_count = len(load_file(args.bank / CORRECTION_FILE, "direct-llm-correction"))
+    correction_count = len(
+        {
+            record["word_id"]
+            for path in sorted(
+                args.bank.glob(f"{CORRECTION_PREFIX}*.tsv"),
+                key=lambda path: (path.name != "review-corrections.tsv", path.name),
+            )
+            for record in load_file(path, "direct-llm-correction")
+        }
+    )
     print(
         f"Validated {len(expected_ids)} reviewed example translations, including "
         f"{correction_count} reviewed corrections; coverage and English matching are complete."

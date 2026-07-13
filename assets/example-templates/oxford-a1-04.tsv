@@ -1,0 +1,59 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a1-nurse			a nurse	She is a nurse.	The nurse is here.
+a1-topic			this topic	This topic is important.	I like this topic.
+a1-fun		n. 乐趣；有趣的事	have fun	This is fun.	We have fun here.
+a1-pepper		n. 胡椒；辣椒	some pepper	This food needs pepper.	I have some pepper.
+a1-diet			a good diet	This diet is good.	I have a good diet.
+a1-cream		n. 奶油；乳霜	some cream	This is cream.	I have some cream.
+a1-breakfast			breakfast	This is breakfast.	Breakfast is ready.
+a1-hi			hi	Hi!	Hi, come in!
+a1-phrase			this phrase	This phrase is important.	I know this phrase.
+a1-hello			hello	Hello!	Hello, my friend!
+a1-friendly			be friendly	She is friendly.	The people are friendly.
+a1-uncle			my uncle	He is my uncle.	My uncle is here.
+a1-tourist			a tourist	He is a tourist.	The tourist is here.
+a1-birthday			my birthday	It is my birthday.	My birthday is in June.
+a1-teenager			a teenager	He is a teenager.	The teenager is here.
+a1-policeman			a policeman	He is a policeman.	The policeman is here.
+a1-grandmother			my grandmother	She is my grandmother.	My grandmother is here.
+a1-paragraph			this paragraph	This paragraph is short.	I read the paragraph.
+a1-favourite		n. 最喜欢的人或事物	my favourite	This is my favourite.	That is her favourite.
+a1-aunt			my aunt	She is my aunt.	My aunt is here.
+a1-vacation			on vacation	I am on vacation.	We go on vacation.
+a1-cousin			my cousin	She is my cousin.	My cousin is here.
+a1-chart			this chart	This chart is useful.	I read the chart.
+a1-practise		v. 练习	practise every day	I practise every day.	You can practise here.
+a1-dialogue			this dialogue	I read this dialogue.	This dialogue is short.
+a1-singer			a singer	She is a singer.	The singer is here.
+a1-grandfather			my grandfather	He is my grandfather.	My grandfather is here.
+a1-menu			the menu	I read the menu.	The menu is here.
+a1-hungry			be hungry	I am hungry.	You are hungry.
+a1-shower		n. 淋浴	take a shower	I take a shower.	You can take a shower.
+a1-actress			an actress	She is an actress.	The actress is here.
+a1-cooking			like cooking	I like cooking.	Cooking takes time.
+a1-boyfriend			her boyfriend	He is her boyfriend.	Her boyfriend is here.
+a1-spell		v. 拼写	spell it	I can spell it.	Can you spell it?
+a1-jeans		n. 牛仔裤	these jeans	These are jeans.	I see jeans.
+a1-dancer			a dancer	She is a dancer.	The dancer is here.
+a1-gym		n. 体育馆；健身房	a gym	This is a gym.	I go to the gym.
+a1-geography			like geography	I like geography.	Geography is important.
+a1-bye			bye	Bye!	Bye, see you later!
+a1-boring		adj. 无聊的；乏味的	be boring	It is boring.	This film is boring.
+a1-exam			the exam	The exam is today.	This exam is difficult.
+a1-grandparent		n. 祖父或祖母；祖辈	my grandparent	She is my grandparent.	My grandparent is here.
+a1-dancing			like dancing	I like dancing.	Dancing is fun.
+a1-homework			do my homework	I do my homework.	My homework is here.
+a1-waiter			a waiter	He is a waiter.	The waiter is here.
+a1-goodbye			goodbye	Goodbye!	Goodbye, see you later!
+a1-spelling		n. 拼写	correct spelling	This spelling is correct.	I know the spelling.
+a1-hobby			my hobby	This is my hobby.	I like my hobby.
+a1-blonde		adj. 金发的	be blonde	She is blonde.	Her hair is blonde.
+a1-euro			one euro	One euro is enough.	I have one euro.
+a1-thirsty			be thirsty	I am thirsty.	You are thirsty.
+a1-blog			this blog	I read this blog.	This blog is good.
+a1-girlfriend			his girlfriend	She is his girlfriend.	His girlfriend is here.
+a1-online			be online	I am online.	You are online.
+a1-thanks			thanks	Thanks!	Thanks for your help!
+a1-website			this website	I use this website.	This website is useful.

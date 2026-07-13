@@ -1,22 +1,34 @@
-use crate::course::CoursePack;
-
+use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
 use crate::catalog_reviewed_stage_templates::reviewed_stage_template;
+use crate::course::CoursePack;
 
 pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
     for stage in &mut course.stages {
-        if stage.id != "foundation-words" && stage.id != "ogden-850" {
+        if stage.id != "foundation-words"
+            && stage.id != "ogden-850"
+            && stage.id != "oxford-a1"
+        {
             continue;
         }
 
         for lesson in &mut stage.lessons {
             let mut changed = false;
             for (index, word) in lesson.new_words.iter_mut().enumerate() {
-                let Some((meaning, phrase, first, second)) = reviewed_stage_template(&word.text)
-                else {
+                let template = if stage.id == "oxford-a1" {
+                    reviewed_a1_template(&word.id)
+                } else {
+                    reviewed_stage_template(&word.text).map(|(meaning, phrase, first, second)| {
+                        (None, meaning, phrase, first, second)
+                    })
+                };
+                let Some((display, meaning, phrase, first, second)) = template else {
                     continue;
                 };
                 changed = true;
 
+                if let Some(display) = display {
+                    word.text = display;
+                }
                 if let Some(meaning) = meaning {
                     word.meaning = meaning;
                 }
@@ -57,48 +69,73 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::course::{CoursePack, Lesson, Question, Reading, Stage, WordItem};
+    use crate::course::{CoursePack, Lesson, Question, Reading, SentenceItem, Stage, WordItem};
 
-    #[test]
-    fn keeps_question_options_for_lessons_without_reviewed_templates() {
-        let expected_options = vec!["I am here.".to_owned(), "You are there.".to_owned()];
-        let mut course = CoursePack {
+    fn one_word_course(stage_id: &str, word_id: &str, text: &str, example: &str) -> CoursePack {
+        CoursePack {
             id: "test".to_owned(),
             title: "test".to_owned(),
             version: 1,
             stages: vec![Stage {
-                id: "foundation-words".to_owned(),
-                title: "foundation".to_owned(),
+                id: stage_id.to_owned(),
+                title: "test".to_owned(),
                 lessons: vec![Lesson {
-                    id: "foundation-001".to_owned(),
-                    title: "foundation".to_owned(),
+                    id: "test-unit".to_owned(),
+                    title: "test".to_owned(),
                     new_words: vec![WordItem {
-                        id: "word-i".to_owned(),
-                        text: "I".to_owned(),
-                        ipa: "/aɪ/".to_owned(),
-                        meaning: "pron. 我".to_owned(),
-                        phrase: "I am".to_owned(),
-                        example: "I am here.".to_owned(),
+                        id: word_id.to_owned(),
+                        text: text.to_owned(),
+                        ipa: "/test/".to_owned(),
+                        meaning: "test".to_owned(),
+                        phrase: text.to_owned(),
+                        example: example.to_owned(),
                     }],
-                    sentences: Vec::new(),
+                    sentences: vec![SentenceItem {
+                        text: example.to_owned(),
+                        meaning: "test".to_owned(),
+                    }],
                     reading: Reading {
-                        title: "foundation".to_owned(),
-                        sentences: Vec::new(),
+                        title: "test".to_owned(),
+                        sentences: vec![example.to_owned(), example.to_owned()],
                         questions: vec![Question {
                             prompt: "test".to_owned(),
-                            options: expected_options.clone(),
+                            options: vec![example.to_owned()],
                             correct_index: 0,
                         }],
                     },
                 }],
             }],
-        };
+        }
+    }
+
+    #[test]
+    fn keeps_question_options_for_lessons_without_reviewed_templates() {
+        let mut course = one_word_course("foundation-words", "word-i", "I", "I am here.");
+        let expected = course.stages[0].lessons[0].reading.questions[0]
+            .options
+            .clone();
 
         apply_reviewed_stage_templates(&mut course);
 
         assert_eq!(
             course.stages[0].lessons[0].reading.questions[0].options,
-            expected_options
+            expected
+        );
+    }
+
+    #[test]
+    fn applies_reviewed_a1_templates_by_stable_word_id() {
+        let mut course = one_word_course("oxford-a1", "a1-march", "march", "It is march.");
+
+        apply_reviewed_stage_templates(&mut course);
+
+        let lesson = &course.stages[0].lessons[0];
+        assert_eq!(lesson.new_words[0].text, "March");
+        assert_eq!(lesson.new_words[0].example, "It is March.");
+        assert_eq!(lesson.reading.sentences[1], "March is a month.");
+        assert_eq!(
+            lesson.reading.questions[0].options,
+            vec!["It is March.".to_owned()]
         );
     }
 }

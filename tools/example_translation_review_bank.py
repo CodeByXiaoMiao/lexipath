@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-CORRECTION_FILE = "review-corrections.tsv"
+CORRECTION_PREFIX = "review-corrections"
 HASH_RE = re.compile(r"[0-9a-f]{16}")
 
 
@@ -42,7 +42,7 @@ def load_tsv(path: Path, expected_method: str) -> dict[str, dict[str, str]]:
 def load_effective_bank(directory: Path) -> tuple[dict[str, dict[str, str]], set[str]]:
     base: dict[str, dict[str, str]] = {}
     for path in sorted(directory.glob("*.tsv")):
-        if path.name == CORRECTION_FILE:
+        if path.name.startswith(CORRECTION_PREFIX):
             continue
         for word_id, record in load_tsv(path, "direct-llm-reviewed").items():
             if word_id in base:
@@ -52,19 +52,20 @@ def load_effective_bank(directory: Path) -> tuple[dict[str, dict[str, str]], set
     if not base:
         raise ValueError(f"no translation bank TSV files found in {directory}")
 
-    correction_path = directory / CORRECTION_FILE
-    corrections = (
-        load_tsv(correction_path, "direct-llm-correction")
-        if correction_path.exists()
-        else {}
-    )
-    unknown = sorted(set(corrections) - set(base))
-    if unknown:
-        raise ValueError(
-            f"{correction_path}: corrections have no base record; first items: "
-            + ", ".join(unknown[:20])
-        )
-
     effective = dict(base)
-    effective.update(corrections)
-    return effective, set(corrections)
+    overridden_ids: set[str] = set()
+    correction_paths = sorted(
+        directory.glob(f"{CORRECTION_PREFIX}*.tsv"),
+        key=lambda path: (path.name != "review-corrections.tsv", path.name),
+    )
+    for correction_path in correction_paths:
+        corrections = load_tsv(correction_path, "direct-llm-correction")
+        unknown = sorted(set(corrections) - set(base))
+        if unknown:
+            raise ValueError(
+                f"{correction_path}: corrections have no base record; first items: "
+                + ", ".join(unknown[:20])
+            )
+        effective.update(corrections)
+        overridden_ids.update(corrections)
+    return effective, overridden_ids

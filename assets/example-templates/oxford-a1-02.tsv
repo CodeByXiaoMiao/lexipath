@@ -1,0 +1,59 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a1-agree			agree with you	I agree with you.	You can agree with me.
+a1-die			people die	People die.	A person can die.
+a1-century			a century	A century is a long time.	This century is important.
+a1-build			build it	I can build it.	You can build it.
+a1-section			this section	Read this section.	This section is important.
+a1-stay			a short stay	It is a short stay.	The stay is short.
+a1-activity			this activity	I like this activity.	This activity is good.
+a1-plan			this plan	This plan is good.	I have a plan.
+a1-return			his return	I wait for his return.	His return is important.
+a1-draw		v. 画；拉	draw a picture	I can draw a picture.	You can draw this.
+a1-product			this product	This product is good.	I use this product.
+a1-practice		n. 练习；实践	practice is important	Practice is important.	I need more practice.
+a1-wife			his wife	She is his wife.	His wife is here.
+a1-half			half of it	This is half of it.	I only need half.
+a1-explain			explain this	I can explain this.	You can explain that.
+a1-drive			drive a car	I can drive a car.	She can drive a car.
+a1-break			a short break	I need a break.	The break is short.
+a1-difference			the difference	I can see the difference.	The difference is important.
+a1-thank		v. 感谢；道谢	thank him	I want to thank him.	You can thank her.
+a1-situation			a difficult situation	This is a difficult situation.	The situation can change.
+a1-model			this model	This model is good.	I use this model.
+a1-project		n. 项目；计划	this project	This project is important.	I have a project.
+a1-player		n. 选手；运动员	a good player	He is a good player.	The player is here.
+a1-similar			be similar	They are similar.	These two books are similar.
+a1-worker			a worker	He is a worker.	The worker is here.
+a1-pound		n. 英镑；磅	one pound	I have one pound.	One pound is enough.
+a1-piece			a piece of bread	This is a piece of bread.	I have one piece of bread.
+a1-doctor			a doctor	She is a doctor.	The doctor is here.
+a1-date			the date	What is the date?	I know the date.
+a1-film		n. 电影；胶片	a good film	This is a good film.	I like this film.
+a1-listen			listen to music	I listen to music.	You can listen to this.
+a1-culture			culture is important	Culture is important.	I like this culture.
+a1-share		n. 一份；份额	my share	This is my share.	Your share is here.
+a1-thousand		num. 一千	one thousand	One thousand is a big number.	One thousand is a lot.
+a1-husband			her husband	He is her husband.	Her husband is here.
+a1-sport			this sport	I like this sport.	This sport is good.
+a1-enjoy			enjoy the game	I enjoy the game.	You can enjoy this game.
+a1-fill			fill the box	I can fill the box.	You can fill it.
+a1-march	March	n. 三月	March	It is March.	March is a month.
+a1-introduce			introduce him	I can introduce him.	You can introduce her.
+a1-success			a success	This plan is a success.	The project is a success.
+a1-arrive			arrive today	I can arrive today.	You can arrive later.
+a1-hot			hot weather	The weather is hot.	It is hot here.
+a1-capital			the capital	This city is the capital.	I know the capital.
+a1-article			this article	I read this article.	This article is important.
+a1-artist			an artist	She is an artist.	The artist is here.
+a1-career			a good career	He has a good career.	A career takes time.
+a1-modern			be modern	It is modern.	This city is modern.
+a1-compare			compare two books	I can compare two books.	You can compare the two books.
+a1-final		adj. 最后的；最终的	the final part	This is the final part.	This is the final test.
+a1-skill			this skill	This skill is important.	I have this skill.
+a1-message			a message	I have a message.	This message is important.
+a1-forget			forget it	I sometimes forget it.	You can forget it.
+a1-miss		v. 想念；错过	miss you	I miss you.	I miss my home.
+a1-finish		v. 完成；结束	finish it	I can finish it.	You can finish it.
+a1-check		v. 检查；核对	check it	I can check it.	Please check this.

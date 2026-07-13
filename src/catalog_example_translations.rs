@@ -17,8 +17,13 @@ const BANK_FILES: &[&str] = &[
     include_str!("../assets/example-translations/oxford-b1-03-b2-01.tsv"),
     include_str!("../assets/example-translations/oxford-b2-02-03.tsv"),
 ];
-const CORRECTION_FILE: &str =
-    include_str!("../assets/example-translations/review-corrections.tsv");
+const CORRECTION_FILES: &[&str] = &[
+    include_str!("../assets/example-translations/review-corrections.tsv"),
+    include_str!("../assets/example-translations/review-corrections-a1-01.tsv"),
+    include_str!("../assets/example-translations/review-corrections-a1-02.tsv"),
+    include_str!("../assets/example-translations/review-corrections-a1-03.tsv"),
+    include_str!("../assets/example-translations/review-corrections-a1-04.tsv"),
+];
 
 #[derive(Debug, Clone)]
 struct ExampleTranslationRecord {
@@ -101,25 +106,27 @@ fn records() -> &'static Vec<ExampleTranslationRecord> {
             parse_bank_file(content, "direct-llm-reviewed", &mut output);
         }
 
-        let mut corrections = Vec::new();
-        parse_bank_file(CORRECTION_FILE, "direct-llm-correction", &mut corrections);
-        let mut corrected_ids = HashSet::new();
-        for correction in corrections {
-            assert!(
-                corrected_ids.insert(correction.word_id.clone()),
-                "duplicate reviewed correction for '{}'",
-                correction.word_id
-            );
-            let target = output
-                .iter_mut()
-                .find(|record| record.word_id == correction.word_id)
-                .unwrap_or_else(|| {
-                    panic!(
-                        "reviewed correction has no base record for '{}'",
-                        correction.word_id
-                    )
-                });
-            *target = correction;
+        for content in CORRECTION_FILES {
+            let mut corrections = Vec::new();
+            parse_bank_file(content, "direct-llm-correction", &mut corrections);
+            let mut file_ids = HashSet::new();
+            for correction in corrections {
+                assert!(
+                    file_ids.insert(correction.word_id.clone()),
+                    "duplicate reviewed correction in one layer for '{}'",
+                    correction.word_id
+                );
+                let target = output
+                    .iter_mut()
+                    .find(|record| record.word_id == correction.word_id)
+                    .unwrap_or_else(|| {
+                        panic!(
+                            "reviewed correction has no base record for '{}'",
+                            correction.word_id
+                        )
+                    });
+                *target = correction;
+            }
         }
         output
     })
