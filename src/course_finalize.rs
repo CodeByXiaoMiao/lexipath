@@ -22,6 +22,17 @@ pub fn finalize_course_with_options(
     catalog_template_apply::apply_reviewed_templates(course);
     formalize_generated_lessons(course);
     append_required_stage_assessments(course);
+    validate_finalized_course_with_options(course, require_llm_readings)
+}
+
+pub fn validate_finalized_course(course: &CoursePack) -> anyhow::Result<()> {
+    validate_finalized_course_with_options(course, false)
+}
+
+fn validate_finalized_course_with_options(
+    course: &CoursePack,
+    require_llm_readings: bool,
+) -> anyhow::Result<()> {
     if require_llm_readings {
         validate_story_bank_coverage(course)?;
     }
