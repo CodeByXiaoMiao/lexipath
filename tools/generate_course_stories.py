@@ -213,8 +213,12 @@ def validate_story(
         if any(len(tokens(sentence)) > max_words for sentence in sentences):
             issues.append(f"{field}: sentence is too long")
         connector_count = len(CONNECTORS & set(tokens(" ".join(sentences))))
-        if connector_count < min_connectors:
-            issues.append(f"{field}: too few connectors")
+        available_connector_count = len(CONNECTORS & allowed_words(known, []))
+        required_connectors = min(min_connectors, available_connector_count)
+        if connector_count < required_connectors:
+            issues.append(
+                f"{field}: too few connectors; expected {required_connectors}, found {connector_count}"
+            )
 
     normalized = {sentence.strip().lower() for sentence in sentences}
     if len(normalized) != len(sentences):
