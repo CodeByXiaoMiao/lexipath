@@ -12,9 +12,40 @@ The desktop application never calls an LLM. An OpenAI-compatible model is used o
 4. The Python validator rejects unknown words, weak narrative structure, missing targets, repeated sentence frames, translation-count mismatches, and empty/non-Chinese translations.
 5. Accepted articles are saved to `assets/course-stories/curated.json`.
 6. Rust finalization applies the static articles and validates them again.
-7. A release intended to contain only LLM articles must use `--require-llm-readings`; finalization fails if any ordinary lesson is missing an article.
+7. A release intended to contain only LLM articles must use `--require-llm-readings`; finalization fails if any required ordinary lesson is missing an article.
 
 AI is not a runtime or release-time dependency. A model outage can delay content authoring, but cannot silently change an existing release.
+
+## Coverage policy
+
+The first 15 lessons in the `foundation-words` stage are controlled introductory sentence drills. Their cumulative vocabulary is intentionally too small for a coherent 10-or-more-sentence article, so they are excluded from LLM-article coverage and from `--require-llm-readings`.
+
+The Ogden stage-final assessment is a separately curated long reading and is also excluded from the ordinary LLM article bank.
+
+All other Ogden and Oxford lessons require reviewed LLM-authored articles. The migration baseline is:
+
+| Stage | Ordinary lessons requiring LLM articles | Accepted at migration start | Remaining at migration start |
+|---|---:|---:|---:|
+| Ogden 850 | 133 | 0 | 133 |
+| Oxford A1 | 82 | 1 | 81 |
+| Oxford A2 | 96 | 0 | 96 |
+| Oxford B1 | 97 | 0 | 97 |
+| Oxford B2 | 92 | 0 | 92 |
+| **Total** | **500** | **1** | **499** |
+
+The table is a migration baseline, not a live counter. After every accepted batch, validate the current bank and record the new coverage in the pull request or batch commit.
+
+Generation order is fixed:
+
+```text
+Ogden 850 -> Oxford A1 -> Oxford A2 -> Oxford B1 -> Oxford B2
+```
+
+Ogden must not be omitted: the 499-article migration total includes its 133 ordinary lessons.
+
+The current selected authoring model is `openai/gpt-4.1` through GitHub Models. Changing the model requires an intentional maintenance decision and must be recorded in the pull request together with the old model, new model, reason, and a reviewed comparison sample.
+
+Detailed batch commands and acceptance rules are maintained in `docs/LLM_READING_MAINTENANCE.md`.
 
 ## Narrative contract
 
@@ -30,7 +61,7 @@ Validate the committed bank without a network request:
 python tools/generate_course_stories.py course.json --validate-only
 ```
 
-Require complete article coverage for all ordinary lessons:
+Require complete article coverage for all required ordinary lessons:
 
 ```powershell
 python tools/generate_course_stories.py course.json --validate-only --require-complete
@@ -42,12 +73,13 @@ Show the prompt for one lesson:
 python tools/generate_course_stories.py course.json --lesson a1-unit-047 --dry-run
 ```
 
-Generate or replace one lesson with GitHub Models:
+Generate or replace one lesson with the selected model:
 
 ```powershell
 $env:GITHUB_TOKEN = "..."
 python tools/generate_course_stories.py course.json `
   --lesson a1-unit-047 `
+  --model openai/gpt-4.1 `
   --output assets/course-stories/curated.json
 ```
 
@@ -56,6 +88,7 @@ Generate the remaining articles in a stage and resume safely after interruption:
 ```powershell
 python tools/generate_course_stories.py course.json `
   --stage oxford-a1 `
+  --model openai/gpt-4.1 `
   --resume
 ```
 
