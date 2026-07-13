@@ -1,0 +1,12 @@
+# schema=1
+authoring_method	direct-llm-correction
+ogden-scale	2adbefefec4d36b0	这是一个刻度。
+ogden-female	3f0b89817ae216f5	她是女性。
+ogden-trousers	48a175d882756c7b	这是一条裤子。
+ogden-scissors	e6e86d65852787e1	这是一把剪刀。
+a1-nobody	89a56d28544d7aff	这是个小人物。
+a2-pants	89a4f9bb335936c2	这是一条裤子。
+a2-billion	8fe471b22aa6b6b4	这是十亿。
+b1-concentrate	d7b1ea2ad9283c76	这是一种浓缩物。
+b2-load	0df702a50f2b5ed2	这是一个负载。
+b2-draft	c15c7f1d071173eb	这是一股气流。
