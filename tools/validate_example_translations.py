@@ -14,10 +14,14 @@ REJECTED_ARTIFACTS = (
     "这是一个书。",
     "这是一个食物。",
     "这是一 yard。",
+    "这是一十亿。",
+    "这是几把剪刀。",
+    "他是女性。",
     "例句中",
     "机器翻译",
     "（例句中文译文缺失）",
 )
+CORRECTION_FILE = "review-corrections.tsv"
 
 
 def fnv1a64(value: str) -> str:
@@ -32,29 +36,63 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_bank(directory: Path) -> list[dict[str, str]]:
+def load_file(path: Path, expected_method: str) -> list[dict[str, str]]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if len(lines) < 2 or lines[0] != "# schema=1":
+        raise ValueError(f"{path}: unsupported or missing schema")
+    if lines[1] != f"authoring_method\t{expected_method}":
+        raise ValueError(f"{path}: unsupported or missing authoring method")
+
     records: list[dict[str, str]] = []
-    files = sorted(directory.glob("*.tsv"))
+    for line_number, line in enumerate(lines[2:], start=3):
+        if not line.strip():
+            continue
+        fields = line.split("\t", maxsplit=2)
+        if len(fields) != 3 or any(not value.strip() for value in fields):
+            raise ValueError(f"{path}:{line_number}: invalid TSV record")
+        if not re.fullmatch(r"[0-9a-f]{16}", fields[1]):
+            raise ValueError(f"{path}:{line_number}: invalid English fingerprint")
+        records.append(
+            {"word_id": fields[0], "english_hash": fields[1], "chinese": fields[2]}
+        )
+    return records
+
+
+def load_bank(directory: Path) -> list[dict[str, str]]:
+    files = sorted(
+        path for path in directory.glob("*.tsv") if path.name != CORRECTION_FILE
+    )
     if not files:
         raise ValueError(f"no translation bank TSV files found in {directory}")
+
+    records: list[dict[str, str]] = []
+    base_ids: set[str] = set()
     for path in files:
-        lines = path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 2 or lines[0] != "# schema=1":
-            raise ValueError(f"{path}: unsupported or missing schema")
-        if lines[1] != "authoring_method\tdirect-llm-reviewed":
-            raise ValueError(f"{path}: unsupported or missing authoring method")
-        for line_number, line in enumerate(lines[2:], start=3):
-            if not line.strip():
-                continue
-            fields = line.split("\t", maxsplit=2)
-            if len(fields) != 3 or any(not value.strip() for value in fields):
-                raise ValueError(f"{path}:{line_number}: invalid TSV record")
-            if not re.fullmatch(r"[0-9a-f]{16}", fields[1]):
-                raise ValueError(f"{path}:{line_number}: invalid English fingerprint")
-            records.append(
-                {"word_id": fields[0], "english_hash": fields[1], "chinese": fields[2]}
-            )
-    return records
+        for record in load_file(path, "direct-llm-reviewed"):
+            word_id = record["word_id"]
+            if word_id in base_ids:
+                raise ValueError(f"{path}: duplicate base word_id {word_id!r}")
+            base_ids.add(word_id)
+            records.append(record)
+
+    by_id = {record["word_id"]: record for record in records}
+    correction_path = directory / CORRECTION_FILE
+    if correction_path.exists():
+        correction_ids: set[str] = set()
+        for correction in load_file(correction_path, "direct-llm-correction"):
+            word_id = correction["word_id"]
+            if word_id in correction_ids:
+                raise ValueError(
+                    f"{correction_path}: duplicate correction word_id {word_id!r}"
+                )
+            correction_ids.add(word_id)
+            if word_id not in by_id:
+                raise ValueError(
+                    f"{correction_path}: correction has no base record for {word_id!r}"
+                )
+            by_id[word_id] = correction
+
+    return [by_id[record["word_id"]] for record in records]
 
 
 def course_words(course: dict[str, Any]):
@@ -102,7 +140,7 @@ def main() -> int:
         field = f"records[{index}]"
         word_id = record["word_id"].strip()
         if word_id in by_id:
-            issues.append(f"{field}: duplicate word_id {word_id!r}")
+            issues.append(f"{field}: duplicate effective word_id {word_id!r}")
             continue
         by_id[word_id] = record
         issues.extend(validate_chinese(field, record["chinese"]))
@@ -120,7 +158,8 @@ def main() -> int:
         if record["english_hash"] != expected_hash:
             issues.append(
                 f"{field}: English fingerprint mismatch: "
-                f"bank={record['english_hash']}, expected={expected_hash}"
+                f"bank={record['english_hash']}, expected={expected_hash}, "
+                f"example={word.get('example', '')!r}"
             )
         issues.extend(validate_chinese(field, record["chinese"]))
 
@@ -132,14 +171,15 @@ def main() -> int:
         )
 
     if issues:
-        print("\n".join(issues[:200]), file=sys.stderr)
-        if len(issues) > 200:
-            print(f"... {len(issues) - 200} more issues", file=sys.stderr)
+        print("\n".join(issues[:400]), file=sys.stderr)
+        if len(issues) > 400:
+            print(f"... {len(issues) - 400} more issues", file=sys.stderr)
         return 1
 
+    correction_count = len(load_file(args.bank / CORRECTION_FILE, "direct-llm-correction"))
     print(
-        f"Validated {len(expected_ids)} reviewed example translations; "
-        "coverage and English matching are complete."
+        f"Validated {len(expected_ids)} reviewed example translations, including "
+        f"{correction_count} reviewed corrections; coverage and English matching are complete."
     )
     return 0
 
