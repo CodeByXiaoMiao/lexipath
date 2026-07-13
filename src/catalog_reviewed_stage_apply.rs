@@ -1,5 +1,6 @@
 use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
 use crate::catalog_reviewed_a2_templates::reviewed_a2_template;
+use crate::catalog_reviewed_b1_templates::reviewed_b1_template;
 use crate::catalog_reviewed_stage_templates::reviewed_stage_template;
 use crate::course::CoursePack;
 
@@ -9,6 +10,7 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
             && stage.id != "ogden-850"
             && stage.id != "oxford-a1"
             && stage.id != "oxford-a2"
+            && stage.id != "oxford-b1"
         {
             continue;
         }
@@ -19,6 +21,7 @@ pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
                 let template = match stage.id.as_str() {
                     "oxford-a1" => reviewed_a1_template(&word.id),
                     "oxford-a2" => reviewed_a2_template(&word.id),
+                    "oxford-b1" => reviewed_b1_template(&word.id),
                     _ => reviewed_stage_template(&word.text).map(
                         |(meaning, phrase, first, second)| {
                             (None, meaning, phrase, first, second)
@@ -156,6 +159,22 @@ mod tests {
         assert_eq!(
             lesson.reading.questions[0].options,
             vec!["I play golf.".to_owned()]
+        );
+    }
+
+    #[test]
+    fn applies_reviewed_b1_templates_by_stable_word_id() {
+        let mut course = one_word_course("oxford-b1", "b1-set", "set", "This is a set.");
+
+        apply_reviewed_stage_templates(&mut course);
+
+        let lesson = &course.stages[0].lessons[0];
+        assert_eq!(lesson.new_words[0].meaning, "n. 一套；一组");
+        assert_eq!(lesson.new_words[0].example, "I bought a set of tools.");
+        assert_eq!(lesson.reading.sentences[1], "This set includes six books.");
+        assert_eq!(
+            lesson.reading.questions[0].options,
+            vec!["I bought a set of tools.".to_owned()]
         );
     }
 }
