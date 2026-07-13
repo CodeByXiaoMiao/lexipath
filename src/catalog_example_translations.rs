@@ -24,6 +24,7 @@ const CORRECTION_FILES: &[&str] = &[
     include_str!("../assets/example-translations/review-corrections-a1-03.tsv"),
     include_str!("../assets/example-translations/review-corrections-a1-04.tsv"),
     include_str!("../assets/example-translations/review-corrections-a2.tsv"),
+    include_str!("../assets/example-translations/review-corrections-a2-z-final.tsv"),
 ];
 
 #[derive(Debug, Clone)]
