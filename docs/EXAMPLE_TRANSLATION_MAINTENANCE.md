@@ -59,6 +59,21 @@ import raw catalog once
 
 Neither the release workflow nor normal application startup may run the mutating finalization step twice. Re-finalizing an already finalized course can change an example after its translation has been reviewed and is therefore treated as a build defect.
 
+## Human-review export
+
+Do not review the bank by opening the large TSV files in isolation. Export the effective translation after applying the correction layer together with its course context:
+
+```powershell
+python tools/export_example_translation_review.py course.json `
+  --stage foundation-words `
+  --stage ogden-850 `
+  --output foundation-ogden-review.tsv
+```
+
+The export contains the stage, lesson ID, stable word ID, target word, exact English example, effective Chinese translation, and whether the correction layer overrides the base record. Use `--format csv` when spreadsheet software handles CSV more conveniently. A stage ID may be supplied more than once to create a focused review batch.
+
+The export is review material only. Editing it does not change the application. Accepted fixes must still be recorded in `review-corrections.tsv`, and any rewritten English example must update its fingerprint.
+
 ## Validation
 
 After building the finalized course, run:
