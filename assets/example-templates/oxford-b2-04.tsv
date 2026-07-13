@@ -1,0 +1,103 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b2-licence		n. 执照；许可证	a driving licence	You need a driving licence.	The licence is still in use.
+b2-abandon		v. 放弃；遗弃	abandon the plan	They decided to abandon the plan.	Do not abandon animals.
+b2-construct		v. 建造；构成	construct a bridge	The company will construct a new bridge.	We can construct an argument from these facts.
+b2-fault		n. 过错；故障	my fault	It was my fault.	The machine has a serious fault.
+b2-unknown		adj. 未知的；不出名的	an unknown cause	The cause remains unknown.	The writer was unknown at the time.
+b2-wrap		n. 披肩；包装	a warm wrap	She wore a warm wrap around her shoulders.	Remove the plastic wrap before use.
+b2-preparation		n. 准备；准备工作	in preparation	The report is still in preparation.	Good preparation saves time.
+b2-interpret		v. 解释；口译	interpret the results	We need to interpret the results carefully.	We can interpret the result.
+b2-spiritual		adj. 精神的；宗教的	spiritual life	The book explores spiritual life.	Music gave him spiritual support.
+b2-dismiss		v. 驳回；解雇；不予考虑	dismiss the claim	The judge may dismiss the claim.	Do not dismiss the idea.
+b2-suspect		n. 嫌疑人	the main suspect	The suspect was at the station.	The suspect denied the charge.
+b2-scream		n. 尖叫声	a loud scream	We heard a loud scream.	The scream was loud.
+b2-dramatic		adj. 戏剧性的；显著的	a dramatic change	There was a dramatic change in the weather.	The film has a dramatic ending.
+b2-universe		n. 宇宙	universe	The universe is very large.	Scientists study the origin of the universe.
+b2-alter		v. 改变；修改	alter the design	We need to alter the design.	Small changes can alter the result.
+b2-deeply		adv. 深深地；非常地	deeply concerned	I am deeply concerned about the problem.	The story deeply affected her.
+b2-drag		n. 阻力；拖累	a drag on growth	High costs are a drag on growth.	The cost is a drag on the plan.
+b2-possess		v. 拥有；具备	possess a skill	Few people possess this skill.	Few people possess such knowledge.
+b2-agenda		n. 议程；日程	on the agenda	The issue is on the agenda.	We have three items on the agenda.
+b2-funding		n. 资金；经费	government funding	The project depends on government funding.	Funding for the service was reduced.
+b2-therapy		n. 治疗；疗法	physical therapy	He is receiving physical therapy.	The therapy helped reduce the pain.
+b2-purchase		n. 购买；购置物	a major purchase	The car was a major purchase.	Keep the receipt for every purchase.
+b2-visual		adj. 视觉的；直观的	visual information	The chart provides visual information.	This information is visual.
+b2-inch		n. 英寸	one inch	The board is one inch thick.	Move it an inch to the left.
+b2-depth		n. 深度；深入程度	the depth of the water	We need to measure the depth.	The report lacks depth.
+b2-saving		n. 节省；存款	energy saving	The new system offers a major energy saving.	The saving is significant.
+b2-command		n. 命令；指挥权	give a command	The officer gave a clear command.	She has command of the whole team.
+b2-calculate		v. 计算	calculate the cost	We need to calculate the cost.	The system can calculate the result quickly.
+b2-delivery		n. 递送；交付	a delivery service	The shop offers a free delivery service.	The delivery arrived this morning.
+b2-resolve		v. 解决；下定决心	resolve the conflict	Both sides want to resolve the conflict.	We can resolve the problem.
+b2-slide		n. 幻灯片；滑动	a presentation slide	The first slide shows the main result.	This slide shows the main point.
+b2-opponent		n. 对手；反对者	a strong opponent	The opponent was strong.	The opponent has a different plan.
+b2-obligation		n. 义务；责任	a legal obligation	The company has a legal obligation to protect workers.	I felt an obligation to help.
+b2-transform		v. 改变；使转变	transform the area	The project will transform the area.	Education can transform lives.
+b2-efficient		adj. 高效的	an efficient system	We need a more efficient system.	The new machine is efficient and reliable.
+b2-occasionally		adv. 偶尔	occasionally work at home	I occasionally work from home.	The system occasionally fails.
+b2-preserve		v. 保护；保存	preserve the building	The city plans to preserve the old building.	This method helps preserve food.
+b2-load		n. 负载；装载量	a heavy load	The truck carried a heavy load.	The system cannot handle the current load.
+b2-transition		n. 转变；过渡	a smooth transition	We want a smooth transition to the new system.	The transition took several months.
+b2-deserve		v. 值得；应得	deserve respect	They deserve respect.	You deserve a better answer.
+b2-consistent		adj. 一致的；始终如一的	consistent results	The results are consistent.	The report is consistent with the data.
+b2-pose		n. 姿势；姿态	strike a pose	The pose is natural.	The same pose appears in the painting.
+b2-stream		n. 小河；流	a mountain stream	There is a stream near the village.	The stream is clear.
+b2-reputation		n. 声誉；名声	a good reputation	The company has a good reputation.	One mistake can damage a reputation.
+b2-slight		n. 轻视；怠慢	feel a slight	It was a slight.	The comment was a slight.
+b2-tale		n. 故事；传说	a traditional tale	The book tells a traditional tale.	It is a strange tale of luck and loss.
+b2-convert		n. 改信者；皈依者	a recent convert	He is a recent convert.	The convert joined the local group.
+b2-philosophy		n. 哲学；理念	a personal philosophy	Her personal philosophy is simple.	The course introduces basic philosophy.
+b2-submit		v. 提交；服从	submit a report	Please submit the report by Friday.	They refused to submit to pressure.
+b2-urge		n. 冲动；强烈愿望	an urge to leave	I felt a strong urge to leave.	She resisted the urge to answer.
+b2-creature		n. 生物；动物	a strange creature	This creature is strange.	Every creature needs food.
+b2-numerous		adj. 众多的；许多的	numerous examples	The report gives numerous examples.	Numerous people attended the event.
+b2-initially		adv. 最初；起初	initially seem	Initially, the plan seemed simple.	Initially, the work was easy.
+b2-intense		adj. 强烈的；紧张的	intense pressure	The debate was intense.	The pressure was intense.
+b2-inspire		v. 激励；启发	inspire young people	Her story can inspire young people.	Good leaders inspire people.
+b2-temporary		adj. 临时的；暂时的	a temporary solution	This is only a temporary solution.	The change is temporary.
+b2-wealth		n. 财富；丰富资源	great wealth	The family has great wealth.	The region has a wealth of natural resources.
+b2-owe		v. 欠；归功于	owe money	I still owe him some money.	We owe our success to the whole team.
+b2-gradually		adv. 逐渐地	gradually improve	The weather gradually improved.	The pain gradually disappeared.
+b2-enhance		v. 提高；增强	enhance security	The new system will enhance security.	Training can enhance performance.
+b2-evaluate		v. 评估；评价	evaluate the results	We need to evaluate the results.	The committee will evaluate each proposal.
+b2-monitor		n. 显示器；监测器	a computer monitor	The computer monitor is too bright.	The device includes a heart monitor.
+b2-armed		adj. 武装的	an armed guard	An armed guard stood at the door.	The police believed the group was armed.
+b2-anger		n. 愤怒	control anger	He found it difficult to control his anger.	Anger can cause problems.
+b2-sensitive		adj. 敏感的；需谨慎处理的	sensitive information	Do not share sensitive information.	She is sensitive to criticism.
+b2-holy		adj. 神圣的	a holy place	The building is a holy place.	They consider the river holy.
+b2-honour		n. 荣誉；尊敬	a great honour	It is a great honour to be here.	The event was held in his honour.
+b2-pure		adj. 纯净的；纯粹的	pure water	The system produces pure water.	Her decision was based on pure chance.
+b2-acceptable		adj. 可接受的	an acceptable result	This is an acceptable result.	Such behaviour is not acceptable.
+b2-phenomenon		n. 现象	a natural phenomenon	This is a common natural phenomenon.	The phenomenon is common.
+b2-rapid		adj. 迅速的；快速的	rapid growth	The city has experienced rapid growth.	The change was rapid.
+b2-frequency		n. 频率；发生次数	high frequency	We can change the frequency.	The frequency is low.
+b2-absolute		adj. 绝对的；完全的	absolute control	No one has absolute control.	The room was in absolute silence.
+b2-fellow		n. 家伙；同伴	a friendly fellow	He is a friendly fellow.	The fellow is my friend.
+b2-maximum		n. 最大值；上限	the maximum speed	The maximum speed is eighty kilometres per hour.	We can accept a maximum of ten people.
+b2-register		n. 登记簿；寄存器	sign the register	Please sign the register.	The computer stores the value in a register.
+b2-instance		n. 例子；实例	for instance	For instance, this method saves time.	This is one instance of the problem.
+b2-whisper		n. 低语；耳语	a quiet whisper	She spoke in a quiet whisper.	I heard a whisper behind me.
+b2-junior		adj. 初级的；年少的	a junior employee	A junior employee prepared the report.	This is a junior position.
+b2-dig		v. 挖；掘	dig a hole	They began to dig a hole.	You must dig carefully near the cable.
+b2-crop		n. 农作物；收成	a rice crop	The crop is good this year.	Farmers expect a good crop this year.
+b2-pace		n. 速度；步伐	the pace	The pace is too fast.	We can change the pace.
+b2-rank		n. 等级；军衔	a high rank	She holds a high rank in the organization.	We can compare the rank.
+b2-enquiry		n. 询问；调查	make an enquiry	I have an enquiry about the course.	The office received an enquiry.
+b2-reserve		n. 储备；保护区	an emergency reserve	The country keeps an emergency reserve of food.	The animals live in a nature reserve.
+b2-judgement		n. 判断；判决	a fair judgement	The court gave a fair judgement.	Her judgement was fair.
+b2-constantly		adv. 不断地；经常地	constantly change	The system must work constantly.	He constantly checks his phone.
+b2-detect		v. 检测；发现	detect a problem	The test can detect a problem early.	The system can detect a problem.
+b2-install		v. 安装	install the software	Please install the software first.	The company will install a new system.
+b2-infection		n. 感染	prevent infection	Clean water helps prevent infection.	The infection can spread quickly.
+b2-aggressive		adj. 攻击性的；强势的	aggressive behaviour	The dog showed aggressive behaviour.	The company adopted an aggressive sales plan.
+b2-guarantee		n. 保证；担保	a money-back guarantee	The product has a guarantee.	There is no guarantee of success.
+b2-delay		n. 延误；耽搁	a long delay	The flight left after a long delay.	The delay was long.
+b2-edition		n. 版本；版次	the latest edition	I bought the latest edition of the book.	This edition includes new material.
+b2-criticize		v. 批评	criticize the decision	Many people criticize the decision.	It is easy to criticize without offering a solution.
+b2-defeat		n. 失败；战败	a heavy defeat	The team suffered a heavy defeat.	They learned from the defeat.
+b2-split		n. 分裂；裂缝	a split in the group	There is a split in the group.	There is a small split in the wood.
+b2-remark		n. 评论；言论	make a remark	That remark was careless.	Her final remark was important.
+b2-mount		n. 坐骑；支架	a camera mount	The camera is fixed to a strong mount.	The mount can hold the camera.
+b2-found		v. 创立；建立	found a school	They hope to found a new school.	People can found a company.
