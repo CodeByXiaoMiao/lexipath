@@ -1,9 +1,12 @@
 use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
+use crate::catalog_reviewed_a2_templates::reviewed_a2_template;
 use crate::course::Lesson;
 
 pub fn apply_context_repairs(lesson: &mut Lesson) {
     for index in 0..lesson.new_words.len() {
-        if reviewed_a1_template(&lesson.new_words[index].id).is_some() {
+        if reviewed_a1_template(&lesson.new_words[index].id).is_some()
+            || reviewed_a2_template(&lesson.new_words[index].id).is_some()
+        {
             continue;
         }
         let lower = lesson.new_words[index].text.to_ascii_lowercase();
