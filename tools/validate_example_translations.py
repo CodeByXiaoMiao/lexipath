@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -19,11 +21,28 @@ REJECTED_ARTIFACTS = (
     "他是女性。",
     "这是一个水平。",
     "这是一个膝盖。",
+    "这项任务难得令人难以置信。",
+    "这是一套系列丛书。",
+    "这是内部部分。",
+    "成功的前景很好。",
+    "这是一个电子设备。",
+    "这辆车有一个轮胎瘪了。",
+    "这是一处严重的伤势。",
+    "这是一份奖品。",
+    "这是一篇不错的译文。",
+    "这是一个数量。",
+    "这是一个背景。",
+    "他受了很痛的伤。",
+    "那是一种轻慢。",
+    "这是一个可以接受的结果。",
+    "它们大体相同。",
+    "它们肯定完全相同。",
     "例句中",
     "机器翻译",
     "（例句中文译文缺失）",
 )
 CORRECTION_PREFIX = "review-corrections"
+FREEZE_MANIFEST_NAME = "freeze-manifest.json"
 
 
 def fnv1a64(value: str) -> str:
@@ -60,6 +79,13 @@ def load_file(path: Path, expected_method: str) -> list[dict[str, str]]:
     return records
 
 
+def correction_paths(directory: Path) -> list[Path]:
+    return sorted(
+        directory.glob(f"{CORRECTION_PREFIX}*.tsv"),
+        key=lambda path: (path.name != "review-corrections.tsv", path.name),
+    )
+
+
 def load_bank(directory: Path) -> list[dict[str, str]]:
     files = sorted(
         path
@@ -80,10 +106,7 @@ def load_bank(directory: Path) -> list[dict[str, str]]:
             records.append(record)
 
     by_id = {record["word_id"]: record for record in records}
-    for correction_path in sorted(
-        directory.glob(f"{CORRECTION_PREFIX}*.tsv"),
-        key=lambda path: (path.name != "review-corrections.tsv", path.name),
-    ):
+    for correction_path in correction_paths(directory):
         correction_ids: set[str] = set()
         for correction in load_file(correction_path, "direct-llm-correction"):
             word_id = correction["word_id"]
@@ -99,6 +122,16 @@ def load_bank(directory: Path) -> list[dict[str, str]]:
             by_id[word_id] = correction
 
     return [by_id[record["word_id"]] for record in records]
+
+
+def effective_correction_count(directory: Path) -> int:
+    return len(
+        {
+            record["word_id"]
+            for path in correction_paths(directory)
+            for record in load_file(path, "direct-llm-correction")
+        }
+    )
 
 
 def course_words(course: dict[str, Any]):
@@ -123,6 +156,71 @@ def validate_chinese(field: str, value: Any) -> list[str]:
     return issues
 
 
+def canonical_freeze_payload(
+    course: dict[str, Any],
+    by_id: dict[str, dict[str, str]],
+) -> tuple[bytes, dict[str, int]]:
+    lines: list[str] = []
+    stage_counts: Counter[str] = Counter()
+    for stage, lesson, word in course_words(course):
+        stage_id = stage["id"]
+        stage_counts[stage_id] += 1
+        record = by_id[word["id"]]
+        frozen = {
+            "stage_id": stage_id,
+            "lesson_id": lesson["id"],
+            "word_id": word["id"],
+            "text": word.get("text", ""),
+            "meaning": word.get("meaning", ""),
+            "phrase": word.get("phrase", ""),
+            "example": word.get("example", ""),
+            "chinese": record["chinese"],
+        }
+        lines.append(
+            json.dumps(
+                frozen,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+        )
+    return ("\n".join(lines) + "\n").encode("utf-8"), dict(stage_counts)
+
+
+def validate_freeze_manifest(
+    manifest_path: Path,
+    course: dict[str, Any],
+    by_id: dict[str, dict[str, str]],
+    correction_count: int,
+) -> list[str]:
+    if not manifest_path.is_file():
+        return [f"{manifest_path}: whole-bank freeze manifest is missing"]
+
+    try:
+        manifest = load_json(manifest_path)
+    except (OSError, json.JSONDecodeError) as error:
+        return [f"{manifest_path}: invalid freeze manifest: {error}"]
+
+    issues: list[str] = []
+    payload, stage_counts = canonical_freeze_payload(course, by_id)
+    digest = hashlib.sha256(payload).hexdigest()
+    expected = {
+        "schema": 1,
+        "status": "frozen",
+        "record_count": sum(stage_counts.values()),
+        "effective_correction_count": correction_count,
+        "stage_counts": stage_counts,
+        "canonical_sha256": digest,
+    }
+    for key, value in expected.items():
+        if manifest.get(key) != value:
+            issues.append(
+                f"{manifest_path}: {key} mismatch; "
+                f"manifest={manifest.get(key)!r}, expected={value!r}"
+            )
+    return issues
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("course", type=Path)
@@ -131,11 +229,20 @@ def main() -> int:
         type=Path,
         default=Path("assets/example-translations"),
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        help=(
+            "whole-bank freeze manifest; defaults to "
+            "assets/example-translations/freeze-manifest.json"
+        ),
+    )
     args = parser.parse_args()
 
     course = load_json(args.course)
     try:
         records = load_bank(args.bank)
+        correction_count = effective_correction_count(args.bank)
     except (OSError, ValueError) as error:
         print(error, file=sys.stderr)
         return 1
@@ -152,6 +259,7 @@ def main() -> int:
         issues.extend(validate_chinese(field, record["chinese"]))
 
     expected_ids: set[str] = set()
+    english_to_chinese: dict[str, tuple[str, str]] = {}
     for _stage, lesson, word in course_words(course):
         word_id = word["id"]
         expected_ids.add(word_id)
@@ -160,14 +268,28 @@ def main() -> int:
         if record is None:
             issues.append(f"{field}: reviewed translation is missing")
             continue
-        expected_hash = fnv1a64(word.get("example", ""))
+
+        english = word.get("example", "")
+        expected_hash = fnv1a64(english)
         if record["english_hash"] != expected_hash:
             issues.append(
                 f"{field}: English fingerprint mismatch: "
                 f"bank={record['english_hash']}, expected={expected_hash}, "
-                f"example={word.get('example', '')!r}"
+                f"example={english!r}"
             )
         issues.extend(validate_chinese(field, record["chinese"]))
+
+        if english.rstrip().endswith("?") and not record["chinese"].rstrip().endswith("？"):
+            issues.append(f"{field}: English question must remain a Chinese question")
+
+        previous = english_to_chinese.get(english)
+        if previous is None:
+            english_to_chinese[english] = (word_id, record["chinese"])
+        elif previous[1] != record["chinese"]:
+            issues.append(
+                f"{field}: identical English example has inconsistent Chinese; "
+                f"{previous[0]}={previous[1]!r}, {word_id}={record['chinese']!r}"
+            )
 
     extra = sorted(set(by_id) - expected_ids)
     if extra:
@@ -176,25 +298,27 @@ def main() -> int:
             f"first items: {', '.join(extra[:20])}"
         )
 
+    manifest_path = args.manifest or args.bank / FREEZE_MANIFEST_NAME
+    if not issues:
+        issues.extend(
+            validate_freeze_manifest(
+                manifest_path,
+                course,
+                by_id,
+                correction_count,
+            )
+        )
+
     if issues:
         print("\n".join(issues[:400]), file=sys.stderr)
         if len(issues) > 400:
             print(f"... {len(issues) - 400} more issues", file=sys.stderr)
         return 1
 
-    correction_count = len(
-        {
-            record["word_id"]
-            for path in sorted(
-                args.bank.glob(f"{CORRECTION_PREFIX}*.tsv"),
-                key=lambda path: (path.name != "review-corrections.tsv", path.name),
-            )
-            for record in load_file(path, "direct-llm-correction")
-        }
-    )
     print(
-        f"Validated {len(expected_ids)} reviewed example translations, including "
-        f"{correction_count} reviewed corrections; coverage and English matching are complete."
+        f"Validated frozen whole bank: {len(expected_ids)} reviewed example "
+        f"translations, {correction_count} effective corrections, exact English "
+        f"fingerprints, cross-entry consistency, and canonical manifest digest."
     )
     return 0
 
