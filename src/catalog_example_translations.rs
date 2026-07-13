@@ -6,18 +6,22 @@ use crate::course::{CoursePack, WordItem};
 const EXAMPLE_TRANSLATION_SCHEMA_VERSION: u32 = 1;
 const MISSING_TRANSLATION_TEXT: &str = "（例句中文译文缺失）";
 const BANK_FILES: &[&str] = &[
-    include_str!("../assets/example-translations/foundation-words.tsv"),
-    include_str!("../assets/example-translations/ogden-850.tsv"),
-    include_str!("../assets/example-translations/oxford-a1.tsv"),
-    include_str!("../assets/example-translations/oxford-a2.tsv"),
-    include_str!("../assets/example-translations/oxford-b1.tsv"),
-    include_str!("../assets/example-translations/oxford-b2.tsv"),
+    include_str!("../assets/example-translations/foundation-words-01.tsv"),
+    include_str!("../assets/example-translations/ogden-850-01.tsv"),
+    include_str!("../assets/example-translations/ogden-850-02.tsv"),
+    include_str!("../assets/example-translations/ogden-850-03-04.tsv"),
+    include_str!("../assets/example-translations/oxford-a1-01-02.tsv"),
+    include_str!("../assets/example-translations/oxford-a1-03-a2-01.tsv"),
+    include_str!("../assets/example-translations/oxford-a2-02-03.tsv"),
+    include_str!("../assets/example-translations/oxford-b1-01-02.tsv"),
+    include_str!("../assets/example-translations/oxford-b1-03-b2-01.tsv"),
+    include_str!("../assets/example-translations/oxford-b2-02-03.tsv"),
 ];
 
 #[derive(Debug, Clone)]
 struct ExampleTranslationRecord {
     word_id: String,
-    english: String,
+    english_hash: u64,
     chinese: String,
 }
 
@@ -26,7 +30,7 @@ static INDEX: OnceLock<HashMap<String, ExampleTranslationRecord>> = OnceLock::ne
 
 pub fn reviewed_example_translation(word: &WordItem) -> Option<&'static str> {
     let record = index().get(&word.id)?;
-    (record.english == word.example).then_some(record.chinese.as_str())
+    (record.english_hash == fnv1a64(&word.example)).then_some(record.chinese.as_str())
 }
 
 pub fn example_translation_or_error(word: &WordItem) -> String {
@@ -49,21 +53,32 @@ pub fn validate_example_translation_bank(course: &CoursePack) -> anyhow::Result<
         validate_chinese(&record.word_id, &record.chinese, &mut issues);
     }
 
+    let mut course_ids = HashSet::new();
     for stage in &course.stages {
         for lesson in &stage.lessons {
             for word in &lesson.new_words {
+                course_ids.insert(word.id.as_str());
                 let field = format!("lesson {} / word {}", lesson.id, word.id);
                 match index().get(&word.id) {
                     None => issues.push(format!(
                         "{field}: reviewed Chinese example translation is missing"
                     )),
-                    Some(record) if record.english != word.example => issues.push(format!(
-                        "{field}: translation bank English does not match the course example; bank='{}', course='{}'",
-                        record.english, word.example
-                    )),
+                    Some(record) if record.english_hash != fnv1a64(&word.example) => {
+                        issues.push(format!(
+                            "{field}: translation bank English fingerprint does not match the course example"
+                        ))
+                    }
                     Some(record) => validate_chinese(&field, &record.chinese, &mut issues),
                 }
             }
+        }
+    }
+    for record in records() {
+        if !course_ids.contains(record.word_id.as_str()) {
+            issues.push(format!(
+                "translation record '{}' has no matching course word",
+                record.word_id
+            ));
         }
     }
 
@@ -110,16 +125,17 @@ fn parse_bank_file(content: &str, output: &mut Vec<ExampleTranslationRecord>) {
         }
         let mut fields = line.splitn(3, '\t');
         let word_id = fields.next().unwrap_or_default();
-        let english = fields.next().unwrap_or_default();
+        let english_hash = fields.next().unwrap_or_default();
         let chinese = fields.next().unwrap_or_default();
         assert!(
-            !word_id.is_empty() && !english.is_empty() && !chinese.is_empty(),
+            !word_id.is_empty() && !english_hash.is_empty() && !chinese.is_empty(),
             "invalid example translation record at data line {}",
             index + 3
         );
         output.push(ExampleTranslationRecord {
             word_id: word_id.to_owned(),
-            english: english.to_owned(),
+            english_hash: u64::from_str_radix(english_hash, 16)
+                .expect("invalid example translation English fingerprint"),
             chinese: chinese.to_owned(),
         });
     }
@@ -135,6 +151,15 @@ fn index() -> &'static HashMap<String, ExampleTranslationRecord> {
         }
         output
     })
+}
+
+fn fnv1a64(value: &str) -> u64 {
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in value.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    hash
 }
 
 fn validate_chinese(field: &str, chinese: &str, issues: &mut Vec<String>) {
@@ -206,5 +231,18 @@ mod tests {
             reviewed_example_translation(&word),
             Some("这是一个书。")
         );
+    }
+
+    #[test]
+    fn changed_english_never_reuses_a_stale_translation() {
+        let word = WordItem {
+            id: "w-a".to_owned(),
+            text: "a".to_owned(),
+            ipa: "/ə/".to_owned(),
+            meaning: "一个".to_owned(),
+            phrase: "a book".to_owned(),
+            example: "This is a different example.".to_owned(),
+        };
+        assert_eq!(reviewed_example_translation(&word), None);
     }
 }
