@@ -1,6 +1,7 @@
 use crate::catalog_reviewed_a1_templates::reviewed_a1_template;
 use crate::catalog_reviewed_a2_templates::reviewed_a2_template;
 use crate::catalog_reviewed_b1_templates::reviewed_b1_template;
+use crate::catalog_reviewed_b2_templates::reviewed_b2_template;
 use crate::course::Lesson;
 
 pub fn apply_context_repairs(lesson: &mut Lesson) {
@@ -8,6 +9,7 @@ pub fn apply_context_repairs(lesson: &mut Lesson) {
         if reviewed_a1_template(&lesson.new_words[index].id).is_some()
             || reviewed_a2_template(&lesson.new_words[index].id).is_some()
             || reviewed_b1_template(&lesson.new_words[index].id).is_some()
+            || reviewed_b2_template(&lesson.new_words[index].id).is_some()
         {
             continue;
         }
