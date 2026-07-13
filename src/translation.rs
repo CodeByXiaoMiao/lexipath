@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
+use crate::catalog_example_translations::example_translation_or_error;
 use crate::catalog_meaning::learner_gloss;
 use crate::catalog_stories::curated_translation;
-use crate::course::{CoursePack, Lesson};
+use crate::course::{CoursePack, Lesson, WordItem};
 
 #[derive(Debug, Clone, Default)]
 pub struct TranslationGuide {
@@ -22,6 +23,10 @@ impl TranslationGuide {
             }
         }
         Self { lexicon }
+    }
+
+    pub fn example(&self, word: &WordItem) -> String {
+        example_translation_or_error(word)
     }
 
     pub fn sentence(&self, lesson: &Lesson, english: &str) -> String {
@@ -328,7 +333,14 @@ mod tests {
         let guide = TranslationGuide::new(&course);
         let lesson = course.first_lesson().expect("lesson");
         assert_eq!(guide.sentence(lesson, "I am here."), "我在这里。");
-        assert_eq!(guide.translate_controlled("This is a book."), "这是一个书。");
+        let book = course
+            .stages
+            .iter()
+            .flat_map(|stage| stage.lessons.iter())
+            .flat_map(|lesson| lesson.new_words.iter())
+            .find(|word| word.id == "w-a")
+            .expect("article lesson word");
+        assert_eq!(guide.example(book), "这是一本书。");
         let story_lesson = course
             .stages
             .iter()
