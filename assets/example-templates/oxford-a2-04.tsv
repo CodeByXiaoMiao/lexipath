@@ -1,0 +1,59 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a2-injury		n. 伤；损伤	a serious injury	This is a serious injury.	The injury needs time.
+a2-colleague		n. 同事	a colleague	He is my colleague.	My colleague is here.
+a2-cross		n. 十字形；十字架	a cross	This is a cross.	The two lines make a cross.
+a2-somewhere		adv. 在某处；到某处	go somewhere	I need to go somewhere.	The book is somewhere here.
+a2-manner		n. 方式；举止	in this manner	Do it in this manner.	Do not speak in that manner.
+a2-baseball		n. 棒球运动	play baseball	I play baseball.	Baseball is popular here.
+a2-introduction		n. 介绍；引言	a short introduction	This is a short introduction.	The book has an introduction.
+a2-ordinary		adj. 普通的；平常的	an ordinary day	This is an ordinary day.	The room looks ordinary.
+a2-appearance		n. 外表；出现	her appearance	Her appearance is different.	Her appearance can change.
+a2-code		n. 代码；密码	computer code	This is computer code.	I can read the code.
+a2-usual		adj. 通常的；惯常的	the usual way	This is the usual way.	He arrived at the usual time.
+a2-belong		v. 属于	belong to me	This book may belong to me.	These keys belong to her.
+a2-formal		adj. 正式的	a formal letter	This is a formal letter.	The meeting is formal.
+a2-explanation		n. 解释	need an explanation	I need an explanation.	The explanation is clear.
+a2-search		n. 搜寻；搜索	the search	The search starts now.	The search continues today.
+a2-tie		n. 领带；带子	a tie	This is a tie.	He wears a blue tie.
+a2-device		n. 设备；装置	a device	This is a device.	The device is useful.
+a2-bottom		n. 底部	at the bottom	The book is at the bottom.	Write your name at the bottom.
+a2-working		adj. 运转中的；工作的	be working	This machine is working.	The phone is not working.
+a2-instruction		n. 指示；说明	read the instruction	Read the instruction.	This instruction is important.
+a2-recommend		v. 推荐	recommend this book	I can recommend this book.	They recommend the film.
+a2-shout		n. 喊叫声	hear a shout	I heard a shout.	The shout came from outside.
+a2-athlete		n. 运动员	an athlete	She is an athlete.	The athlete is ready.
+a2-predict		v. 预测	predict the result	I can predict the result.	Nobody can predict everything.
+a2-temperature		n. 温度	the temperature	The temperature is high.	The temperature may fall.
+a2-connect		v. 连接	connect the parts	I can connect the two parts.	These roads connect the cities.
+a2-double		v. 加倍；翻倍	double the number	The number can double.	We can double the amount.
+a2-organize		v. 组织；安排	organize the event	I can organize the event.	She can organize the team.
+a2-thinking		n. 思考	more thinking	Thinking takes time.	This problem needs more thinking.
+a2-gallery		n. 美术馆；画廊	an art gallery	This is an art gallery.	The gallery is open today.
+a2-stress		n. 压力	feel stress	I feel stress at work.	Too much stress is bad.
+a2-succeed		v. 成功	succeed together	We can succeed.	The plan may succeed.
+a2-alternative		n. 可供选择的事物	an alternative	We need an alternative.	This is a good alternative.
+a2-pilot		n. 飞行员	a pilot	He is a pilot.	The pilot is ready.
+a2-attractive		adj. 有吸引力的	an attractive place	This place is attractive.	The offer is attractive.
+a2-steal		v. 偷窃	do not steal	Do not steal.	People sometimes steal money.
+a2-winner		n. 获胜者	the winner	She is the winner.	The winner is happy.
+a2-basketball		n. 篮球运动	play basketball	I play basketball.	Basketball is popular here.
+a2-golf		n. 高尔夫球	play golf	I play golf.	Golf is popular here.
+a2-crazy		adj. 疯狂的	a crazy idea	That idea is crazy.	The plan sounds crazy.
+a2-typical		adj. 典型的	a typical example	This is a typical example.	It is typical of him.
+a2-fix		v. 修理；解决	fix it	I can fix it.	We need to fix the problem.
+a2-fashion		n. 时尚；流行	in fashion	This style is in fashion.	Fashion changes quickly.
+a2-complain		v. 抱怨；投诉	complain about the service	I can complain about the service.	They complain about the price.
+a2-anywhere		adv. 任何地方	go anywhere	I can go anywhere.	You can sit anywhere.
+a2-engineer		n. 工程师	an engineer	She is an engineer.	The engineer is here.
+a2-unfortunately		adv. 不幸地；遗憾的是	unfortunately cannot	Unfortunately, I cannot go.	Unfortunately, the plan failed.
+a2-hero		n. 英雄	a hero	He is a hero.	The hero saves people.
+a2-height		n. 高度	the height	The height is two metres.	We need to know the height.
+a2-tip		n. 建议；小费	a useful tip	Here is a useful tip.	The tip is useful.
+a2-everywhere		adv. 到处	see people everywhere	I see people everywhere.	Flowers grow everywhere.
+a2-criminal		n. 罪犯	a criminal	He is a criminal.	The police caught the criminal.
+a2-knock		n. 敲击声	hear a knock	I heard a knock.	The knock came from the door.
+a2-passenger		n. 乘客	a passenger	She is a passenger.	The passenger is on the bus.
+a2-charity		n. 慈善机构；慈善事业	a charity	This charity helps people.	I gave money to the charity.
+a2-celebrate		v. 庆祝	celebrate together	We can celebrate together.	They celebrate the good news.
