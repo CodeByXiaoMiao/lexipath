@@ -109,7 +109,7 @@ mod tests {
         assert_eq!(background.3, "The background is blue.");
 
         let studio = final_freeze_template("b1-studio").expect("studio template");
-        assert_eq!(studio.3, "The film was made in a small studio.");
+        assert_eq!(studio.3, "The film is from a small studio.");
 
         let slight = final_freeze_template("b2-slight").expect("slight template");
         assert_eq!(slight.1.as_deref(), Some("n. 怠慢；轻视"));
