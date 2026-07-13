@@ -8,6 +8,7 @@ mod catalog_daily;
 mod catalog_example_translations;
 mod catalog_context_repairs;
 mod catalog_final_review_templates;
+mod catalog_final_freeze_templates;
 mod catalog_formalize;
 mod catalog_meaning;
 mod catalog_function_templates;
