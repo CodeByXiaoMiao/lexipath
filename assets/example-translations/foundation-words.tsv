@@ -1,0 +1,92 @@
+# schema=1
+authoring_method	direct-llm-reviewed
+word-i	I am here.	我在这里。
+word-am	I am here.	我在这里。
+word-here	I am here.	我在这里。
+word-you	You are there.	你在那里。
+word-are	You are there.	你在那里。
+word-there	You are there.	你在那里。
+w-this	This is a book.	这是一本书。
+w-is	It is red.	它是红色的。
+w-a	This is a book.	这是一本书。
+w-book	This book is red.	这本书是红色的。
+w-it	It is red.	它是红色的。
+w-red	This book is red.	这本书是红色的。
+w-big	This is a big book.	这是一本大书。
+w-small	This is a small book.	这是一本小书。
+w-and	It is red and black.	它有红色和黑色两种颜色。
+w-not	It is not red.	它不是红色的。
+w-black	This book is black.	这本书是黑色的。
+w-white	This book is white.	这本书是白色的。
+w-he	He has one.	他有一个。
+w-she	She has two.	她有两个。
+w-has	He has one.	他有一个。
+w-one	He has one book.	他有一本书。
+w-two	She has two.	她有两个。
+w-three	He has three.	他有三个。
+w-we	We can go.	我们可以走了。
+w-they	They can come.	他们可以来。
+w-can	We can go.	我们可以走了。
+w-go	We go now.	我们现在走。
+w-come	They come now.	他们现在来。
+w-now	We can go now.	我们现在可以走了。
+w-do	Do you like food?	你喜欢食物吗？
+w-like	I like food.	我喜欢食物。
+w-food	You like food.	你喜欢食物。
+w-yes	Yes, I do.	是的，我喜欢。
+w-no	No, I do not.	不，我不喜欢。
+w-why	Why not?	为什么不呢？
+w-man	He is a man.	他是一名男子。
+w-woman	She is a woman.	她是一名女子。
+w-boy	He is a boy.	他是一个男孩。
+w-girl	She is a girl.	她是一个女孩。
+w-person	A man is a person.	男人也是人。
+w-people	They are people.	他们都是人。
+w-see	I see him.	我看见他了。
+w-look	Look at me.	看着我。
+w-at	Look at him.	看着他。
+w-me	Look at me.	看着我。
+w-him	I see him.	我看见他了。
+w-her	You see her.	你看见她了。
+w-books	I see books.	我看见一些书。
+w-doors	I see doors.	我看见几扇门。
+w-rooms	I see rooms.	我看见几个房间。
+w-days	I see days.	我看见好几天。
+w-nights	I see nights.	我看见了许多个夜晚。
+w-boxes	I see boxes.	我看见几个盒子。
+w-the	This is the book.	就是这本书。
+w-an	This word is "an".	这个词是“an”。
+w-have	I have a book.	我有一本书。
+w-these	These are books.	这些是书。
+w-those	Those are books.	那些是书。
+w-word	This is a word.	这是一个单词。
+w-in	A book is in a box.	一本书放在盒子里。
+w-on	A book is on a table.	一本书放在桌子上。
+w-under	A book is under a table.	一本书放在桌子下面。
+w-box	This is a box.	这是一个盒子。
+w-table	This is a table.	这是一张桌子。
+w-near	This box is near this table.	这个盒子靠近这张桌子。
+w-door	This door is open.	这扇门开着。
+w-room	I am inside this room.	我在这个房间里面。
+w-open	This door is open.	这扇门开着。
+w-closed	This door is closed.	这扇门关着。
+w-inside	I am inside this room.	我在这个房间里面。
+w-outside	You are outside this room.	你在这个房间外面。
+w-day	This is a day.	这是一天。
+w-night	It is night.	现在是夜晚。
+w-morning	It is morning.	现在是早晨。
+w-afternoon	It is afternoon.	现在是下午。
+w-evening	It is evening.	现在是傍晚。
+w-time	Morning is a time.	早晨是一天中的一个时段。
+w-about	This is about a book.	这是关于一本书的内容。
+w-know	I know this.	我知道这件事。
+w-use	I can use this.	我会使用这个。
+w-make	I can make this.	我会制作这个。
+w-good	This is good.	这很好。
+w-thing	This is a thing.	这是一个东西。
+w-was	I was here.	我当时在这里。
+w-more	This is more than one.	这里不止一个。
+w-than	Two is more than one.	二比一大。
+w-ago	I was here one day ago.	我一天前来过这里。
+w-recently	I was here recently.	我最近来过这里。
+w-previously	I was here previously.	我以前来过这里。
