@@ -40,14 +40,18 @@ pub fn formalize_generated_lessons(course: &mut CoursePack) {
 
 pub fn validate_formalized_course(course: &CoursePack) -> anyhow::Result<()> {
     let mut issues = Vec::<String>::new();
+    let mut known_tokens = HashSet::<String>::new();
 
     for stage in &course.stages {
         for lesson in &stage.lessons {
+            for word in &lesson.new_words {
+                known_tokens.extend(tokenize(&word.text));
+            }
             if stage.id == "foundation-words" || lesson.is_stage_assessment() {
                 continue;
             }
 
-            validate_lesson(lesson, &mut issues);
+            validate_lesson(lesson, &known_tokens, &mut issues);
         }
     }
 
@@ -61,9 +65,13 @@ pub fn validate_formalized_course(course: &CoursePack) -> anyhow::Result<()> {
     }
 }
 
-fn validate_lesson(lesson: &Lesson, issues: &mut Vec<String>) {
+fn validate_lesson(
+    lesson: &Lesson,
+    known_tokens: &HashSet<String>,
+    issues: &mut Vec<String>,
+) {
     if has_curated_story(&lesson.id) {
-        issues.extend(validate_curated_story(lesson));
+        issues.extend(validate_curated_story(lesson, known_tokens));
     } else if lesson.reading.title != CONTROLLED_CONTEXT_TITLE {
         issues.push(format!(
             "lesson {} / reading.title: expected controlled-context practice title",
