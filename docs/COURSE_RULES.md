@@ -69,3 +69,9 @@ Every article declares a setup, goal, problem, at least two attempts, a turn, an
 AI creates candidates offline through `tools/generate_course_stories.py`. The desktop program and normal release workflow do not call an AI service. Strict release finalization uses `--require-llm-readings` and fails when any required ordinary lesson is missing an article.
 
 The migration baseline is 500 required ordinary articles: 133 Ogden, 82 A1, 96 A2, 97 B1, and 92 B2. One A1 article existed when the migration started, leaving 499 to generate. Operational generation and review procedures are defined in `docs/LLM_READING_MAINTENANCE.md`.
+
+## Reviewed example-translation contract
+
+Every vocabulary example sentence has a reviewed static Simplified Chinese translation in `assets/example-translations/*.tsv`. The word ID and exact English example jointly identify the translation. Runtime dictionary-gloss concatenation must never be used for example sentences.
+
+Course finalization fails when a required translation is missing, duplicated, empty, non-Chinese, or attached to stale English. Operational review and validation procedures are defined in `docs/EXAMPLE_TRANSLATION_MAINTENANCE.md`.
