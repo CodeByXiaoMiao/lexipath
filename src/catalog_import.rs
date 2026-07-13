@@ -265,8 +265,16 @@ fn resolve_entries(
             missing.into_iter().take(20).collect::<Vec<_>>().join(", ")
         );
     }
-    entries.sort_by_key(|entry| entry.rank);
+    sort_entries(&mut entries);
     Ok(entries)
+}
+
+fn sort_entries(entries: &mut [DictionaryEntry]) {
+    entries.sort_by(|left, right| {
+        left.rank
+            .cmp(&right.rank)
+            .then_with(|| normalize_entry(&left.word).cmp(&normalize_entry(&right.word)))
+    });
 }
 
 fn header_index(headers: &csv::StringRecord, name: &str) -> anyhow::Result<usize> {
@@ -484,8 +492,33 @@ mod tests {
     }
 
     #[test]
+    fn equal_rank_entries_have_a_deterministic_word_order() {
+        let mut entries = vec![
+            dictionary_entry("meal", 10),
+            dictionary_entry("arch", 10),
+            dictionary_entry("colour", 10),
+            dictionary_entry("ant", 10),
+        ];
+        sort_entries(&mut entries);
+        assert_eq!(
+            entries.iter().map(|entry| entry.word.as_str()).collect::<Vec<_>>(),
+            ["ant", "arch", "colour", "meal"]
+        );
+    }
+
+    #[test]
     fn hyphenated_entries_use_a_stable_dictionary_key() {
         assert_eq!(normalize_entry("T-shirt"), "t shirt");
         assert_eq!(normalize_entry("T shirt"), "t shirt");
+    }
+
+    fn dictionary_entry(word: &str, rank: u32) -> DictionaryEntry {
+        DictionaryEntry {
+            word: word.to_owned(),
+            phonetic: "test".to_owned(),
+            translation: "test".to_owned(),
+            part_of_speech: "n".to_owned(),
+            rank,
+        }
     }
 }
