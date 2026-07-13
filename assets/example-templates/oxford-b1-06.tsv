@@ -1,0 +1,83 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b1-ours		pron. 我们的	be ours	This house is ours.	The final decision is ours.
+b1-decorate		v. 装饰	decorate the room	We can decorate the room.	Pictures decorate the walls.
+b1-translation		n. 翻译；译文	the translation	This is a good translation.	Her translation is clear and natural.
+b1-photography		n. 摄影	study photography	She studies photography at college.	Photography has become his main interest.
+b1-similarity		n. 相似之处	a clear similarity	There is a clear similarity between the two designs.	Their similarity surprised me.
+b1-scan		v. 扫描；浏览	scan the document	Please scan the document and send it to me.	We can scan this.
+b1-talented		adj. 有才华的	a talented musician	She is a talented musician.	The team has many talented young players.
+b1-definite		adj. 明确的；确定的	a definite answer	We need a definite answer today.	We need a definite answer.
+b1-determined		adj. 坚定的；下定决心的	be determined to win	She is determined to win.	He remained determined despite the difficulty.
+b1-donate		v. 捐赠	donate money	They donate money to the hospital every year.	You can donate old clothes.
+b1-bubble		n. 气泡；泡沫	a soap bubble	I can see a bubble in the water.	I can see the bubble.
+b1-drum		n. 鼓	play the drum	He can play the drum.	The sound of the drum was very loud.
+b1-stadium		n. 体育场	a football stadium	Thousands of people filled the stadium.	The match takes place at the new stadium.
+b1-costume		n. 服装；戏服	wear a costume	She wore a costume.	I can see the costume.
+b1-calm		adj. 平静的；镇定的	stay calm	Please stay calm.	The sea was calm in the morning.
+b1-documentary		n. 纪录片	watch a documentary	This is a documentary about nature.	The documentary won an award.
+b1-indirect		adj. 间接的	an indirect answer	He gave an indirect answer.	The policy had an indirect effect on prices.
+b1-earthquake		n. 地震	a strong earthquake	A strong earthquake hit the city.	The earthquake was felt across the region.
+b1-incredibly		adv. 难以置信地；非常	incredibly difficult	The task was incredibly difficult.	She can run incredibly fast.
+b1-ambitious		adj. 有雄心的；宏大的	an ambitious plan	The company announced an ambitious plan.	She is ambitious and works hard.
+b1-qualified		adj. 有资格的；合格的	a qualified doctor	Only a qualified doctor can do this work.	She is qualified.
+b1-expedition		n. 探险；考察	a scientific expedition	They joined a scientific expedition.	The expedition starts tomorrow.
+b1-cheat		v. 欺骗；作弊	cheat in an exam	Do not cheat in the exam.	He tried to cheat his customers.
+b1-shy		adj. 害羞的	a shy child	He was a shy child.	She is too shy to speak in public.
+b1-worldwide		adj. 全世界的	worldwide attention	The event attracted worldwide attention.	The company sells its products worldwide.
+b1-relaxed		adj. 放松的	feel relaxed	I felt relaxed after the holiday.	The meeting had a relaxed atmosphere.
+b1-entertain		v. 招待；娱乐	entertain guests	We can entertain our guests.	The show will entertain children and adults.
+b1-breathing		n. 呼吸	slow breathing	Slow breathing can help you relax.	His breathing is slow.
+b1-hurricane		n. 飓风	a powerful hurricane	A powerful hurricane reached the coast.	The hurricane destroyed many homes.
+b1-robot		n. 机器人	a service robot	The hotel has a service robot.	This robot can carry heavy boxes.
+b1-embarrassed		adj. 尴尬的	feel embarrassed	I felt embarrassed by my mistake.	She is embarrassed.
+b1-fur		n. 毛皮；软毛	thick fur	The animal has thick fur.	People should not buy real fur.
+b1-unpleasant		adj. 令人不快的	an unpleasant smell	There was an unpleasant smell in the room.	The experience was unpleasant.
+b1-printing		n. 印刷	modern printing	Modern printing is fast and cheap.	The book is ready for printing.
+b1-bride		n. 新娘	the bride	The bride wore a white dress.	The bride is here.
+b1-organized		adj. 有条理的；组织好的	an organized person	She is a very organized person.	The event was well organized.
+b1-revise		v. 复习；修改	revise for an exam	I need to revise for the exam.	Please revise the final paragraph.
+b1-dislike		v. 不喜欢	dislike loud music	I dislike loud music.	Some people dislike change.
+b1-queue		n. 队列	join the queue	We joined the queue for tickets.	The queue is very long.
+b1-fashionable		adj. 时髦的	fashionable clothes	She wears fashionable clothes.	This area has become fashionable.
+b1-sailor		n. 水手	an experienced sailor	He is an experienced sailor.	The sailor is here.
+b1-cheerful		adj. 快乐的；开朗的	a cheerful person	She is a cheerful person.	She is cheerful.
+b1-frighten		v. 使害怕	frighten the children	The noise can frighten children.	Do not frighten the animals.
+b1-organizer		n. 组织者	the event organizer	The event organizer is here.	Every organizer received a schedule.
+b1-shiny		adj. 有光泽的；闪亮的	shiny shoes	He wore shiny black shoes.	The table looked clean and shiny.
+b1-luxury		n. 奢侈；奢侈品	a rare luxury	A private room was a rare luxury.	For many people, travel is a luxury.
+b1-embarrassing		adj. 令人尴尬的	an embarrassing mistake	This was an embarrassing mistake.	It was an embarrassing situation for everyone.
+b1-quotation		n. 引语；报价	a famous quotation	The speech began with a famous quotation.	We asked for a written quotation.
+b1-injured		adj. 受伤的	an injured player	The injured player left the field.	She is injured.
+b1-keyboard		n. 键盘	a computer keyboard	This computer keyboard is very quiet.	I can see the keyboard.
+b1-theirs		pron. 他们的	be theirs	The blue car is theirs.	The choice is theirs to make.
+b1-summarize		v. 总结；概述	summarize the report	Please summarize the report in one paragraph.	We can summarize this.
+b1-frightening		adj. 令人害怕的	a frightening experience	It was a frightening experience.	The sound was frightening in the dark.
+b1-repeated		adj. 反复的；重复的	repeated mistakes	Repeated mistakes are a problem.	The machine failed after repeated use.
+b1-disappointing		adj. 令人失望的	a disappointing result	This is a disappointing result.	Sales were disappointing this month.
+b1-educated		adj. 受过教育的	an educated person	She is a highly educated person.	An educated public can make better decisions.
+b1-amazed		adj. 惊讶的	be amazed by	We were amazed by the view.	I am amazed that he finished so quickly.
+b1-indoor		adj. 室内的	an indoor activity	Swimming can be an indoor activity.	The centre has an indoor sports area.
+b1-imaginary		adj. 想象中的	an imaginary friend	The child has an imaginary friend.	The story takes place in an imaginary world.
+b1-underwear		n. 内衣	clean underwear	Pack enough clean underwear.	I can see the underwear.
+b1-spoken		adj. 口语的	be spoken	Her spoken language is very clear.	Spoken language is often less formal.
+b1-annoyed		adj. 恼怒的	feel annoyed	I was annoyed by the problem.	She is annoyed about the problem.
+b1-fry		v. 油炸；煎	fry an egg	I can fry an egg.	Fry the vegetables for five minutes.
+b1-fasten		v. 系牢；扣紧	fasten the seat belt	Please fasten your seat belt.	Fasten the box with a rope.
+b1-outdoors		adv. 在户外	work outdoors	They work outdoors in summer.	We ate outdoors because the weather was warm.
+b1-careless		adj. 粗心的	a careless mistake	It was a careless mistake.	Careless driving can be dangerous.
+b1-annoy		v. 使恼怒；打扰	annoy the neighbours	Loud music may annoy the neighbours.	The noise can annoy people.
+b1-spicy		adj. 辛辣的	spicy food	I like spicy food.	This soup is too spicy for me.
+b1-indoors		adv. 在室内	stay indoors	We are indoors because of the rain.	We can stay indoors.
+b1-alcoholic		adj. 含酒精的；酗酒的	an alcoholic drink	This is an alcoholic drink.	He received help for alcoholic behaviour.
+b1-racing		n. 赛跑；赛车	car racing	He is interested in car racing.	Racing can be dangerous without proper rules.
+b1-annoying		adj. 烦人的	an annoying sound	This is an annoying sound.	It is annoying when the bus is late.
+b1-covered		adj. 覆盖着的	covered in snow	The road was covered in snow.	Her desk is covered with books.
+b1-poisonous		adj. 有毒的	a poisonous plant	This is a poisonous plant.	This plant is poisonous.
+b1-statistic		n. 统计数据	an important statistic	The report includes an important statistic.	One statistic does not tell the whole story.
+b1-relaxing		adj. 令人放松的	a relaxing holiday	We had a relaxing holiday.	Listening to music can be relaxing.
+b1-engaged		adj. 订婚的；忙于的	be engaged to	She is engaged to her childhood friend.	The line is engaged, so call later.
+b1-dressed		adj. 穿着衣服的	be dressed in black	He was dressed in black.	The children were dressed and ready to leave.
+b1-located		adj. 位于	be located	The hotel is located near the station.	The school is located near the station.
+b1-planning		n. 规划；计划工作	careful planning	The project requires careful planning.	Planning is important.
