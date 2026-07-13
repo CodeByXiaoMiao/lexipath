@@ -52,5 +52,269 @@
       "那天晚上，汤姆写下了这次旅行、那把椅子和能够帮助他的建议。",
       "安娜读完故事后说，这位新作家下次可以更好地听取建议。"
     ]
+  },
+  {
+    "lesson_id": "ogden-unit-001",
+    "title": "拱门下的小蚂蚁",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom and Anna are in a room near an arch.",
+      "The arch has a red colour and a black colour.",
+      "Anna has a form on the table.",
+      "Tom has a meal in a box.",
+      "An ant is on the form.",
+      "Tom does not see the ant.",
+      "Anna sees the ant and looks at Tom.",
+      "Anna has good humour about the small ant.",
+      "The meal is now near the ant.",
+      "The small form has a white colour.",
+      "The ant is under the arch, and the meal is on the table.",
+      "Tom has humour about the ant and the meal.",
+      "Anna and Tom see the arch, the form, and the ant.",
+      "The small ant has a meal, and Tom and Anna are good."
+    ],
+    "translations": [
+      "汤姆和安娜在一个靠近拱门的房间里。",
+      "这座拱门有红色和黑色两种颜色。",
+      "安娜把一张表格放在桌上。",
+      "汤姆有一份装在盒子里的饭。",
+      "一只蚂蚁爬到了表格上。",
+      "汤姆没有看见那只蚂蚁。",
+      "安娜看见蚂蚁后看向汤姆。",
+      "安娜觉得这只小蚂蚁很有趣。",
+      "那份饭现在放在蚂蚁附近。",
+      "这个小造型是白色的。",
+      "蚂蚁在拱门下面，饭放在桌上。",
+      "汤姆觉得蚂蚁和那份饭很有趣。",
+      "安娜和汤姆看着拱门、表格和蚂蚁。",
+      "小蚂蚁得到了一顿饭，汤姆和安娜也很开心。"
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 2,
+      "problem_sentence": 4,
+      "attempt_sentences": [
+        5,
+        6
+      ],
+      "turn_sentence": 8,
+      "reveal_sentence": 10,
+      "resolution_sentence": 13
+    }
+  },
+  {
+    "lesson_id": "ogden-unit-002",
+    "title": "头顶上的盒子",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom and Anna are near the red arch.",
+      "A small box is on the head of a man.",
+      "The man is not able to see the box.",
+      "Tom can be near the man.",
+      "Anna can be near Tom and look at the head.",
+      "The box is for a meal, and an ant is in it.",
+      "Tom is able to use the table for the box.",
+      "The man can go to the table and be near Anna.",
+      "Anna and Tom make a small arch of boxes.",
+      "The man can be under the arch, and the box is on the table.",
+      "The box is for Tom, and the meal is for the man.",
+      "Tom and Anna are able to see the man's head.",
+      "The man is able to go, and the box is for him.",
+      "Tom and Anna go to the room for a meal."
+    ],
+    "translations": [
+      "汤姆和安娜在红色拱门附近。",
+      "一个小盒子放在一名男子的头上。",
+      "那名男子看不到盒子。",
+      "汤姆可以走到男子身边。",
+      "安娜可以站在汤姆旁边看着男子的头。",
+      "盒子是用来装饭的，里面还有一只蚂蚁。",
+      "汤姆能够借助桌子把盒子取下来。",
+      "男子可以走到桌边，来到安娜附近。",
+      "安娜和汤姆用盒子搭了一个小拱门。",
+      "男子站在拱门下面，盒子则放到了桌上。",
+      "盒子给汤姆，饭给那名男子。",
+      "汤姆和安娜终于能看清男子的头了。",
+      "男子可以离开了，盒子也留给了汤姆。",
+      "汤姆和安娜回到房间吃饭。"
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 1,
+      "problem_sentence": 2,
+      "attempt_sentences": [
+        3,
+        4,
+        6,
+        7
+      ],
+      "turn_sentence": 8,
+      "reveal_sentence": 10,
+      "resolution_sentence": 13
+    }
+  },
+  {
+    "lesson_id": "ogden-unit-003",
+    "title": "两本颜色不同的书",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom and Anna are in a room with a man.",
+      "The man has a book from a woman.",
+      "Tom can say that the book is red.",
+      "Anna can say that the book is black.",
+      "The book is by the woman, but it is for the man.",
+      "Tom is with Anna, but the man is outside.",
+      "The man comes from outside and looks at the book.",
+      "Anna has a form by the door.",
+      "The woman comes from the room with a white book.",
+      "She can say that the red book is by her.",
+      "The man has the white book, but Tom has the red book.",
+      "Anna and Tom go from the door with the good form."
+    ],
+    "translations": [
+      "汤姆和安娜与一名男子待在一个房间里。",
+      "那名男子有一本来自一位女子的书。",
+      "汤姆说那本书是红色的。",
+      "安娜说那本书是黑色的。",
+      "这本书是那位女子写的，但它是给男子的。",
+      "汤姆和安娜在一起，但那名男子在外面。",
+      "男子从外面回来并查看那本书。",
+      "安娜在门边拿着一张表格。",
+      "那位女子从房间里出来，手里还有一本白色的书。",
+      "她说明红色的书是她写的。",
+      "男子拿到白色的书，而汤姆拿着红色的书。",
+      "安娜和汤姆带着填写好的表格离开门口。"
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 1,
+      "problem_sentence": 3,
+      "attempt_sentences": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "turn_sentence": 8,
+      "reveal_sentence": 9,
+      "resolution_sentence": 11
+    }
+  },
+  {
+    "lesson_id": "ogden-unit-004",
+    "title": "谁来拿红色的书",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom and Anna are near the door with all the people.",
+      "Who will get the red book?",
+      "Tom or Anna will get the book.",
+      "All the people look at Tom and Anna.",
+      "Tom will go as Anna comes.",
+      "Anna will get the form, but Tom will get the book.",
+      "Who has the form, Tom or Anna?",
+      "Anna has the form as Tom has the book.",
+      "The man who is by the door has a meal.",
+      "All the people can see the meal.",
+      "Who can get the meal, Tom or Anna?",
+      "Tom and Anna get the meal for all the people."
+    ],
+    "translations": [
+      "汤姆和安娜与所有人一起站在门边。",
+      "谁会拿到那本红色的书？",
+      "汤姆或安娜会拿到那本书。",
+      "所有人都看着汤姆和安娜。",
+      "安娜过来时，汤姆会走过去。",
+      "安娜会拿表格，而汤姆会拿书。",
+      "表格在谁手里，是汤姆还是安娜？",
+      "安娜拿着表格，同时汤姆拿着书。",
+      "站在门边的男子有一份饭。",
+      "所有人都能看到那份饭。",
+      "谁能拿到那份饭，是汤姆还是安娜？",
+      "汤姆和安娜把饭拿给所有人。"
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 1,
+      "problem_sentence": 3,
+      "attempt_sentences": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "turn_sentence": 8,
+      "reveal_sentence": 10,
+      "resolution_sentence": 11
+    }
+  },
+  {
+    "lesson_id": "ogden-unit-005",
+    "title": "楼上的红色盒子",
+    "level": "A1",
+    "characters": [
+      "Tom",
+      "Anna"
+    ],
+    "sentences": [
+      "Tom and Anna have some food in a box.",
+      "When they go up to a room, the red box is not there.",
+      "Tom says that he can take the red box.",
+      "Anna says that she can take some food.",
+      "If Tom goes up, Anna will look near the door.",
+      "If Anna sees the box, she will say so.",
+      "They go up, but the box is not there.",
+      "When Tom looks under the table, he sees an ant.",
+      "The ant is on some food, so Tom does not take it.",
+      "Anna can take the box when the ant is outside.",
+      "If the ant comes up, Tom can use the small box.",
+      "Tom and Anna take some food to the room.",
+      "The ant has some food, so all can have a meal."
+    ],
+    "translations": [
+      "汤姆和安娜有一些装在盒子里的食物。",
+      "他们上楼进入一个房间时，红色盒子却不在那里。",
+      "汤姆说他可以把红色盒子拿回来。",
+      "安娜说她可以先拿一些食物。",
+      "如果汤姆上楼，安娜就会在门边寻找。",
+      "如果安娜看见盒子，她就会这样告诉汤姆。",
+      "他们再次上楼，但盒子还是不在那里。",
+      "汤姆查看桌子下面时，看见了一只蚂蚁。",
+      "蚂蚁爬在一些食物上，所以汤姆没有拿走它。",
+      "蚂蚁到外面后，安娜就可以拿起盒子。",
+      "如果蚂蚁再爬上来，汤姆可以使用小盒子。",
+      "汤姆和安娜把一些食物拿到房间里。",
+      "蚂蚁也得到了一些食物，所以大家都能吃上一顿饭。"
+    ],
+    "arc": {
+      "setup_sentence": 0,
+      "goal_sentence": 0,
+      "problem_sentence": 1,
+      "attempt_sentences": [
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "turn_sentence": 7,
+      "reveal_sentence": 8,
+      "resolution_sentence": 12
+    }
   }
 ]
