@@ -1,0 +1,103 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b1-challenge		n. 挑战	face a challenge	The team faces a difficult challenge.	Learning a language is a challenge.
+b1-stuff		n. 东西；材料	my stuff	I left my stuff at home.	We can discuss stuff.
+b1-access		n. 使用权；通道	have access to	Students have access to the library.	This road gives access to the beach.
+b1-sexual		adj. 性的	sexual health	The course includes information about sexual health.	This is a sexual health issue.
+b1-effective		adj. 有效的	an effective method	This is an effective method.	This is effective.
+b1-western		adj. 西方的；西部的	be western	She studies western history.	The western part of the city is quiet.
+b1-marriage		n. 婚姻	a happy marriage	They have a happy marriage.	The marriage is strong.
+b1-reference		n. 参考；提及	for reference	Keep this report for reference.	The book contains a reference to the event.
+b1-agent		n. 代理人；经纪人	a travel agent	The travel agent found us a hotel.	Her agent arranged the meeting.
+b1-ahead		adv. 在前面；领先	move ahead	The road ahead is clear.	Our team is two points ahead.
+b1-importance		n. 重要性	the importance of health	We understand the importance of health.	The report explains its importance.
+b1-generation		n. 一代；产生	a new generation	A new generation is growing up.	This machine produces power for a whole generation.
+b1-commercial		adj. 商业的；商业化的	commercial success	The film was a commercial success.	This area is used for commercial purposes.
+b1-involved		adj. 参与的；复杂的	be involved in	She is involved in the project.	The process is too involved to explain quickly.
+b1-reality		n. 现实	face reality	We must face reality.	The plan sounds good, but reality is different.
+b1-yard		n. 院子；码	in the yard	The children are in the yard.	The yard is near here.
+b1-collection		n. 收藏；收集物	a book collection	She has a large book collection.	The collection has many books.
+b1-communication		n. 沟通；通信	good communication	Good communication prevents problems.	The storm cut communication with the town.
+b1-supply		n. 供应；供给	the water supply	The water supply is low.	We have a good supply of food.
+b1-examine		v. 检查；审查	examine the evidence	We can examine the problem.	We need to examine the evidence carefully.
+b1-consumer		n. 消费者	consumer rights	The law protects consumer rights.	The consumer is here.
+b1-define		v. 定义；说明	define the word	Can you define this word?	The report will define the main goal.
+b1-influence		n. 影响	have an influence	Parents have a strong influence on children.	This influence can be strong.
+b1-victim		n. 受害者	an accident victim	The victim received medical help.	Each victim told the police what happened.
+b1-software		n. 软件	new software	This software is easy to use.	We use this software at work.
+b1-vote		n. 选票；投票	the vote	Every vote is important.	The final vote takes place tomorrow.
+b1-eventually		adv. 最终	eventually succeed	After several attempts, we eventually succeeded.	We eventually found the answer.
+b1-occasion		n. 场合；时刻	a special occasion	We wore formal clothes for the occasion.	This restaurant is perfect for a special occasion.
+b1-highly		adv. 非常；高度地	highly successful	The project was highly successful.	This is highly important.
+b1-lack		n. 缺乏	a lack of time	The project failed because of a lack of money.	A lack of sleep affects your health.
+b1-southern		adj. 南方的；南部的	be southern	They live in the southern part of the country.	This is southern.
+b1-global		adj. 全球的	a global problem	Climate change is a global problem.	The company has a global market.
+b1-slightly		adv. 稍微	slightly different	The two pictures are slightly different.	Please move the chair slightly.
+b1-release		n. 发布；释放	a new release	This release is now available.	The release is now available.
+b1-safety		n. 安全	road safety	Safety is important to everyone.	We checked the equipment for safety.
+b1-hardly		adv. 几乎不	hardly hear	I can hardly hear you.	There was hardly any food left.
+b1-directly		adv. 直接地	speak directly	Please speak directly to the manager.	The road leads directly to the station.
+b1-absolutely		adv. 完全地；绝对地	absolutely right	You are absolutely right.	This information is absolutely necessary.
+b1-essential		adj. 必不可少的	essential information	Clean water is essential for life.	This information is essential.
+b1-confirm		v. 确认；证实	confirm the date	Please confirm the date by email.	The test can confirm the result.
+b1-powerful		adj. 强大的；有影响力的	a powerful engine	The car has a powerful engine.	Words can be very powerful.
+b1-file		n. 文件；档案	open a file	I saved the report in a file.	Please open the file on your computer.
+b1-primary		adj. 主要的；首要的	the primary reason	Cost was the primary reason for our decision.	Our primary goal is safety.
+b1-obvious		adj. 明显的	an obvious mistake	There is an obvious mistake in the report.	The answer seems obvious now.
+b1-length		n. 长度	measure the length	We can check the length of the room.	The length of the film is two hours.
+b1-nuclear		adj. 核能的；核武器的	nuclear power	The country produces nuclear power.	People discussed the risk of nuclear weapons.
+b1-spirit		n. 精神；心灵	team spirit	The team showed great spirit.	The team has strong spirit.
+b1-studio		n. 工作室；演播室	a film studio	The film is in a small studio.	She works in a television studio.
+b1-strength		n. 力量；优点	physical strength	The job requires physical strength.	This strength can help.
+b1-contact		n. 联系；接触	keep in contact	We still keep in contact.	Avoid direct contact with the chemical.
+b1-battle		n. 战斗；斗争	a long battle	This battle was long.	She won her battle against the disease.
+b1-spot		n. 地点；斑点	a quiet spot	We found a quiet spot by the river.	There is a dark spot on the wall.
+b1-consequence		n. 后果	a serious consequence	The decision may have a serious consequence.	Every action has a consequence.
+b1-practical		adj. 实用的；实际的	practical advice	She gave me practical advice.	This is a practical solution.
+b1-aim		n. 目标；目的	the main aim	The main aim is to reduce cost.	We achieved our aim.
+b1-due		adj. 预定的；到期的	due tomorrow	The report is due tomorrow.	The train is due at six.
+b1-content		n. 内容	the course content	The course content is easy to understand.	I checked the content of the report.
+b1-conclusion		n. 结论	reach a conclusion	We reached the same conclusion.	The evidence supports this conclusion.
+b1-guard		n. 警卫；守卫	a security guard	A security guard checked my bag.	The guard can help us.
+b1-deliver		v. 递送；发表	deliver this	We can deliver it tomorrow.	She will deliver a short speech.
+b1-ignore		v. 忽视；不理会	ignore this	Do not ignore this problem.	He chose to ignore my question.
+b1-sight		n. 景象；视力	a beautiful sight	The mountains were a beautiful sight.	The boat disappeared from sight.
+b1-sample		n. 样品；样本	a free sample	The shop gave me a free sample.	The doctor took a blood sample.
+b1-possibly		adv. 可能地	possibly happen	What could possibly happen?	This is possibly the best solution.
+b1-tiny		adj. 极小的	a tiny room	They live in a tiny room.	This is tiny.
+b1-block		n. 街区；块	a city block	This block is near the station.	Put the ice in a block.
+b1-identity		n. 身份；特征	protect your identity	You should protect your identity online.	The police confirmed his identity.
+b1-survive		v. 幸存；挺过	survive the accident	She managed to survive the accident.	Small businesses must survive difficult times.
+b1-promote		v. 促进；宣传；晋升	promote the product	The company will promote the new product.	Exercise can promote good health.
+b1-package		n. 包裹；包装	a small package	A small package arrived today.	The package contains a gift.
+b1-folk		n. 人们；民间的	local folk	The local folk were friendly.	We listened to traditional folk music.
+b1-concentrate		v. 集中注意力	concentrate on work	I cannot concentrate on my work.	Please concentrate on the question.
+b1-mainly		adv. 主要地	mainly because	I chose it mainly because of the price.	The group is mainly young people.
+b1-border		n. 边界；边境	cross the border	The border is near the city.	The river forms the border between the two countries.
+b1-gather		v. 聚集；收集	gather information	We need to gather more information.	People gather in the square every evening.
+b1-plus		prep. 加；外加	three plus two	Three plus two is five.	The hotel costs fifty dollars plus tax.
+b1-currently		adv. 目前	currently working	She is currently working from home.	The museum is currently closed.
+b1-spread		n. 传播；扩散	the spread of disease	Clean water can slow the spread of disease.	The spread of the news was very fast.
+b1-entry		n. 进入；参赛作品；条目	an entry form	Please complete the entry form.	Her entry won first prize.
+b1-murder		n. 谋杀	a murder case	The murder is a serious issue.	The murder was in the news.
+b1-editor		n. 编辑	a newspaper editor	She works as a newspaper editor.	The editor is here.
+b1-commit		v. 犯；承诺投入	commit a crime	He did not commit the crime.	We must commit more time to the project.
+b1-technical		adj. 技术的；专业的	technical support	Call us if you need technical support.	The report contains technical information.
+b1-youth		n. 青年时期；年轻人	during his youth	He lived here in his youth.	The centre offers activities for local youth.
+b1-native		n. 当地人；本地人	a native of the city	She is a native of this city.	The guide is a native speaker.
+b1-row		n. 一排；争吵	a row of houses	There is a row of houses by the road.	They had a serious row about money.
+b1-fairly		adv. 相当地；公平地	fairly easy	The test was fairly easy.	The test is fairly easy.
+b1-intelligence		n. 智力；情报	human intelligence	Human intelligence is difficult to measure.	The report contains secret intelligence.
+b1-category		n. 类别	in the same category	These books belong in the same category.	Choose the correct category.
+b1-exhibition		n. 展览	an art exhibition	The exhibition is open today.	The exhibition starts tomorrow.
+b1-equally		adv. 同样地；平等地	equally important	Both questions are equally important.	Both plans are equally good.
+b1-location		n. 地点；位置	a perfect location	This is a perfect location for a hotel.	Send me your exact location.
+b1-improvement		n. 改进；进步	a clear improvement	There has been a clear improvement.	This change is an improvement.
+b1-northern		adj. 北方的；北部的	be northern	They live in the northern part of the country.	The northern coast is cold.
+b1-combine		v. 结合；合并	combine the two ideas	We can combine the two ideas.	Oil and water do not combine easily.
+b1-contrast		n. 对比；差异	in contrast	The two pictures show a clear contrast.	The contrast is clear.
+b1-gentleman		n. 绅士；先生	the gentleman	A gentleman helped me.	The gentleman is here.
+b1-proper		adj. 合适的；正确的	proper equipment	You need proper equipment for this job.	Please use the proper name.
+b1-remind		v. 提醒；使想起	remind me	Please remind me tomorrow.	I can remind you tomorrow.
+b1-academic		adj. 学术的	academic research	She is doing academic research.	The book is written for an academic audience.
