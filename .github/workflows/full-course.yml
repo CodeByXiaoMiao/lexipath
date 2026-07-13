@@ -43,18 +43,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ChristopherA/iambic-mnemonic
+          ref: 5dda49e1207014cf16ad5801661d52bd330b559c
           path: sources/ogden
 
       - name: Checkout CEFR word list
         uses: actions/checkout@v4
         with:
           repository: Kolia951/The_Oxford_3000_CEFR
+          ref: a2ce104ae89c8a9e474906a9aa9429ad8744f4ce
           path: sources/oxford
 
       - name: Checkout ECDICT
         uses: actions/checkout@v4
         with:
           repository: skywind3000/ECDICT
+          ref: bc015ed2e24a7abef49fc6dbbb7fe32c1dadaf8b
           path: sources/ecdict
 
       - name: Merge LexiPath dictionary supplements
