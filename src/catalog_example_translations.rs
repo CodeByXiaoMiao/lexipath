@@ -17,6 +17,8 @@ const BANK_FILES: &[&str] = &[
     include_str!("../assets/example-translations/oxford-b1-03-b2-01.tsv"),
     include_str!("../assets/example-translations/oxford-b2-02-03.tsv"),
 ];
+const CORRECTION_FILE: &str =
+    include_str!("../assets/example-translations/review-corrections.tsv");
 
 #[derive(Debug, Clone)]
 struct ExampleTranslationRecord {
@@ -59,15 +61,15 @@ pub fn validate_example_translation_bank(course: &CoursePack) -> anyhow::Result<
             for word in &lesson.new_words {
                 course_ids.insert(word.id.as_str());
                 let field = format!("lesson {} / word {}", lesson.id, word.id);
+                let actual_hash = fnv1a64(&word.example);
                 match index().get(&word.id) {
                     None => issues.push(format!(
                         "{field}: reviewed Chinese example translation is missing"
                     )),
-                    Some(record) if record.english_hash != fnv1a64(&word.example) => {
-                        issues.push(format!(
-                            "{field}: translation bank English fingerprint does not match the course example"
-                        ))
-                    }
+                    Some(record) if record.english_hash != actual_hash => issues.push(format!(
+                        "{field}: translation fingerprint mismatch; bank={:016x}, expected={actual_hash:016x}, example='{}'",
+                        record.english_hash, word.example
+                    )),
                     Some(record) => validate_chinese(&field, &record.chinese, &mut issues),
                 }
             }
@@ -87,7 +89,7 @@ pub fn validate_example_translation_bank(course: &CoursePack) -> anyhow::Result<
     } else {
         anyhow::bail!(
             "reviewed example translation validation failed: {}",
-            issues.into_iter().take(120).collect::<Vec<_>>().join(" | ")
+            issues.into_iter().take(300).collect::<Vec<_>>().join(" | ")
         )
     }
 }
@@ -96,13 +98,38 @@ fn records() -> &'static Vec<ExampleTranslationRecord> {
     RECORDS.get_or_init(|| {
         let mut output = Vec::new();
         for content in BANK_FILES {
-            parse_bank_file(content, &mut output);
+            parse_bank_file(content, "direct-llm-reviewed", &mut output);
+        }
+
+        let mut corrections = Vec::new();
+        parse_bank_file(CORRECTION_FILE, "direct-llm-correction", &mut corrections);
+        let mut corrected_ids = HashSet::new();
+        for correction in corrections {
+            assert!(
+                corrected_ids.insert(correction.word_id.clone()),
+                "duplicate reviewed correction for '{}'",
+                correction.word_id
+            );
+            let target = output
+                .iter_mut()
+                .find(|record| record.word_id == correction.word_id)
+                .unwrap_or_else(|| {
+                    panic!(
+                        "reviewed correction has no base record for '{}'",
+                        correction.word_id
+                    )
+                });
+            *target = correction;
         }
         output
     })
 }
 
-fn parse_bank_file(content: &str, output: &mut Vec<ExampleTranslationRecord>) {
+fn parse_bank_file(
+    content: &str,
+    expected_authoring_method: &str,
+    output: &mut Vec<ExampleTranslationRecord>,
+) {
     let mut lines = content.lines();
     let schema = lines.next().expect("translation bank file has no schema");
     assert_eq!(
@@ -115,7 +142,7 @@ fn parse_bank_file(content: &str, output: &mut Vec<ExampleTranslationRecord>) {
         .expect("translation bank file has no authoring method");
     assert_eq!(
         authoring,
-        "authoring_method\tdirect-llm-reviewed",
+        format!("authoring_method\t{expected_authoring_method}"),
         "unsupported example translation authoring method"
     );
 
@@ -185,6 +212,9 @@ fn validate_chinese(field: &str, chinese: &str, issues: &mut Vec<String>) {
         "这是一个书。",
         "这是一个食物。",
         "这是一 yard。",
+        "这是一十亿。",
+        "这是几把剪刀。",
+        "他是女性。",
         "例句中",
         "机器翻译",
         MISSING_TRANSLATION_TEXT,
@@ -231,6 +261,29 @@ mod tests {
             reviewed_example_translation(&word),
             Some("这是一个书。")
         );
+    }
+
+    #[test]
+    fn reviewed_corrections_override_base_candidates() {
+        let female = WordItem {
+            id: "ogden-female".to_owned(),
+            text: "female".to_owned(),
+            ipa: "/test/".to_owned(),
+            meaning: "adj. 女性的".to_owned(),
+            phrase: "be female".to_owned(),
+            example: "She is female.".to_owned(),
+        };
+        assert_eq!(reviewed_example_translation(&female), Some("她是女性。"));
+
+        let scissors = WordItem {
+            id: "ogden-scissors".to_owned(),
+            text: "scissors".to_owned(),
+            ipa: "/test/".to_owned(),
+            meaning: "n. 剪刀".to_owned(),
+            phrase: "scissors".to_owned(),
+            example: "These are scissors.".to_owned(),
+        };
+        assert_eq!(reviewed_example_translation(&scissors), Some("这是一把剪刀。"));
     }
 
     #[test]
