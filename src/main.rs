@@ -15,6 +15,8 @@ mod catalog_import;
 mod catalog_load;
 mod catalog_polish;
 mod catalog_quality;
+mod catalog_reviewed_stage_apply;
+mod catalog_reviewed_stage_templates;
 mod catalog_repair;
 mod catalog_semantic_templates;
 mod catalog_stories;

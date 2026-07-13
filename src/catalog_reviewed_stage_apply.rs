@@ -1,9 +1,6 @@
 use crate::course::CoursePack;
 
-#[path = "catalog_reviewed_stage_templates.rs"]
-mod catalog_reviewed_stage_templates;
-
-use catalog_reviewed_stage_templates::reviewed_stage_template;
+use crate::catalog_reviewed_stage_templates::reviewed_stage_template;
 
 pub fn apply_reviewed_stage_templates(course: &mut CoursePack) {
     for stage in &mut course.stages {

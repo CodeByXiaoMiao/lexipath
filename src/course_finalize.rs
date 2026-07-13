@@ -1,12 +1,11 @@
 #[path = "catalog_template_apply.rs"]
 mod catalog_template_apply;
-#[path = "catalog_reviewed_stage_apply.rs"]
-mod catalog_reviewed_stage_apply;
 
 use crate::catalog_example_translations::validate_example_translation_bank;
 use crate::catalog_formalize::{formalize_generated_lessons, validate_formalized_course};
 use crate::catalog_polish::polish_generated_content;
 use crate::catalog_quality::validate_content_quality;
+use crate::catalog_reviewed_stage_apply::apply_reviewed_stage_templates;
 use crate::catalog_stories::validate_story_bank_coverage;
 use crate::course::CoursePack;
 use crate::stage_assessment::append_required_stage_assessments;
@@ -22,7 +21,7 @@ pub fn finalize_course_with_options(
 ) -> anyhow::Result<()> {
     polish_generated_content(course);
     catalog_template_apply::apply_reviewed_templates(course);
-    catalog_reviewed_stage_apply::apply_reviewed_stage_templates(course);
+    apply_reviewed_stage_templates(course);
     formalize_generated_lessons(course);
     append_required_stage_assessments(course);
     validate_finalized_course_with_options(course, require_llm_readings)
