@@ -1,0 +1,103 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b1-prince		n. 王子	a young prince	The story is about a young prince.	The prince lived in a large castle.
+b1-historical		adj. 历史的	historical records	This book contains historical information.	The film is based on historical events.
+b1-unable		adj. 不能的	unable to attend	I am unable to attend the meeting.	She was unable to answer.
+b1-attract		v. 吸引	attract visitors	The city can attract people.	Bright colours can attract attention.
+b1-participate		v. 参加	participate in the event	Everyone can participate in the event.	She chose not to participate.
+b1-reject		v. 拒绝	reject the offer	She decided to reject the offer.	The court may reject the claim.
+b1-tape		n. 胶带；录音带	a piece of tape	Use a piece of tape to fix it.	I can see the tape.
+b1-hire		v. 雇用；租用	hire a car	We decided to hire a car.	The company plans to hire more staff.
+b1-familiar		adj. 熟悉的	look familiar	Your face looks familiar.	I am familiar with this system.
+b1-consist		v. 由……组成	consist of three parts	The group can consist of six people.	The team will consist of six people.
+b1-unemployment		n. 失业	high unemployment	The town has high unemployment.	The new factory may reduce unemployment.
+b1-eastern		adj. 东方的；东部的	be eastern	They live in the eastern part of the country.	The eastern side gets more sun.
+b1-warn		v. 警告；提醒	warn people	I must warn you about this problem.	I must warn you not to go.
+b1-surely		adv. 肯定；想必	surely know	You surely know the answer.	This surely cannot be true.
+b1-intention		n. 意图；打算	have no intention	My intention is to help.	Her intention was to help.
+b1-definition		n. 定义	a clear definition	The book gives a clear definition.	We can discuss the definition.
+b1-suitable		adj. 合适的	suitable for children	This film is suitable for children.	We need to find a suitable place.
+b1-immediate		adj. 立即的；直接的	immediate action	The problem requires immediate action.	There was no immediate danger.
+b1-divide		v. 分开；除	divide the work	We can divide the work between us.	Divide ten by two.
+b1-ought		modal. 应该	ought to help	We ought to help them.	You ought to be more careful.
+b1-literature		n. 文学；文献	literature	She studies literature.	I read the literature on the subject.
+b1-leading		adj. 主要的；领先的	a leading company	It is a leading technology company.	This is a leading company.
+b1-appointment		n. 预约；任命	the appointment	I have an appointment tomorrow.	Her appointment as manager was announced.
+b1-fuel		n. 燃料	save fuel	This car needs less fuel.	The plane needs more fuel.
+b1-expand		v. 扩大；扩展	expand the business	The company plans to expand the business.	Heat causes metal to expand.
+b1-mental		adj. 心理的；精神的	mental health	Exercise is good for mental health.	The job requires mental strength.
+b1-educational		adj. 教育的；有教育意义的	an educational programme	The museum offers educational programmes.	The film is both fun and educational.
+b1-explore		v. 探索；探究	explore the area	We can explore the area.	We can explore this place.
+b1-enemy		n. 敌人	a common enemy	They joined together against a common enemy.	The enemy is near.
+b1-scientific		adj. 科学的	scientific research	The claim needs scientific evidence.	She is involved in scientific research.
+b1-totally		adv. 完全地	totally different	The two plans are totally different.	I totally agree with you.
+b1-channel		n. 频道；渠道	a news channel	This news channel is popular.	Email is our main communication channel.
+b1-frequently		adv. 经常地	frequently asked	This question is frequently asked.	We frequently meet after work.
+b1-seriously		adv. 严重地；认真地	take it seriously	You should take the warning seriously.	Please take this seriously.
+b1-properly		adv. 正确地；适当地	work properly	The machine is not working properly.	Please prepare the food properly.
+b1-unlikely		adj. 不太可能的	seem unlikely	It seems unlikely that he will come.	Rain is unlikely today.
+b1-necessarily		adv. 必然地	not necessarily true	That is not necessarily true.	More money does not necessarily mean success.
+b1-theme		n. 主题	the main theme	The main theme is family.	The party has a winter theme.
+b1-conclude		v. 得出结论；结束	conclude the meeting	We conclude that the plan will work.	The meeting will conclude at five.
+b1-captain		n. 船长；队长	the team captain	She is the team captain.	The captain is here.
+b1-shift		n. 轮班；转变	a night shift	He works the night shift.	There has been a major shift in opinion.
+b1-locate		v. 找到；确定位置	locate the problem	We need to locate the problem.	The map helps visitors locate the station.
+b1-escape		n. 逃脱；逃跑	make an escape	They plan an escape.	The escape was difficult.
+b1-trend		n. 趋势	a growing trend	Working from home is a growing trend.	The report shows a clear trend.
+b1-investigate		v. 调查	investigate the case	The police will investigate the case.	We need to investigate the cause.
+b1-afford		v. 买得起；承担得起	afford a house	We cannot afford a new house.	We can afford this.
+b1-beauty		n. 美；美丽	natural beauty	The area is famous for its natural beauty.	The beauty of this place is clear.
+b1-emergency		n. 紧急情况	in an emergency	Call this number in an emergency.	The hospital is ready for any emergency.
+b1-advise		v. 建议；劝告	advise someone	I advise you to wait.	I can advise him.
+b1-appreciate		v. 感激；欣赏	appreciate the help	I really appreciate your help.	You need time to appreciate this music.
+b1-setting		n. 环境；背景	the setting	This story has a city setting.	The story takes place in a village setting.
+b1-prepared		adj. 准备好的	be prepared	We are prepared for the meeting.	Always be prepared for change.
+b1-flow		n. 流动；流量	the flow of traffic	The flow of water is strong.	The river has a strong flow.
+b1-mix		n. 混合；混合物	a mix of styles	The building is a mix of old and new styles.	Add the water to the mix.
+b1-persuade		v. 说服	persuade someone	I can persuade him to stay.	It was difficult to persuade him.
+b1-politician		n. 政治家	a local politician	A local politician spoke to us.	The politician is here.
+b1-percentage		n. 百分比	a high percentage	A high percentage of people agree.	We can discuss the percentage.
+b1-soil		n. 土壤	rich soil	These plants need rich soil.	The soil is too dry.
+b1-effectively		adv. 有效地	work effectively	We can work effectively together.	This method reduces cost effectively.
+b1-engineering		n. 工程学；工程	study engineering	She studies engineering at university.	Engineering is important.
+b1-rare		adj. 稀有的；少见的	a rare animal	This is a rare animal.	Such mistakes are rare.
+b1-host		n. 主人；主持人	the host of the show	She is the host of the show.	The host is ready.
+b1-producer		n. 制片人；生产者	a film producer	He works as a film producer.	The country is a major food producer.
+b1-impression		n. 印象	make an impression	This can make a strong impression.	My first impression was positive.
+b1-meanwhile		adv. 与此同时	meanwhile wait	I can cook; meanwhile, he can clean.	The shop is closed. Meanwhile, we can wait here.
+b1-attach		v. 附上；连接	attach a file	Please attach the file to the email.	We can attach this.
+b1-atmosphere		n. 气氛；大气层	a friendly atmosphere	The restaurant has a friendly atmosphere.	The atmosphere is friendly.
+b1-smart		adj. 聪明的；整洁的	a smart student	She is a smart student.	You look smart in that jacket.
+b1-clause		n. 条款；从句	the clause	This sentence has a clause.	This clause is important.
+b1-marketing		n. 市场营销	a marketing plan	The company needs a new marketing plan.	She works in marketing.
+b1-pour		v. 倒；倾泻	pour the water	Please pour the water into the glass.	Rain continued to pour all night.
+b1-warning		n. 警告	a clear warning	The sign gives a clear warning.	We ignored the warning and continued.
+b1-prisoner		n. 囚犯	a dangerous prisoner	The prisoner is now in court.	The prisoner spoke to a lawyer.
+b1-champion		n. 冠军	the world champion	She is the world champion.	The champion is here.
+b1-switch		n. 开关；转换	turn on the switch	Press the switch to start the machine.	The switch is next to the door.
+b1-specifically		adv. 专门地；明确地	specifically ask	I specifically asked for a quiet room.	The rule applies specifically to new staff.
+b1-signal		n. 信号；标志	a strong signal	My phone has a strong signal here.	Dark clouds are a signal of rain.
+b1-strongly		adv. 强烈地	strongly agree	I strongly agree with this decision.	The doctor strongly advised him to stop.
+b1-apart		adv. 分开；相隔	far apart	The two houses are far apart.	Keep the wet clothes apart.
+b1-plenty		pron. 大量；充足	plenty of time	We have plenty of time.	There is plenty for everyone.
+b1-achievement		n. 成就	a major achievement	Finishing the project was a major achievement.	She is proud of her achievement.
+b1-proud		adj. 骄傲的；自豪的	be proud of	I am proud of our team.	Her parents were proud of her.
+b1-bomb		n. 炸弹	the bomb	The police found a bomb.	I can see the bomb.
+b1-originally		adv. 原来；起初	originally	The meeting was originally on Monday.	The meeting was originally at ten.
+b1-complaint		n. 投诉；抱怨	make a complaint	I have a complaint about the service.	The complaint is about the service.
+b1-invest		v. 投资；投入	invest money	They plan to invest money in the project.	We should invest more time in training.
+b1-odd		adj. 奇怪的；奇数的	an odd question	That was an odd question.	Seven is an odd number.
+b1-typically		adv. 通常；典型地	typically cost	The journey typically takes two hours.	This dish is typically served hot.
+b1-similarly		adv. 相似地；同样地	similarly	The two plans are similarly useful.	She reacted similarly to the news.
+b1-talent		n. 天赋；才华	a talent for music	She has a talent for music.	Her talent is clear.
+b1-perfectly		adv. 完全地；完美地	perfectly clear	Your explanation is perfectly clear.	The machine works perfectly.
+b1-convince		v. 说服；使相信	convince someone	Can you convince him to stay?	I can convince him.
+b1-quote		n. 引语；报价	a famous quote	The article begins with a famous quote.	We received a quote for the repair.
+b1-accommodation		n. 住宿	find accommodation	We found cheap accommodation near the station.	The price includes accommodation and breakfast.
+b1-campus		n. 校园	on campus	Students live and study on campus.	The library is in the centre of the campus.
+b1-supporter		n. 支持者	the supporter	He is a supporter of the team.	The supporter is here.
+b1-guilty		adj. 有罪的；内疚的	feel guilty	He was found guilty of the crime.	I felt guilty about the mistake.
+b1-immigrant		n. 移民	a new immigrant	She is a new immigrant.	The immigrant is here.
+b1-illegal		adj. 非法的	an illegal action	It is illegal to park here.	This is illegal.
+b1-forever		adv. 永远	last forever	Nothing lasts forever.	I will remember this day forever.

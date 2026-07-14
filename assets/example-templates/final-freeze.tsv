@@ -1,0 +1,94 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+ogden-very		adv. 非常；很	very big	It is very big.	This is very big.
+ogden-back		adv. 回去；向后	go back	I go back.	You go back.
+ogden-still		adv. 仍然；还	still here	I am still here.	You are still there.
+ogden-great		adj. 很好的；伟大的	is great	It is great.	This is great.
+ogden-seem		v. 看起来；似乎	seem big	It can seem big.	This can seem small.
+ogden-same		adj. 相同的	the same	It is the same.	This is the same.
+ogden-start		n. 开始；开端	a start	This is a start.	I have a start.
+ogden-play		n. 戏剧	a play	This is a play.	I have a play.
+ogden-second		num. 第二	the second	This is the second.	It is the second.
+ogden-effect		n. 影响；效果	an effect	This is an effect.	I have an effect.
+ogden-line		n. 线；行	a line	This is a line.	I have a line.
+ogden-produce		n. 农产品	produce	This is produce.	I know about produce.
+ogden-late		adj. 晚的；迟的	is late	It is late.	This is late.
+ogden-general		n. 将军	a general	This is a general.	I have a general.
+ogden-view		n. 景色；视野	a view	This is a view.	I have a view.
+ogden-watch		n. 手表	a watch	This is a watch.	I have a watch.
+ogden-stop		n. 停靠点；车站	a stop	This is a stop.	I have a stop.
+ogden-industry		n. 行业；工业	an industry	This is an industry.	I have an industry.
+ogden-mind		n. 思维；头脑	a mind	This is a mind.	I have a mind.
+ogden-sense		n. 感觉；感官	a sense	This is a sense.	I have a sense.
+ogden-certain		adj. 特定的；确定的	a certain book	This is a certain book.	I see a certain book.
+ogden-voice		n. 嗓音；人声	a clear voice	The man's voice is clear.	I know this voice.
+ogden-free		adj. 有空的；自由的	am free	I am free.	You are free.
+ogden-account		n. 账目；账户	an account	This is an account.	I have an account.
+ogden-present		n. 礼物	a present	This is a present.	I have a present.
+ogden-past		n. 过去	the past	This is the past.	I know about the past.
+ogden-sound		n. 声音；声响	a clear sound	This sound is clear.	I know this sound.
+ogden-measure		n. 衡量标准；措施	a measure	This is a measure.	I have a measure.
+ogden-pain		n. 疼痛；痛苦	pain	This is pain.	I know about pain.
+ogden-trouble		n. 麻烦；烦恼	trouble	This is trouble.	There is trouble here.
+ogden-fear		n. 恐惧	a fear	This is a fear.	I have a fear.
+ogden-middle		n. 中间；中央	the middle	This is the middle.	I see the middle.
+ogden-complete		adj. 完整的；完全的	is complete	It is complete.	This is complete.
+ogden-transport		n. 交通工具；运输	need transport	We need transport.	They have transport.
+ogden-regular		adj. 有规律的；定期的	be regular	It is regular.	This is regular.
+ogden-ring		n. 戒指；环	a ring	This is a ring.	I have a ring.
+ogden-blow		n. 打击	a blow	This is a blow.	I have a blow.
+ogden-dress		n. 连衣裙；服装	a dress	This is a dress.	I have a dress.
+ogden-birth		n. 分娩；出生	a hard birth	Birth can be hard.	I know about birth.
+ogden-tall		adj. 高的	a tall tree	The tree is tall.	This man is tall.
+ogden-sweet		n. 糖果	a sweet	This is a sweet.	I have a sweet.
+ogden-pleasure		n. 乐事；快乐	a pleasure	It is a pleasure.	This is a pleasure.
+ogden-waste		n. 废料；垃圾	waste	This is waste.	I know about waste.
+ogden-mass		n. 团；大量	a mass	This is a mass.	I have a mass.
+ogden-print		n. 印刷品	a print	This is a print.	I have a print.
+ogden-opposite		n. 对立面；相反的事物	the opposite of this	It is the opposite of this.	This is the opposite of that.
+ogden-pot		n. 锅；罐	a pot	This is a pot.	I have a pot.
+ogden-false		adj. 假的；错误的	is false	It is false.	This is false.
+ogden-smell		n. 气味	a smell	This is a smell.	I have a smell.
+ogden-butter		n. 黄油	butter	This is butter.	I know about butter.
+ogden-flag		n. 旗帜	a flag	This is a flag.	I have a flag.
+ogden-chemical		n. 化学品	a chemical	This is a chemical.	I have a chemical.
+ogden-tail		n. 尾巴	a tail	This is a tail.	I have a tail.
+ogden-reward		n. 奖励；报酬	a reward	This is a reward.	I have a reward.
+ogden-comfort		n. 安慰；舒适	a comfort	This is a comfort.	I have a comfort.
+ogden-nerve		n. 神经	a nerve	This is a nerve.	I have a nerve.
+ogden-orange		n. 橙子	an orange	This is an orange.	I have an orange.
+ogden-blade		n. 刀片；叶片	a blade	This is a blade.	I have a blade.
+ogden-wound		n. 伤口	a wound	This is a wound.	I have a wound.
+ogden-rhythm		n. 节奏	a rhythm	This is a rhythm.	I have a rhythm.
+ogden-shame		n. 遗憾；羞耻	a shame	This is a shame.	I have a shame.
+ogden-stamp		n. 邮票；印章	a stamp	This is a stamp.	I have a stamp.
+ogden-cart		n. 手推车；运货车	a cart	This is a cart.	I have a cart.
+ogden-stiff		adj. 僵硬的；坚硬的	is stiff	It is stiff.	This is stiff.
+ogden-crush		n. 挤压；拥挤	a crush	This is a crush.	I have a crush.
+ogden-smash		n. 猛击；撞击	a smash	This is a smash.	I have a smash.
+ogden-cruel		adj. 残忍的	a cruel person	He is a cruel person.	She is a cruel person.
+ogden-harmony		n. 和谐；协调	a harmony	This is a harmony.	I have a harmony.
+ogden-screw		n. 螺丝	a screw	This is a screw.	I have a screw.
+ogden-bulb		n. 灯泡；球茎	a bulb	This is a bulb.	I have a bulb.
+ogden-amusement		n. 娱乐活动；消遣	an amusement	This is an amusement.	I have an amusement.
+ogden-porter		n. 搬运工；门房	a porter	This is a porter.	I have a porter.
+ogden-paste		n. 糊状物；糨糊	a paste	This is a paste.	I have a paste.
+ogden-fowl		n. 家禽	a fowl	This is a fowl.	I have a fowl.
+a1-just		adj. 公平的；公正的	is just	It is just.	This is just.
+a1-cost		n. 成本；代价	the cost	This is the cost.	I know the cost.
+a1-sorry		adj. 抱歉的；难过的	am sorry	I am sorry.	You are sorry.
+a2-realize		v. 意识到；明白	realize this	I realize this.	You realize it.
+a2-task		n. 任务	a task	This is a task.	I have a task.
+a2-hall		n. 大厅；门厅	a hall	This is a hall.	I have a hall.
+a2-option		n. 选项；选择	an option	This is an option.	I have an option.
+a2-background		n. 背景	a blue background	The background is blue.	I can see the background.
+a2-quantity		n. 数量；量	a small quantity	The quantity is small.	We need a large quantity.
+a2-prize		n. 奖品；奖赏	a prize	This is a prize.	I have a prize.
+a2-lecture		n. 讲座；演讲	a lecture	This is a lecture.	I have a lecture.
+b1-claim		n. 说法；主张；索赔	make a claim	This claim may be true.	The claim may be true.
+b1-studio		n. 工作室；演播室	a film studio	The film is from a small studio.	She works in a television studio.
+b1-entry		n. 报名；参赛作品；条目	an entry form	Please complete the entry form.	Her entry won first prize.
+b2-slight		n. 怠慢；轻视	take it as a slight	I took his silence as a slight.	She took the comment as a slight.
+b2-guarantee		n. 保修；保证	a money-back guarantee	The product has a guarantee.	There is no guarantee of success.
+b2-float		n. 浮标；漂浮物；彩车	float	The float is on the water.	A float can mark the line.

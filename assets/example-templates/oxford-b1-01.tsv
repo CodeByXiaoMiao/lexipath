@@ -1,0 +1,103 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b1-ad		n. 广告	an ad	I saw an ad online.	The ad was for a new phone.
+b1-goods		n. 货物	the goods	The goods arrived today.	These goods are ready to sell.
+b1-grade		n. 成绩；等级	a good grade	She got a good grade.	This grade is good.
+b1-latest		adj. 最新的	the latest news	This is the latest news.	I read the latest report.
+b1-old-fashioned		adj. 过时的；老式的	an old-fashioned idea	That idea is old-fashioned.	This old-fashioned phone still works.
+b1-path		n. 小路；路径	a narrow path	We followed the path home.	This path leads to the river.
+b1-tyre		n. 轮胎	a flat tyre	The car has a flat tyre.	I can see the tyre.
+b1-within		prep. 在……之内	within a week	We can finish it within a week.	The answer is within the report.
+b1-set		n. 一套；一组	a set of keys	I bought a set of tools.	This set includes six books.
+b1-issue		n. 问题；议题	a serious issue	We discussed the issue today.	This issue affects many people.
+b1-policy		n. 政策；规定	a new policy	The company introduced a new policy.	This policy protects workers.
+b1-court		n. 法院；球场	go to court	The case went to court.	The court will make a decision.
+b1-whether		conj. 是否	whether to go	I do not know whether to go.	We asked whether the shop was open.
+b1-require		v. 需要；要求	require more time	This job may require more time.	The rules require everyone to wait.
+b1-remain		v. 仍然是；保持	remain this	I can remain here.	We can remain here.
+b1-economic		adj. 经济的	economic growth	The country faces an economic problem.	Economic change affects everyone.
+b1-upon		prep. 在……上；一……就	upon	The book is upon the table.	I can put the book upon the table.
+b1-therefore		adv. 因此	therefore decide	The road was closed; therefore, we waited.	It was late, and therefore we left.
+b1-staff		n. 全体员工	the hotel staff	The staff were very helpful.	Our staff meet every Monday.
+b1-particularly		adv. 尤其；特别	particularly useful	This book is particularly useful.	I particularly like the ending.
+b1-management		n. 管理；管理层	good management	Good management saves time.	The management can change the plan.
+b1-effort		n. 努力	make an effort	I make an effort to help.	This effort can help.
+b1-union		n. 工会；联盟	join a union	Many workers joined the union.	The union can help people.
+b1-central		adj. 中心的；主要的	a central role	This idea is central to the plan.	The station is in the central part of town.
+b1-official		n. 官员	a government official	A government official is here.	The official is here.
+b1-claim		n. 声称；索赔	make a claim	This claim may be true.	The claim may be true.
+b1-indeed		adv. 的确；确实	indeed true	The story is strange, but indeed true.	It was indeed a difficult choice.
+b1-simply		adv. 仅仅；简直	simply impossible	The task is simply impossible today.	I simply forgot the time.
+b1-chapter		n. 章节	the final chapter	I finished the final chapter.	This chapter explains the problem.
+b1-financial		adj. 财务的；金融的	financial support	The project needs financial support.	She gave me financial advice.
+b1-application		n. 申请；应用	an application form	I sent my job application yesterday.	This application is easy to use.
+b1-production		n. 生产；制作	food production	Production is important to the company.	The film is now in production.
+b1-security		n. 安全；安保	airport security	Security is important here.	The system improves online security.
+b1-occur		v. 发生	occur suddenly	A problem can occur here.	A change can occur here.
+b1-election		n. 选举	win an election	The election takes place next month.	The election is next month.
+b1-campaign		n. 运动；竞选活动	an election campaign	The campaign reached many young people.	The campaign can help people.
+b1-various		det. 各种各样的	various reasons	People came for various reasons.	The shop sells various kinds of tea.
+b1-economy		n. 经济	the local economy	Tourism helps the local economy.	The economy is growing slowly.
+b1-represent		v. 代表；象征	represent the team	She will represent our team.	The colour red can represent danger.
+b1-risk		n. 风险	a serious risk	Driving too fast is a serious risk.	We should reduce the risk.
+b1-standard		n. 标准；水平	a high standard	The work meets a high standard.	This standard is high.
+b1-prove		v. 证明	prove it	Can you prove that it is true?	The test may prove him right.
+b1-charge		n. 指控；费用	face a charge	He faces a serious charge.	The charge is serious.
+b1-performance		n. 表演；表现	a strong performance	She gave a strong performance.	The performance was very good.
+b1-royal		adj. 王室的；皇家的	the royal family	The royal family is here.	This building was once a royal home.
+b1-despite		prep. 尽管	despite the rain	We went out despite the rain.	Despite the rain, we can go.
+b1-pressure		n. 压力	under pressure	He works well under pressure.	The team felt a lot of pressure.
+b1-basis		n. 基础；依据	on a daily basis	This plan has a clear basis.	The basis is clear.
+b1-analysis		n. 分析	the analysis	This analysis is very clear.	Our analysis showed the main problem.
+b1-decade		n. 十年	for a decade	She lived there for a decade.	A decade is ten years.
+b1-shoot		v. 拍摄；射击	shoot a film	They will shoot the film here.	Do not shoot without a clear view.
+b1-treatment		n. 治疗；对待	medical treatment	He needs medical treatment.	The treatment can help.
+b1-relate		v. 与……有关；理解	relate to the problem	I can relate this question to our work.	I can relate to how you feel.
+b1-whatever		pron. 无论什么	whatever you choose	Choose whatever you like.	Whatever happens, I will help you.
+b1-difficulty		n. 困难	have difficulty	I had difficulty finding the place.	We solved the difficulty together.
+b1-legal		adj. 合法的；法律的	legal advice	You should get legal advice.	This action is completely legal.
+b1-resource		n. 资源	a useful resource	This website is a useful resource.	Water is an important resource.
+b1-determine		v. 决定；确定	determine the result	Several factors determine the result.	The test will determine the cause.
+b1-function		n. 功能；作用	the main function	The main function of this tool is simple.	This button has a different function.
+b1-indicate		v. 表明；指示	indicate a problem	The results indicate a problem.	The sign can indicate the right way.
+b1-wonder		n. 奇迹；奇观	a natural wonder	This place is a natural wonder.	Children looked at it with wonder.
+b1-announce		v. 宣布	announce the result	They will announce the result tomorrow.	They can announce the result.
+b1-lay		v. 放置；铺设	lay it down	Please lay the book on the table.	I can lay the book on the table.
+b1-nor		conj. 也不	neither this nor that	He did not call, nor did he write.	I cannot see it, nor can you.
+b1-environmental		adj. 环境的	an environmental problem	Pollution is an environmental problem.	This is an environmental problem.
+b1-suffer		v. 遭受；受苦	suffer from pain	Many people suffer from stress.	People can suffer without help.
+b1-previous		adj. 先前的	the previous year	This is the previous plan.	I met her at my previous job.
+b1-responsibility		n. 责任	take responsibility	You must take responsibility for the decision.	This responsibility is important.
+b1-total		adj. 总的；完全的	the total cost	The total cost is too high.	It was a total surprise.
+b1-element		n. 要素；元素	an important element	This element is important to the plan.	This element is important.
+b1-duty		n. 职责；义务	do your duty	It is my duty to help.	This duty is important.
+b1-tend		v. 往往；倾向于	tend to worry	People tend to worry about change.	Prices tend to rise in summer.
+b1-truth		n. 真相；事实	tell the truth	Please tell me the truth.	The truth is clear.
+b1-treat		n. 款待；乐事	a special treat	Dinner at that restaurant was a special treat.	This trip is a treat for the children.
+b1-throughout		prep. 贯穿；遍及	throughout the year	The shop is open throughout the year.	People celebrated throughout the city.
+b1-generally		adv. 通常；大体上	generally agree	People generally agree with the plan.	The weather is generally warm here.
+b1-hang		v. 悬挂；吊	hang the picture	Please hang the picture on the wall.	Wet clothes hang outside.
+b1-encourage		v. 鼓励	encourage someone	Good teachers encourage students to ask questions.	We can encourage him to continue.
+b1-religious		adj. 宗教的；虔诚的	be religious	This is a religious event.	He comes from a religious family.
+b1-reflect		v. 反射；反映	reflect light	Water can reflect light.	This can reflect light.
+b1-admit		v. 承认；准许进入	admit a mistake	I admit that I was wrong.	I can admit my mistake.
+b1-unless		conj. 除非	unless it rains	We will go unless it rains.	You cannot enter unless you have a ticket.
+b1-client		n. 客户	a new client	She is meeting a new client.	The client accepted our plan.
+b1-obviously		adv. 明显地	obviously wrong	The answer is obviously wrong.	He was obviously tired.
+b1-basic		adj. 基本的	basic information	The form asks for basic information.	Everyone needs basic computer skills.
+b1-intend		v. 打算；计划	intend to stay	I intend to stay for a week.	They intend to finish today.
+b1-impact		n. 影响；冲击	have an impact	The decision will have a major impact.	Tourism has an impact on the town.
+b1-attitude		n. 态度	a positive attitude	A positive attitude can help.	His attitude is good.
+b1-aware		adj. 意识到的	be aware of	Are you aware of the risk?	People are now more aware of the problem.
+b1-weapon		n. 武器	a dangerous weapon	The police found a dangerous weapon.	Words can sometimes be used as a weapon.
+b1-cultural		adj. 文化的	a cultural event	The city holds a cultural event every year.	We should respect cultural differences.
+b1-employment		n. 就业；雇用	find employment	She found employment in the city.	The project created new employment.
+b1-technique		n. 技巧；技术	a useful technique	This technique saves time.	She learned a new painting technique.
+b1-medium		n. 媒介；中等尺寸	the medium	This is a useful medium.	I need a medium size.
+b1-politics		n. 政治	study politics	He studies politics at university.	Politics affects everyday life.
+b1-version		n. 版本；说法	a new version	I downloaded the latest version.	Her version of the story was different.
+b1-candidate		n. 候选人	a strong candidate	She is a strong candidate for the job.	The candidate is here.
+b1-press		n. 新闻界；报刊	the local press	The news appeared in the local press.	The press asked many questions.
+b1-surface		n. 表面	a smooth surface	The table has a smooth surface.	I can see the surface.
+b1-worth		adj. 值得的；有价值的	worth the time	This book is worth the price.	This idea is worth considering.

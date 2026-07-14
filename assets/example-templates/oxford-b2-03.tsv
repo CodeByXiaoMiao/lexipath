@@ -1,0 +1,103 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+b2-partly		adv. 部分地	partly responsible	The answer is partly correct.	The problem is only partly solved.
+b2-elsewhere		adv. 在别处	look elsewhere	The answer may be found elsewhere.	We decided to look elsewhere.
+b2-household		n. 家庭；住户	each household	Each household received a letter.	A household can include several people.
+b2-breast		n. 胸部；乳房	breast cancer	The doctor checked her breast.	The campaign provides information about breast cancer.
+b2-silence		n. 沉默；寂静	complete silence	The silence was complete.	His silence was unusual.
+b2-acknowledge		v. 承认；确认	acknowledge a mistake	He chose to acknowledge his mistake.	We should acknowledge their contribution.
+b2-secure		adj. 安全的；稳固的	a secure system	We need a more secure system.	The door is now secure.
+b2-publication		n. 出版物；出版	a scientific publication	The article appeared in a scientific publication.	The publication is available online.
+b2-shadow		n. 阴影；影子	in the shadow	The tree has a long shadow.	He waited in the shadow of the building.
+b2-struggle		n. 斗争；艰难努力	a long struggle	The project was a long struggle.	Their struggle for equal rights continued.
+b2-sum		n. 金额；总和	a large sum	They paid a large sum of money.	The sum of the two numbers is ten.
+b2-imply		v. 暗示	imply that	Her question may imply that something is wrong.	This may imply a problem.
+b2-being		n. 生物；存在	a human being	Every human being needs food and water.	The story is about a strange being.
+b2-illustrate		v. 说明；加插图	illustrate a point	This example will illustrate my point.	A picture can illustrate the idea.
+b2-phase		n. 阶段；时期	the final phase	The project has entered its final phase.	This difficult phase will soon end.
+b2-display		n. 展示；显示屏	a digital display	The digital display shows the time.	The museum has a display about local history.
+b2-initiative		n. 倡议；主动性	a new initiative	The government announced a new initiative.	She showed initiative by solving the problem herself.
+b2-basically		adv. 基本上	basically the same	The two ideas are basically the same.	The work is basically finished.
+b2-sequence		n. 顺序；序列	in the correct sequence	Put the events in the correct sequence.	The machine follows a fixed sequence.
+b2-generate		v. 产生；生成	generate power	The system can generate enough power.	This change may generate new problems.
+b2-widely		adv. 广泛地	widely used	This method is widely used.	The news was widely discussed.
+b2-crew		n. 全体工作人员；船员	the flight crew	The crew is ready.	The crew can operate the aircraft.
+b2-notion		n. 观念；想法	a common notion	The common notion is not always correct.	This notion is common.
+b2-capture		n. 捕获；抓拍	a clear capture	This capture is clear.	The capture of the animal was difficult.
+b2-closely		adv. 密切地；仔细地	work closely	We must work closely together.	Please examine the result closely.
+b2-emphasis		n. 强调；重点	place emphasis on	The course places emphasis on practice.	There is too much emphasis on speed.
+b2-truly		adv. 真正地；确实地	truly sorry	She is truly sorry.	I truly believe this.
+b2-prospect		n. 前景；可能性	a good prospect	There is a good prospect of success.	There is little prospect of success.
+b2-inform		v. 通知；告知	inform the public	The government must inform the public.	Please inform me of any change.
+b2-unique		adj. 独一无二的；独特的	a unique opportunity	This is a unique opportunity.	Each person has a unique experience.
+b2-priority		n. 优先事项；优先权	top priority	Safety is our top priority.	This priority must come first.
+b2-opening		n. 开端；空缺	an opening in the team	There is an opening in the team.	The opening of the new school attracted many people.
+b2-combination		n. 组合；结合	a good combination	This combination works well.	The combination is simple.
+b2-rely		v. 依靠；信赖	rely on data	We can rely on the report.	You can rely on her for help.
+b2-upper		adj. 上部的；较高的	the upper floor	Our office is on the upper floor.	That is the upper part.
+b2-outcome		n. 结果；结局	a positive outcome	We hope for a positive outcome.	The final outcome depends on the vote.
+b2-defend		v. 防御；辩护	defend the decision	We can defend the decision.	The wall can defend the town from attack.
+b2-approve		v. 批准；赞同	approve the plan	The board will approve the plan tomorrow.	I do not approve of his behaviour.
+b2-zone		n. 区域；地带	a safety zone	Do not enter the safety zone.	The city created a new business zone.
+b2-apparent		adj. 明显的；表面上的	an apparent difference	The difference is apparent.	The problem is apparent.
+b2-ultimately		adv. 最终；根本上	ultimately decide	Ultimately, the decision is yours.	The project ultimately succeeded.
+b2-passage		n. 通道；段落	a narrow passage	This passage is narrow.	Read the final passage of the article.
+b2-incident		n. 事件；事故	a serious incident	The incident was serious.	No one was hurt in the incident.
+b2-pursue		v. 追求；继续进行	pursue a career	She wants to pursue a career in science.	The police continued to pursue the car.
+b2-surgery		n. 外科手术	have surgery	The surgery is today.	The surgery took three hours.
+b2-elect		v. 选举；推选	elect a leader	Members will elect a new leader.	The people elect parliament every four years.
+b2-blame		n. 责任；责备	accept the blame	He accepted the blame for the mistake.	Do not place all the blame on one person.
+b2-estimate		n. 估计；估价	a rough estimate	This is only a rough estimate.	The estimate may be wrong.
+b2-vital		adj. 至关重要的	vital information	This is vital information.	Water is vital for life.
+b2-recover		v. 恢复；找回	recover from illness	She is beginning to recover from the illness.	We managed to recover the lost data.
+b2-specialist		n. 专家；专科医生	a medical specialist	You should see a medical specialist.	The specialist examined the problem.
+b2-characteristic		n. 特征；特点	a common characteristic	This characteristic is useful.	A good leader has this characteristic.
+b2-tone		n. 语气；音调	a friendly tone	She spoke in a friendly tone.	The tone of the report is serious.
+b2-landscape		n. 风景；局面	a mountain landscape	The painting shows a mountain landscape.	The landscape is beautiful.
+b2-elderly		adj. 年老的	an elderly man	An elderly man asked for help.	The service supports elderly people.
+b2-creation		n. 创作；创造物	a new creation	The sculpture is her latest creation.	The creation of the service took two years.
+b2-capable		adj. 有能力的	capable of leading	She is capable of leading the team.	He is capable of this work.
+b2-grand		adj. 宏伟的；盛大的	a grand building	They entered a grand building.	The hotel held a grand celebration.
+b2-revolution		n. 革命；巨大变革	the revolution	The revolution began in the city.	The revolution was important.
+b2-tear		n. 眼泪	a tear in her eye	A tear appeared in her eye.	There was a tear in her eye.
+b2-brief		n. 简报；摘要	a short brief	The manager gave us a short brief.	The brief explains the main objectives.
+b2-external		adj. 外部的	external pressure	The company faces external pressure.	The external wall needs repair.
+b2-tank		n. 储罐；坦克	a water tank	The water tank is full.	The tank can hold water.
+b2-advance		n. 进展；前进	a major advance	The new treatment is a major advance.	This advance can help patients.
+b2-bond		n. 纽带；债券	a strong bond	The experience created a strong bond between them.	Their bond is strong.
+b2-expectation		n. 期待；预期	high expectations	The expectation was too high.	The result met our expectation.
+b2-accuse		v. 指控；指责	accuse him	Do not accuse him without evidence.	Do not accuse people without evidence.
+b2-motor		n. 发动机；马达	an electric motor	This machine has a motor.	The motor can stop suddenly.
+b2-somewhat		adv. 有点；稍微	somewhat better	The second plan is somewhat better.	I was somewhat surprised by the result.
+b2-origin		n. 起源；来源	the origin of the word	We do not know the origin of the word.	The product is of local origin.
+b2-accompany		v. 陪同；伴随	accompany a friend	I will accompany my friend to the hospital.	A short report will accompany the data.
+b2-minor		n. 未成年人	a minor under the law	A minor cannot sign the contract alone.	The law protects every minor.
+b2-constant		n. 常量；常数	the constant	This number is a constant.	The system has one constant.
+b2-expense		n. 费用；开支	travel expenses	Travel is a major expense.	The repair was a major expense.
+b2-severe		adj. 严重的；严厉的	severe damage	The problem is severe.	The judge gave a severe warning.
+b2-cite		v. 引用；举例	cite a source	You must cite the source in your report.	We can cite the report.
+b2-vast		adj. 广阔的；巨大的	a vast area	The forest covers a vast area.	The project requires a vast amount of data.
+b2-oppose		v. 反对	oppose the proposal	Many residents oppose the proposal.	I do not oppose change itself.
+b2-contemporary		adj. 当代的；同时代的	contemporary art	The museum shows contemporary art.	The two writers were contemporary.
+b2-multiple		adj. 多个的；多重的	multiple problems	The system has multiple problems.	The job requires multiple skills.
+b2-afterwards		adv. 随后；以后	talk afterwards	We can talk afterwards.	I will call you afterwards.
+b2-core		n. 核心；要点	the core of the problem	Trust is at the core of the problem.	The course covers the core skills.
+b2-rush		n. 匆忙；高峰	the morning rush	I left before the morning rush.	There is no need to be in a rush.
+b2-justify		v. 证明……合理；为……辩护	justify the cost	The results justify the cost.	Nothing can justify that behaviour.
+b2-rapidly		adv. 迅速地	grow rapidly	The city is growing rapidly.	The problem can change rapidly.
+b2-witness		n. 目击者；证人	a key witness	A key witness spoke to the police.	The witness can give evidence.
+b2-emphasize		v. 强调	emphasize the importance	The report will emphasize the importance of safety.	I want to emphasize one point.
+b2-permanent		adj. 永久的；长期的	a permanent solution	We need a permanent solution.	The damage may be permanent.
+b2-massive		adj. 巨大的；大规模的	a massive change	The project requires a massive investment.	The building is massive.
+b2-decline		n. 下降；衰退	a decline in sales	The report shows a decline.	The decline continued for three years.
+b2-cable		n. 电缆；缆线	a power cable	Use this cable for the screen.	Connect the screen with this cable.
+b2-via		prep. 经由；通过	via email	Please send the report via email.	We can send it via email.
+b2-expose		v. 暴露；揭露	expose the truth	The investigation may expose the truth.	Do not expose the material to water.
+b2-crucial		adj. 至关重要的	a crucial role	Good communication plays a crucial role.	This is a crucial stage of the project.
+b2-inner		adj. 内部的；内心的	the inner part	This is the inner part.	The story describes her inner conflict.
+b2-permit		n. 许可证；许可	a work permit	You need a work permit.	The permit is for one year.
+b2-fundamental		adj. 基本的；根本的	a fundamental principle	Trust is a fundamental principle.	This is a fundamental question.
+b2-cast		n. 演员阵容；石膏	the film cast	The film has a strong cast.	The doctor put his arm in a cast.
+b2-dominate		v. 支配；占主导地位	dominate the market	One company continues to dominate the market.	Large firms can dominate the market.
+b2-lower		adj. 较低的；下部的	a lower price	The second shop offers a lower price.	The lower part of the wall is wet.

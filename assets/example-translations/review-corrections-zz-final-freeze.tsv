@@ -1,0 +1,30 @@
+# schema=1
+authoring_method	direct-llm-correction
+ogden-so	76851f9a558dbfea	它这么大。
+ogden-voice	e4a602467113d229	这个男人的嗓音很清晰。
+ogden-sound	b2da76dcc24eaba3	这个声音很清晰。
+ogden-tall	5aa537e3566e55ff	这棵树很高。
+ogden-bath	e7ae686b7af4d121	我泡澡。
+ogden-shame	d59b471e8de53502	真遗憾。
+a1-shower	514a52497473c908	我冲澡。
+a2-series	360cfa1faf68d276	这是一套丛书。
+a2-easily	d2bf2af857bf9293	我做起来很轻松。
+a2-mostly	b89838eaee0c9873	它大体上是一样的。
+a2-injury	bfc712e40ca3e191	这是重伤。
+a2-background	6b93a72135f259ae	背景是蓝色的。
+a2-definitely	16d0ea389246e098	它肯定是一样的。
+a2-quantity	de8d84c2fe9de73e	数量很少。
+a2-prize	b8278063a2e9836e	这是一件奖品。
+a2-electronic	fa02b69ae0533ffc	这是一台电子设备。
+b1-tyre	e68821267e6a5e44	这辆车有个轮胎瘪了。
+b1-studio	679480d3828e67a2	这部电影出自一家小型制片厂。
+b1-celebration	27d8a4f6b9659c8d	我们举行了一场小型生日庆祝会。
+b1-explosion	e55824d3ab648bd1	我们听到一声巨大的爆炸声。
+b1-painful	0b2c5ebf2cd51fe7	他受了伤，疼得厉害。
+b1-translation	986101e24c63840c	这是一份不错的译文。
+b1-incredibly	b0644e2a4ce373c5	这项任务难度高得令人难以置信。
+b2-prospect	895495c4da8144f7	成功的希望很大。
+b2-unique	a616a46c4525ab50	这是一个独一无二的机会。
+b2-inner	215764eeacdecdb5	这是内侧部分。
+b2-slight	41a04a438cdd3aec	我把他的沉默看作一种怠慢。
+b2-acceptable	35db5c122401b36f	这是一个可接受的结果。

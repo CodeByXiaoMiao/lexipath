@@ -5,8 +5,10 @@ mod audio;
 mod catalog;
 mod catalog_core_meanings;
 mod catalog_daily;
+mod catalog_example_translations;
 mod catalog_context_repairs;
 mod catalog_final_review_templates;
+mod catalog_final_freeze_templates;
 mod catalog_formalize;
 mod catalog_meaning;
 mod catalog_function_templates;
@@ -14,6 +16,12 @@ mod catalog_import;
 mod catalog_load;
 mod catalog_polish;
 mod catalog_quality;
+mod catalog_reviewed_a1_templates;
+mod catalog_reviewed_a2_templates;
+mod catalog_reviewed_b1_templates;
+mod catalog_reviewed_b2_templates;
+mod catalog_reviewed_stage_apply;
+mod catalog_reviewed_stage_templates;
 mod catalog_repair;
 mod catalog_semantic_templates;
 mod catalog_stories;
@@ -59,7 +67,7 @@ fn main() -> eframe::Result<()> {
         return Ok(());
     }
     if arguments.first().map(String::as_str) == Some("--import-catalog") {
-        if let Err(error) = import_and_finalize_catalog(&arguments[1..]) {
+        if let Err(error) = catalog_import::import_catalog(&arguments[1..]) {
             eprintln!("catalog import failed: {error:#}");
             std::process::exit(1);
         }
@@ -73,11 +81,11 @@ fn main() -> eframe::Result<()> {
         return Ok(());
     }
 
-    let mut course = catalog_load::load().expect("course catalog could not be loaded");
+    let course = catalog_load::load().expect("course catalog could not be loaded");
     if course.first_lesson().is_none() {
         panic!("course catalog contains no lesson");
     }
-    course_finalize::finalize_course(&mut course)
+    course_finalize::validate_finalized_course(&course)
         .expect("course catalog failed final content validation");
 
     let options = eframe::NativeOptions {
@@ -96,22 +104,4 @@ fn main() -> eframe::Result<()> {
                 .map_err(|error| Box::<dyn std::error::Error + Send + Sync>::from(error))
         }),
     )
-}
-
-fn import_and_finalize_catalog(arguments: &[String]) -> anyhow::Result<()> {
-    catalog_import::import_catalog(arguments)?;
-    let output_index = arguments
-        .iter()
-        .position(|argument| argument == "--output")
-        .ok_or_else(|| anyhow::anyhow!("--output is required"))?;
-    let output = arguments
-        .get(output_index + 1)
-        .ok_or_else(|| anyhow::anyhow!("missing value after --output"))?
-        .clone();
-    course_finalize_file::run(&[
-        "--input".to_owned(),
-        output.clone(),
-        "--output".to_owned(),
-        output,
-    ])
 }

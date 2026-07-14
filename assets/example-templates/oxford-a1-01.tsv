@@ -1,0 +1,59 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a1-age			age is a number	Age is only a number.	Age is important here.
+a1-cent			one cent	One cent is not much.	I have one cent.
+a1-dollar			one dollar	One dollar is enough.	I have one dollar.
+a1-email		n. 电子邮件	an email	This is an email.	I have an email.
+a1-kilometre			one kilometre	It is one kilometre long.	One kilometre is not far.
+a1-metre		n. 米	one metre	It is one metre long.	One metre is enough.
+a1-mile			one mile	It is one mile long.	One mile is not far.
+a1-programme			this programme	I like this programme.	This programme is good.
+a1-style			this style	I like this style.	This style is good.
+a1-would		modal. 会；愿意；将会	would go	I would go.	You would come.
+a1-find		v. 找到；发现	find it	I can find it.	You can find it.
+a1-yeah			yeah	Yeah!	Yeah, I can go.
+a1-life			life can be hard	Life can be good.	Life can be hard.
+a1-too		adv. 也；太	go too	I go too.	You can come too.
+a1-oh			oh	Oh!	Oh, I see.
+a1-mean		adj. 刻薄的；吝啬的	be mean	He is mean.	Do not be mean.
+a1-call		n. 电话；呼叫	a phone call	I get a phone call.	This call is important.
+a1-world			the world	The world is big.	The world has many people.
+a1-leave		n. 休假；准假	on leave	I am on leave.	He is on leave.
+a1-try		v. 尝试	try again	I can try again.	You can try again.
+a1-really		adv. 确实；真正地	really the same	They are really the same.	These are really the same.
+a1-however			however	I want to go. However, I cannot.	He can go. However, I cannot.
+a1-show		v. 展示；给……看；表示	show him this	I can show him this.	You can show her that.
+a1-area			this area	I know this area.	This area is important.
+a1-student			a student	She is a student.	The student is here.
+a1-begin			begin now	We can begin now.	You can begin now.
+a1-party		n. 聚会；派对	go to a party	I go to a party.	This party is good.
+a1-member			a member	He is a member.	The member is here.
+a1-local			local news	This is local news.	This news is local.
+a1-live		v. 生活；居住	live here	I live here.	They live there.
+a1-believe			believe it	I believe it.	You can believe me.
+a1-home			my home	This is my home.	My home is here.
+a1-information		n. 信息	important information	This information is important.	I need more information.
+a1-lot		n. 许多；大量	a lot of work	I have a lot of work.	That is a lot of work.
+a1-study		n. 学习；研究	study takes time	Study takes time.	This study is important.
+a1-job			my job	This is my job.	My job is important.
+a1-result			the result	This is the result.	I know the result.
+a1-game		n. 游戏；比赛	this game	I like this game.	This game is good.
+a1-stand		v. 站立；站着	stand here	I can stand here.	You can stand there.
+a1-report			this report	This report is important.	I have the report.
+a1-lose		v. 丢失；失去	may lose it	I may lose it.	You may lose it.
+a1-city			this city	This city is big.	I live in this city.
+a1-once			try once	I try it once.	You can try once.
+a1-team			the team	The team is here.	We are a team.
+a1-best		adj. 最好的；adv. 最	the best book	It is the best book.	This is my best book.
+a1-parent		n. 父亲或母亲；家长	a parent	He is a parent.	She is a parent.
+a1-probably		adv. 很可能；大概	probably the same	They are probably the same.	These are probably the same.
+a1-action			take action	We need action.	This action is important.
+a1-health			good health	Health is important.	Good food can help your health.
+a1-course			this course	This course is good.	I like this course.
+a1-grow		v. 生长；成长	a child can grow	A child can grow.	People grow and change.
+a1-subject			this subject	I like this subject.	This subject is important.
+a1-moment			one moment	One moment, please.	This is an important moment.
+a1-teacher			a teacher	She is a teacher.	The teacher is here.
+a1-maybe			maybe the same	Maybe they are the same.	Maybe these are the same.
+a1-class			our class	This is our class.	Our class is here.

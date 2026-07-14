@@ -21,6 +21,13 @@ pub fn apply_reviewed_templates(course: &mut CoursePack) {
                 {
                     word.meaning = meaning;
                     Some((phrase, first, second))
+                } else if display.eq_ignore_ascii_case("female") {
+                    word.meaning = "adj. 女性的".to_owned();
+                    Some((
+                        "be female".to_owned(),
+                        "She is female.".to_owned(),
+                        "It is female.".to_owned(),
+                    ))
                 } else if let Some((meaning, phrase, first, second)) =
                     final_review_template(&display)
                 {
@@ -156,5 +163,16 @@ mod tests {
         let word = &course.stages[0].lessons[0].new_words[0];
         assert_eq!(word.meaning, "adj. 老的；旧的");
         assert_eq!(word.example, "It is old.");
+    }
+
+    #[test]
+    fn female_uses_a_matching_subject() {
+        let mut course = one_word_course("female", "adj. 女性的");
+        polish_generated_content(&mut course);
+        apply_reviewed_templates(&mut course);
+
+        let word = &course.stages[0].lessons[0].new_words[0];
+        assert_eq!(word.example, "She is female.");
+        assert_eq!(word.phrase, "be female");
     }
 }

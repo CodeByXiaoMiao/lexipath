@@ -1,0 +1,60 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a2-employee		n. 员工	an employee	He is an employee.	The employee is here.
+a2-refuse		v. 拒绝	refuse the offer	I can refuse the offer.	She may refuse to go.
+a2-prevent		v. 防止；阻止	prevent a problem	This can prevent a problem.	We can prevent it.
+a2-professional		n. 专业人士	a professional	She is a professional.	The professional can help.
+a2-perform		v. 表演；执行	perform on stage	They perform on stage.	I can perform this song.
+a2-direct		adj. 直接的	a direct answer	This is a direct answer.	We need direct action.
+a2-worry		n. 担忧；令人担心的事	a worry	Money is a worry.	This is my main worry.
+a2-immediately		adv. 立即；马上	go immediately	I will go immediately.	Please answer immediately.
+a2-variety		n. 多种多样；种类	a variety of food	We have a variety of food.	This shop offers a wide variety of food.
+a2-depend		v. 取决于；依靠	depend on the weather	It may depend on the weather.	Success can depend on practice.
+a2-speaker		n. 演讲者；说话者	the speaker	She is the speaker.	The speaker is ready.
+a2-soldier		n. 军人；士兵	a soldier	He is a soldier.	The soldier is here.
+a2-ah		interj. 啊	ah	Ah, I see.	Ah, that is better.
+a2-independent		adj. 独立的	be independent	She is independent.	The two groups are independent.
+a2-survey		n. 调查	do a survey	We did a survey.	The survey asks five questions.
+a2-context		n. 上下文；语境	in this context	This word has a different meaning in this context.	The context is clear.
+a2-coach		n. 教练	the coach	He is the coach.	The coach helps the team.
+a2-notice		n. 通知；告示	read the notice	I read the notice.	The notice is on the door.
+a2-beat		n. 节拍；心跳声	hear the beat	I can hear the beat.	The beat is fast.
+a2-fit		n. 合身；适合	a good fit	This shirt is a good fit.	The fit is perfect.
+a2-audience		n. 观众；听众	the audience	The audience is quiet.	The audience likes the show.
+a2-arrangement		n. 安排	this arrangement	This arrangement works well.	We can change the arrangement.
+a2-attend		v. 参加；出席	attend the meeting	I can attend the meeting.	Many people attend the event.
+a2-speech		n. 演讲；讲话	give a speech	He gave a speech.	The speech was short.
+a2-fresh		adj. 新鲜的	fresh food	The food is fresh.	We need fresh water.
+a2-equipment		n. 设备；器材	new equipment	This equipment is new.	We need more equipment.
+a2-review		n. 评论；评述	read a review	I read the review.	The review was positive.
+a2-expression		n. 表达；表情	this expression	I know this expression.	Her expression is different.
+a2-hurt		v. 使受伤；伤害	hurt my hand	I hurt my hand.	Do not hurt yourself.
+a2-sale		n. 出售；促销	have a sale	The shop has a sale.	This book is on sale.
+a2-track		n. 轨道；小路	a train track	This is a train track.	We walk along the track.
+a2-completely		adv. 完全地	completely different	They are completely different.	The work is completely finished.
+a2-researcher		n. 研究人员	a researcher	She is a researcher.	The researcher wrote a report.
+a2-camp		n. 营地；营房	a camp	This is a camp.	The camp is near the river.
+a2-normally		adv. 通常；正常情况下	normally go	I normally go by bus.	She normally works at home.
+a2-queen		n. 王后；女王	the queen	She is the queen.	The queen is here.
+a2-employ		v. 雇用	employ people	They employ many people.	The company can employ him.
+a2-tradition		n. 传统	an old tradition	This is an old tradition.	The tradition continues today.
+a2-speed		n. 速度	the speed	The speed is too high.	Please reduce your speed.
+a2-screen		n. 屏幕；幕	a screen	This is a screen.	The screen is very large.
+a2-understanding		n. 理解；了解	a good understanding	We have a good understanding.	Understanding takes time.
+a2-progress		n. 进步；进展	make progress	We make progress.	The progress is clear.
+a2-crowd		n. 人群	the crowd	A crowd waits outside.	The crowd is very large.
+a2-link		n. 链接；联系	a link	This is a link.	There is a link between them.
+a2-comment		n. 评论；意见	a comment	This is a comment.	I have one comment.
+a2-reporter		n. 记者	a reporter	She is a reporter.	The reporter asks a question.
+a2-wild		adj. 野生的；狂野的	a wild animal	This animal is wild.	Wild animals live here.
+a2-vehicle		n. 交通工具	a vehicle	This is a vehicle.	A car is a vehicle.
+a2-average		n. 平均数；平均水平	the average	The average is too high.	This is above average.
+a2-earn		v. 赚得	earn money	I can earn more money.	She works to earn money.
+a2-guest		n. 客人	a guest	He is a guest.	The guest is here.
+a2-active		adj. 活跃的；积极的	an active group	The group is active.	She has an active life.
+a2-feed		n. 饲料	animal feed	This is animal feed.	The feed is in the bag.
+a2-employer		n. 雇主	an employer	She is an employer.	The employer is here.
+a2-arrange		v. 安排；整理	arrange a meeting	I can arrange a meeting.	Please arrange the books.
+a2-mostly		adv. 主要地；大部分	mostly the same	It is mostly the same.	The group is mostly young people.
+a2-count		v. 数；计算	count the books	I can count the books.	Count them carefully.

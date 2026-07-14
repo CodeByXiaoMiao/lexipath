@@ -4,15 +4,31 @@ LexiPath has one fixed learning path. Users do not edit lesson order, daily volu
 
 ## Mandatory unit sequence
 
+For ordinary Ogden and Oxford lessons:
+
 1. Learn every new word and play its English pronunciation.
 2. Pass word-meaning recognition.
 3. Pass listening recognition.
 4. Pass paired sentence training.
-5. Read the controlled text and play the complete English reading.
+5. Read the reviewed LLM-authored article and play the complete English reading.
 6. Pass reading comprehension.
 7. Mark the unit complete only when no failed item remains.
 
 A wrong item returns to the pending mastery queue. Correct items are removed. The next phase opens only when the queue is empty, so the final pass requirement is always 100%.
+
+## Foundation exception
+
+The first 15 lessons belong to the `foundation-words` stage. They are controlled introductory sentence drills rather than long reading lessons because the cumulative learned vocabulary is too small to support a coherent 10-or-more-sentence article without introducing unknown words.
+
+These 15 lessons:
+
+- may use deterministic phrase, example, and controlled-sentence templates;
+- must be labeled as controlled sentence practice rather than reading articles;
+- are excluded from the LLM article bank;
+- are excluded from the `--require-llm-readings` coverage gate; and
+- must not be counted as missing LLM articles.
+
+The Ogden stage-final assessment is a separately curated long reading and is also outside the ordinary LLM article bank.
 
 ## Zero-unknown-word contract
 
@@ -44,10 +60,18 @@ Every English word, phrase, example, sentence, reading sentence, complete readin
 
 The engine is reusable, but the product is not a user-configurable course platform. Future official stages such as Oxford 5000 or technical reading are added as validated course data that follows the same fixed workflow and rules.
 
-## Curated narrative contract
+## LLM reading contract
 
-Normal generated units may use the controlled-context fallback, but official story units are static assets in `assets/course-stories/curated.json`.
+Vocabulary phrases and example sentences may be produced by deterministic templates, but an ordinary Ogden or Oxford reading article must come from the reviewed static LLM article bank in `assets/course-stories/curated.json`. Template sentences must not be presented as an article.
 
-Every curated story is required to declare a setup, goal, problem, at least two attempts, a turn, an optional reveal, and a resolution. The deterministic validator also checks sentence-count limits by CEFR level, target-word coverage, exact-form coverage, named-character use, connector variety, repeated sentence openings, duplicate sentences, and the cumulative vocabulary whitelist.
+Every article declares a setup, goal, problem, at least two attempts, a turn, an optional reveal, and a resolution. The deterministic validator checks sentence-count limits by CEFR level, target-word coverage, exact-form coverage, named-character use, connector variety, repeated openings, duplicate sentences, the cumulative vocabulary whitelist, and one Simplified Chinese translation per English sentence.
 
-AI can create candidate stories offline through `tools/generate_course_stories.py`. AI is not called by the desktop program or by the release workflow.
+AI creates candidates offline through `tools/generate_course_stories.py`. The desktop program and normal release workflow do not call an AI service. Strict release finalization uses `--require-llm-readings` and fails when any required ordinary lesson is missing an article.
+
+The migration baseline is 500 required ordinary articles: 133 Ogden, 82 A1, 96 A2, 97 B1, and 92 B2. One A1 article existed when the migration started, leaving 499 to generate. Operational generation and review procedures are defined in `docs/LLM_READING_MAINTENANCE.md`.
+
+## Reviewed example-translation contract
+
+Every vocabulary example sentence has a reviewed static Simplified Chinese translation in `assets/example-translations/*.tsv`. The word ID and exact English example jointly identify the translation. Runtime dictionary-gloss concatenation must never be used for example sentences.
+
+Course finalization fails when a required translation is missing, duplicated, empty, non-Chinese, or attached to stale English. Operational review and validation procedures are defined in `docs/EXAMPLE_TRANSLATION_MAINTENANCE.md`.

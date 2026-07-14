@@ -262,7 +262,7 @@ impl LexiPathApp {
         );
         ui.add_space(3.0);
 
-        let example_translation = self.translations.sentence(self.session.lesson(), &word.example);
+        let example_translation = self.translations.example(&word);
         ui.horizontal_wrapped(|ui| {
             ui.label(format!("例句：{}", word.example));
             if ui.small_button("▶").clicked() {

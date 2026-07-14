@@ -1,0 +1,16 @@
+{
+  "canonical_sha256": "666d9effdff5c4476b9c6f1417d965890cedd07a40aa491030acd3a0379fb000",
+  "effective_correction_count": 1888,
+  "record_count": 3083,
+  "schema": 1,
+  "scope": "course word text, meaning, phrase, primary example, and effective Chinese translation",
+  "stage_counts": {
+    "foundation-words": 90,
+    "ogden-850": 797,
+    "oxford-a1": 492,
+    "oxford-a2": 576,
+    "oxford-b1": 580,
+    "oxford-b2": 548
+  },
+  "status": "frozen"
+}

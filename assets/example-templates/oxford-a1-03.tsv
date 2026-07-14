@@ -1,0 +1,59 @@
+# schema=1
+authoring_method	direct-assistant-reviewed
+word_id	display	meaning	phrase	primary_example	secondary_example
+a1-title		n. 标题；头衔	the title	This is the title.	I know the title.
+a1-guess			my guess	This is my guess.	Your guess is good.
+a1-visit			my first visit	This is my first visit.	The visit is short.
+a1-customer		n. 顾客；客户	a customer	She is a customer.	The customer is here.
+a1-post		n. 邮件；邮政	the post	The post is here.	I get the post.
+a1-improve			can improve	The situation can improve.	This can improve with time.
+a1-radio		n. 收音机；无线电	a radio	I have a radio.	This radio is good.
+a1-popular		adj. 受欢迎的；流行的	a popular programme	This programme is popular.	This style is popular.
+a1-interview			an interview	I have an interview.	The interview is today.
+a1-holiday		n. 假日；假期	a holiday	It is a holiday.	I have a holiday.
+a1-advice			good advice	This is good advice.	I need your advice.
+a1-adult			an adult	He is an adult.	The adult is here.
+a1-writer			a writer	She is a writer.	The writer is here.
+a1-text			this text	I read this text.	This text is short.
+a1-address			my address	This is my address.	I know the address.
+a1-object			this object	This object is small.	I see the object.
+a1-partner			my partner	He is my partner.	My partner is here.
+a1-positive		adj. 积极的；肯定的	a positive result	This is a positive result.	The result is positive.
+a1-painting			this painting	I like this painting.	This painting is beautiful.
+a1-scientist			a scientist	She is a scientist.	The scientist is here.
+a1-newspaper			the newspaper	I read the newspaper.	The newspaper is here.
+a1-dinner			dinner	This is dinner.	Dinner is ready.
+a1-extra		adj. 额外的	extra time	I need extra time.	We have extra food.
+a1-travel		v. 旅行	travel by car	I like to travel.	We can travel by car.
+a1-born		adj. 出生的	be born	I was born here.	She was born in May.
+a1-mum		n. 妈妈	my mum	She is my mum.	My mum is here.
+a1-interested			interested in art	I am interested in art.	She is interested in music.
+a1-reader			a reader	He is a reader.	The reader is here.
+a1-nobody		pron. 没有人	nobody is here	Nobody is here.	Nobody can see it.
+a1-perfect			a perfect plan	The plan is perfect.	This is a perfect plan.
+a1-conversation			a conversation	We have a conversation.	This conversation is important.
+a1-sentence			this sentence	This sentence is short.	I read the sentence.
+a1-beginning			the beginning	This is the beginning.	The beginning is important.
+a1-pair			a pair	These two make a pair.	This is a pair.
+a1-driver			a driver	He is a driver.	The driver is here.
+a1-meaning			the meaning	What is the meaning?	I know the meaning.
+a1-exercise		n. 练习；锻炼	an easy exercise	This exercise is easy.	I do this exercise.
+a1-august	August	n. 八月	August	It is August.	August is a month.
+a1-apartment		n. 公寓	an apartment	This is an apartment.	The apartment is here.
+a1-ride		n. 骑行；乘车	go for a ride	I go for a ride.	This ride is good.
+a1-dad			my dad	He is my dad.	My dad is here.
+a1-lesson			this lesson	This lesson is important.	I like this lesson.
+a1-farmer			a farmer	He is a farmer.	The farmer is here.
+a1-visitor			a visitor	He is a visitor.	The visitor is here.
+a1-coffee			like coffee	I like coffee.	This coffee is hot.
+a1-repeat		v. 重复	repeat it	Please repeat it.	I can repeat it.
+a1-traffic			a lot of traffic	There is a lot of traffic.	Traffic is a problem.
+a1-football			play football	I play football.	We can play football.
+a1-hey			hey	Hey!	Hey, come here!
+a1-mistake			my mistake	This is my mistake.	I can see the mistake.
+a1-description			this description	This description is good.	I read the description.
+a1-cool			cool weather	The weather is cool.	It is cool here.
+a1-famous			be famous	He is famous.	This city is famous.
+a1-actor			an actor	He is an actor.	The actor is here.
+a1-welcome		adj. 受欢迎的	welcome here	You are welcome here.	All people are welcome.
+a1-lunch			lunch	This is lunch.	Lunch is ready.
