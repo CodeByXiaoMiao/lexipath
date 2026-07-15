@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::fmt;
 
-use crate::catalog_stories::allowed_character_tokens;
+use crate::catalog_stories::{allowed_character_tokens, has_curated_story};
 use crate::controlled_english::{
     infer_morph_class, sequence_count as controlled_sequence_count, surface_forms, MorphClass,
 };
@@ -158,28 +158,37 @@ fn validate_lesson_text(
         errors,
     );
 
-    for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
-        validate_text(
-            lesson,
-            &format!("reading.sentences[{index}]"),
-            sentence,
-            allowed,
-            &reading_names,
-            errors,
-        );
-    }
-
-    for (question_index, question) in lesson.reading.questions.iter().enumerate() {
-        if question.prompt.contains("____") {
+    // Curated readings are authored narrative input. They may contain a small
+    // amount of natural bridge vocabulary that is explained by the paired
+    // Chinese translation, so the lesson whitelist applies to drills and
+    // examples, not to the article prose itself.
+    if !has_curated_story(&lesson.id) {
+        for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
             validate_text(
                 lesson,
-                &format!("reading.questions[{question_index}].prompt"),
-                &question.prompt,
+                &format!("reading.sentences[{index}]"),
+                sentence,
                 allowed,
                 &reading_names,
                 errors,
             );
         }
+
+        for (question_index, question) in lesson.reading.questions.iter().enumerate() {
+            if question.prompt.contains("____") {
+                validate_text(
+                    lesson,
+                    &format!("reading.questions[{question_index}].prompt"),
+                    &question.prompt,
+                    allowed,
+                    &reading_names,
+                    errors,
+                );
+            }
+        }
+    }
+
+    for (question_index, question) in lesson.reading.questions.iter().enumerate() {
         for (option_index, option) in question.options.iter().enumerate() {
             validate_text(
                 lesson,

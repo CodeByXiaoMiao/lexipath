@@ -229,6 +229,7 @@ fn question_source_sentence<'a>(
 fn cloze_sentence(sentence: &str, entry: &str) -> String {
     let sentence_lower = sentence.to_ascii_lowercase();
     let entry_lower = entry.to_ascii_lowercase();
+    let mut ranges = Vec::new();
     for (start, _) in sentence_lower.match_indices(&entry_lower) {
         let end = start + entry_lower.len();
         let left_is_word = start > 0
@@ -237,19 +238,26 @@ fn cloze_sentence(sentence: &str, entry: &str) -> String {
                 .next_back()
                 .map(is_word_character)
                 .unwrap_or(false);
-        let right_is_word = end < sentence_lower.len()
+        let mut right_is_word = end < sentence_lower.len()
             && sentence_lower[end..]
                 .chars()
                 .next()
                 .map(is_word_character)
                 .unwrap_or(false);
+        // A possessive suffix is part of the same learner-facing entry
+        // (e.g. `cow's`), so the base word still needs to be clozed.
+        if sentence_lower[end..].starts_with("'s") {
+            right_is_word = false;
+        }
         if !left_is_word && !right_is_word {
-            let mut output = sentence.to_owned();
-            output.replace_range(start..end, "____");
-            return output;
+            ranges.push((start, end));
         }
     }
-    sentence.to_owned()
+    let mut output = sentence.to_owned();
+    for (start, end) in ranges.into_iter().rev() {
+        output.replace_range(start..end, "____");
+    }
+    output
 }
 
 fn is_word_character(character: char) -> bool {

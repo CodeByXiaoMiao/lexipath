@@ -11,6 +11,7 @@ use crate::course::CoursePack;
 use crate::stage_assessment::append_required_stage_assessments;
 use crate::validator::validate_course;
 
+#[allow(dead_code)]
 pub fn finalize_course(course: &mut CoursePack) -> anyhow::Result<()> {
     finalize_course_with_options(course, false)
 }
@@ -27,8 +28,8 @@ pub fn finalize_course_with_options(
     validate_finalized_course_with_options(course, require_llm_readings)
 }
 
-pub fn validate_finalized_course(course: &CoursePack) -> anyhow::Result<()> {
-    validate_finalized_course_with_options(course, false)
+pub fn validate_release_course(course: &CoursePack) -> anyhow::Result<()> {
+    validate_finalized_course_with_options(course, true)
 }
 
 fn validate_finalized_course_with_options(
@@ -64,4 +65,15 @@ fn validate_finalized_course_with_options(
     validate_formalized_course(course)?;
     validate_example_translation_bank(course)?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn embedded_foundation_is_a_valid_release_fallback() {
+        let course = CoursePack::embedded().expect("embedded foundation course");
+        validate_release_course(&course).expect("foundation release validation");
+    }
 }

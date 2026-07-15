@@ -1,9 +1,8 @@
-use std::fs;
-
 use eframe::egui;
 
 use crate::audio::SystemSpeaker;
 use crate::catalog::CourseCatalog;
+use crate::catalog_stories::curated_paragraph_ranges;
 use crate::course::{CoursePack, Lesson};
 use crate::display_text::safe_ipa;
 use crate::engine::{LearningSession, Phase};
@@ -21,11 +20,13 @@ pub struct LexiPathApp {
     translations: TranslationGuide,
     status: String,
     course_finished: bool,
+    listening_answer: String,
+    selected_reading_sentence: Option<usize>,
 }
 
 impl LexiPathApp {
     pub fn new(context: &eframe::CreationContext<'_>, course: CoursePack) -> Self {
-        install_windows_font(&context.egui_ctx);
+        crate::fonts::install(&context.egui_ctx);
         let translations = TranslationGuide::new(&course);
         let first = course
             .first_lesson()
@@ -48,6 +49,8 @@ impl LexiPathApp {
             translations,
             status: "按固定顺序完成学习。到期复习优先于新课。".to_owned(),
             course_finished: false,
+            listening_answer: String::new(),
+            selected_reading_sentence: None,
         };
         app.load_next_available();
         app
@@ -194,7 +197,7 @@ impl LexiPathApp {
 
         if let Some(store) = &mut self.progress {
             if let Some(review_id) = self.active_review_id.take() {
-                if let Err(error) = store.complete_review(review_id) {
+                if let Err(error) = store.complete_review(review_id, accuracy) {
                     self.status = format!("保存复习失败：{error}");
                     return;
                 }
@@ -304,20 +307,37 @@ impl LexiPathApp {
             return;
         };
         let text = self.session.lesson().new_words[index].text.clone();
-        let Some((options, correct)) = self.session.listening_options() else {
-            return;
-        };
         ui.heading("听音识词");
         if ui.button("▶ 播放").clicked() {
             self.speak(&text);
             self.session.mark_current_audio_played();
         }
-        self.show_answer_buttons(
-            ui,
-            options,
-            correct,
-            self.session.current_audio_played(),
+        let enabled = self.session.current_audio_played();
+        ui.label("播放后输入你听到的英文词：");
+        ui.add_enabled(
+            enabled,
+            egui::TextEdit::singleline(&mut self.listening_answer).hint_text("英文输入"),
         );
+        if ui
+            .add_enabled(enabled, egui::Button::new("提交答案"))
+            .clicked()
+        {
+            if self.listening_answer.trim().is_empty() {
+                self.status = "请输入听到的英文词。".to_owned();
+                return;
+            }
+            let answer = self.listening_answer.clone();
+            let result = self.session.answer_current_text(&answer);
+            self.listening_answer.clear();
+            self.status = if result.correct {
+                "正确。".to_owned()
+            } else {
+                format!("错误：正确答案是「{}」。该项目仍留在待掌握队列。", text)
+            };
+        }
+        if !enabled {
+            ui.label("请先播放当前英文。");
+        }
     }
 
     fn show_sentences(&mut self, ui: &mut egui::Ui) {
@@ -361,15 +381,15 @@ impl LexiPathApp {
             .max_height(reading_height)
             .auto_shrink([false, false])
             .show(ui, |ui| {
-                for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
-                    if is_assessment && index % 12 == 0 {
-                        if index > 0 {
-                            ui.add_space(10.0);
+                if is_assessment {
+                    for (index, sentence) in lesson.reading.sentences.iter().enumerate() {
+                        if index % 12 == 0 {
+                            if index > 0 {
+                                ui.add_space(10.0);
+                            }
+                            ui.strong(format!("第 {} 段", index / 12 + 1));
                         }
-                        ui.strong(format!("第 {} 段", index / 12 + 1));
-                    }
-                    let translation = self.translations.sentence(&lesson, sentence);
-                    ui.vertical(|ui| {
+                        let translation = self.translations.sentence(&lesson, sentence);
                         ui.horizontal_wrapped(|ui| {
                             ui.label(egui::RichText::new(sentence).size(19.0));
                             if ui.small_button("▶").clicked() {
@@ -377,8 +397,50 @@ impl LexiPathApp {
                             }
                         });
                         ui.label(egui::RichText::new(translation).size(16.0).weak());
-                    });
-                    ui.add_space(5.0);
+                        ui.add_space(5.0);
+                    }
+                } else {
+                    let ranges = curated_paragraph_ranges(
+                        &lesson.id,
+                        lesson.reading.sentences.len(),
+                    );
+                    for (paragraph_index, (start, end)) in ranges.iter().enumerate() {
+                        ui.group(|ui| {
+                            ui.horizontal_wrapped(|ui| {
+                                for index in *start..*end {
+                                    let sentence = &lesson.reading.sentences[index];
+                                    let selected = self.selected_reading_sentence == Some(index);
+                                    if ui
+                                        .selectable_label(
+                                            selected,
+                                            egui::RichText::new(sentence).size(19.0),
+                                        )
+                                        .clicked()
+                                    {
+                                        self.selected_reading_sentence = Some(index);
+                                    }
+                                    if ui.small_button("▶").clicked() {
+                                        self.speak(sentence);
+                                    }
+                                    ui.add_space(4.0);
+                                }
+                            });
+                            if let Some(index) = self.selected_reading_sentence {
+                                if *start <= index && index < *end {
+                                    let sentence = &lesson.reading.sentences[index];
+                                    let translation = self.translations.sentence(&lesson, sentence);
+                                    ui.label(
+                                        egui::RichText::new(translation)
+                                            .size(16.0)
+                                            .weak(),
+                                    );
+                                }
+                            }
+                        });
+                        if paragraph_index + 1 < ranges.len() {
+                            ui.add_space(10.0);
+                        }
+                    }
                 }
             });
 
@@ -544,31 +606,5 @@ fn phase_name(phase: Phase) -> &'static str {
         Phase::Reading => "阅读",
         Phase::Comprehension => "理解",
         Phase::Complete => "完成",
-    }
-}
-
-fn install_windows_font(context: &egui::Context) {
-    for path in [
-        r"C:\Windows\Fonts\msyh.ttc",
-        r"C:\Windows\Fonts\msyh.ttf",
-        r"C:\Windows\Fonts\simhei.ttf",
-    ] {
-        let Ok(bytes) = fs::read(path) else {
-            continue;
-        };
-        let mut fonts = egui::FontDefinitions::default();
-        fonts.font_data.insert(
-            "windows-cjk".to_owned(),
-            egui::FontData::from_owned(bytes).into(),
-        );
-        for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
-            fonts
-                .families
-                .entry(family)
-                .or_default()
-                .insert(0, "windows-cjk".to_owned());
-        }
-        context.set_fonts(fonts);
-        break;
     }
 }

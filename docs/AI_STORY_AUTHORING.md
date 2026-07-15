@@ -2,14 +2,14 @@
 
 LexiPath treats a reading article as authored course content, not as a set of template examples.
 
-The desktop application never calls an LLM. An OpenAI-compatible model is used only in an offline authoring step. Accepted articles and their Chinese translations are committed as static JSON, then Rust validates them again during course finalization.
+The desktop application never calls an LLM. A model is used only in an offline authoring step. This step can be driven by GitHub Models in CI or by the current GPT model directly in the local workspace; the local path does not require `GITHUB_TOKEN`. Accepted articles and their Chinese translations are committed as static JSON, then Rust validates them again during course finalization.
 
 ## Content flow
 
 1. Generate and finalize a `course.json` so every lesson has stable target words and meanings.
 2. Run `tools/generate_course_stories.py` for one lesson, one stage, or the complete course.
-3. The model writes one coherent English story plus one Simplified Chinese translation per sentence.
-4. The Python validator rejects unknown words, weak narrative structure, missing targets, repeated sentence frames, translation-count mismatches, and empty/non-Chinese translations.
+3. The model writes one continuous English story plus one Simplified Chinese translation per sentence. The story must stay in one setting, carry the same characters and concrete objects through the event, and use causal or temporal links between actions.
+4. The Python validator rejects weak narrative structure, missing targets, repeated sentence frames, translation-count mismatches, and empty/non-Chinese translations. Rust additionally checks connector density, a persistent scene/entity chain, and adjacent-sentence links.
 5. Accepted articles are saved to `assets/course-stories/curated.json`.
 6. Rust finalization applies the static articles and validates them again.
 7. A release intended to contain only LLM articles must use `--require-llm-readings`; finalization fails if any required ordinary lesson is missing an article.
@@ -35,6 +35,8 @@ All other Ogden and Oxford lessons require reviewed LLM-authored articles. The m
 
 The table is a migration baseline, not a live counter. After every accepted batch, validate the current bank and record the new coverage in the pull request or batch commit.
 
+The current repository snapshot contains 6 accepted articles (5 Ogden and 1 Oxford A1), so 494 ordinary lessons still require authored articles. Strict release validation intentionally fails until those assets are present.
+
 Generation order is fixed:
 
 ```text
@@ -51,7 +53,10 @@ Detailed batch commands and acceptance rules are maintained in `docs/LLM_READING
 
 Each article must contain a setup, character goal, concrete problem, at least two attempts, a turn, an optional reveal, and a resolution that recalls an earlier object, action, or piece of advice. Every current target must appear in at least two separate sentences. Sentence length and connector requirements increase by CEFR level.
 
+An article is not accepted merely because every target word appears twice. Independent example sentences are rejected: after removing the target words, most sentences must still share a character, object, place, or causal event with nearby sentences. The resolution must follow from the attempts and turn, rather than introducing a new topic.
+
 The `translations` array must match `sentences` one-for-one and remain in the same order.
+Every English sentence must have terminal punctuation. Every Chinese translation must use Chinese sentence punctuation, contain no untranslated English fragment, and pass the rejected-artifact and unnatural-frame checks in both the authoring script and Rust finalization.
 
 ## Commands
 

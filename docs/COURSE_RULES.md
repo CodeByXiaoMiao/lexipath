@@ -16,6 +16,8 @@ For ordinary Ogden and Oxford lessons:
 
 A wrong item returns to the pending mastery queue. Correct items are removed. The next phase opens only when the queue is empty, so the final pass requirement is always 100%.
 
+Due reviews use the fixed initial intervals of 1, 3, 7, 14, 30, and 60 days. If a due review's first-attempt accuracy is below 80%, only the next pending review for that lesson is brought forward to the following day; successful reviews keep the existing schedule.
+
 ## Foundation exception
 
 The first 15 lessons belong to the `foundation-words` stage. They are controlled introductory sentence drills rather than long reading lessons because the cumulative learned vocabulary is too small to support a coherent 10-or-more-sentence article without introducing unknown words.

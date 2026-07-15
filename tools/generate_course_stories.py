@@ -64,6 +64,24 @@ IRREGULAR_FORMS = {
 }
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")
 CJK_RE = re.compile(r"[\u4e00-\u9fff]")
+REJECTED_ENGLISH_FRAMES = (
+    "can be near",
+    "has no humour about",
+    "are with all the people in a room",
+    "now has a black colour",
+    "can not get it, but he can look at the box as anna can",
+)
+REJECTED_TRANSLATION_ARTIFACTS = (
+    "这是一个书。",
+    "这是一个食物。",
+    "这是一 yard。",
+    "这是一十亿。",
+    "这是几把剪刀。",
+    "他是女性。",
+    "机器翻译",
+    "例句中",
+    "（例句中文译文缺失）",
+)
 
 
 def tokens(text: str) -> list[str]:
@@ -124,6 +142,24 @@ def profile(level: str) -> tuple[int, int, int, int]:
     }[level]
 
 
+def article_word_limits(level: str) -> tuple[int, int]:
+    return {
+        "A1": (60, 90),
+        "A2": (90, 130),
+        "B1": (130, 180),
+        "B2": (180, 240),
+    }[level]
+
+
+def minimum_comma_sentences(level: str) -> int:
+    return {
+        "A1": 2,
+        "A2": 3,
+        "B1": 4,
+        "B2": 5,
+    }[level]
+
+
 def prompt_vocabulary(known: list[str], targets: list[str], level: str) -> list[str]:
     limits = {
         "A1": (220, 80),
@@ -172,6 +208,55 @@ def target_coverage(sentences: list[str], target: str) -> tuple[int, int]:
     return exact_hits, exact_sentences
 
 
+def cohesion_issues(
+    sentences: list[str], characters: list[str], targets: list[str], field: str
+) -> list[str]:
+    """Reject sentence collections that do not carry one persistent event."""
+    stop_words = {
+        "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "can", "did",
+        "do", "for", "from", "had", "has", "have", "he", "her", "him", "his", "i", "in",
+        "is", "it", "its", "of", "on", "or", "she", "that", "the", "their", "them", "there",
+        "they", "this", "to", "was", "we", "were", "with", "you", "your",
+    }
+    connectors = CONNECTORS
+    character_tokens = set(tokens(" ".join(characters)))
+    target_tokens = set(tokens(" ".join(targets)))
+    sentence_tokens = [tokens(sentence) for sentence in sentences]
+    frequencies: dict[str, int] = {}
+    for sentence in sentence_tokens:
+        for token in sentence:
+            if token not in stop_words and token not in connectors and token not in character_tokens and token not in target_tokens:
+                frequencies[token] = frequencies.get(token, 0) + 1
+    anchors = {token for token, count in frequencies.items() if count >= 2}
+    linked = sum(
+        any(token in anchors or token in character_tokens or token in connectors for token in sentence)
+        for sentence in sentence_tokens
+    )
+    issues: list[str] = []
+    if linked * 4 < len(sentence_tokens) * 3:
+        issues.append(f"{field}: too many sentences read as isolated examples")
+
+    transitions = 0
+    for index in range(1, len(sentence_tokens)):
+        previous = set(sentence_tokens[index - 1])
+        if index > 1:
+            previous.update(sentence_tokens[index - 2])
+        if any(
+            token in previous or token in anchors or token in character_tokens or token in connectors
+            for token in sentence_tokens[index]
+        ):
+            transitions += 1
+    if transitions * 4 < (len(sentence_tokens) - 1) * 3:
+        issues.append(f"{field}: too many adjacent sentences lack a causal or entity link")
+
+    if len(sentence_tokens) >= 4:
+        resolution = set(sentence_tokens[-1]) - target_tokens - connectors - character_tokens
+        earlier = set(token for sentence in sentence_tokens[:-2] for token in sentence)
+        if not resolution & earlier:
+            issues.append(f"{field}: resolution does not recall an earlier story element")
+    return issues
+
+
 def validate_story(
     story: dict[str, Any], lesson: dict[str, Any], known: list[str]
 ) -> list[str]:
@@ -212,6 +297,8 @@ def validate_story(
             issues.append(f"{field}: expected {minimum}-{maximum} sentences")
         if any(len(tokens(sentence)) > max_words for sentence in sentences):
             issues.append(f"{field}: sentence is too long")
+        if any(not sentence.rstrip().endswith((".", "?", "!")) for sentence in sentences):
+            issues.append(f"{field}: every English sentence must end with terminal punctuation")
         connector_count = len(CONNECTORS & set(tokens(" ".join(sentences))))
         available_connector_count = len(CONNECTORS & allowed_words(known, []))
         required_connectors = min(min_connectors, available_connector_count)
@@ -220,13 +307,66 @@ def validate_story(
                 f"{field}: too few connectors; expected {required_connectors}, found {connector_count}"
             )
 
+        minimum_words, maximum_words = article_word_limits(level)
+        word_count = sum(len(tokens(sentence)) for sentence in sentences)
+        if not minimum_words <= word_count <= maximum_words:
+            issues.append(
+                f"{field}: expected {minimum_words}-{maximum_words} article words; found {word_count}"
+            )
+        comma_sentences = sum("," in sentence for sentence in sentences)
+        required_comma_sentences = minimum_comma_sentences(level)
+        if comma_sentences < required_comma_sentences:
+            issues.append(
+                f"{field}: expected at least {required_comma_sentences} sentences with natural commas; "
+                f"found {comma_sentences}"
+            )
+
+    paragraphs = story.get("paragraphs")
+    if not isinstance(paragraphs, list) or not paragraphs:
+        issues.append(f"{field}: paragraphs must define the article's paragraph ranges")
+    else:
+        paragraph_count = len(paragraphs)
+        minimum_paragraphs = 2 if level in {"A1", "A2"} else 3
+        maximum_paragraphs = 3 if level in {"A1", "A2"} else 4
+        if not minimum_paragraphs <= paragraph_count <= maximum_paragraphs:
+            issues.append(
+                f"{field}: expected {minimum_paragraphs}-{maximum_paragraphs} paragraphs; found {paragraph_count}"
+            )
+        expected_start = 0
+        for index, paragraph in enumerate(paragraphs):
+            if not isinstance(paragraph, dict):
+                issues.append(f"{field}: paragraph {index} must be an object")
+                continue
+            start = paragraph.get("start")
+            end = paragraph.get("end")
+            if start != expected_start or not isinstance(end, int) or end <= start or end > len(sentences):
+                issues.append(f"{field}: paragraph {index} range is not contiguous")
+                continue
+            expected_start = end
+        if expected_start != len(sentences):
+            issues.append(f"{field}: paragraph ranges must cover every sentence")
+
     normalized = {sentence.strip().lower() for sentence in sentences}
     if len(normalized) != len(sentences):
         issues.append(f"{field}: duplicate sentence")
     if len(translations) != len(sentences):
         issues.append(f"{field}: expected one Chinese translation per sentence")
-    elif any(not item.strip() or not CJK_RE.search(item) for item in translations):
-        issues.append(f"{field}: every translation must contain Chinese text")
+    elif any(
+        not item.strip()
+        or not CJK_RE.search(item)
+        or any(character.isascii() and character.isalpha() for character in item)
+        or not item.rstrip().endswith(("。", "！", "？"))
+        or any(artifact in item for artifact in REJECTED_TRANSLATION_ARTIFACTS)
+        for item in translations
+    ):
+        issues.append(
+            f"{field}: every translation must be natural Chinese without English fragments or rejected artifacts"
+        )
+
+    for sentence in sentences:
+        lower = sentence.lower()
+        if any(frame in lower for frame in REJECTED_ENGLISH_FRAMES):
+            issues.append(f"{field}: rejected unnatural English frame")
 
     openings = [tokens(sentence)[:2] for sentence in sentences]
     if any(
@@ -269,11 +409,6 @@ def validate_story(
         ):
             issues.append(f"{field}: invalid narrative order")
 
-    allowed = allowed_words(known, characters if isinstance(characters, list) else [])
-    unknown = sorted(set(tokens(" ".join(sentences))) - allowed)
-    if unknown:
-        issues.append(f"{field}: unknown words: {', '.join(unknown)}")
-
     all_story_tokens = tokens(" ".join(sentences))
     for name in characters if isinstance(characters, list) else []:
         if all_story_tokens.count(name.lower()) < 2:
@@ -285,6 +420,14 @@ def validate_story(
             issues.append(
                 f"{field}: target {word['text']} must appear in exact form in at least two sentences"
             )
+    issues.extend(
+        cohesion_issues(
+            sentences,
+            characters if isinstance(characters, list) else [],
+            [word["text"] for word in lesson["new_words"]],
+            field,
+        )
+    )
     return issues
 
 
@@ -293,6 +436,9 @@ def build_prompt(
 ) -> str:
     level = level_of(stage)
     minimum, maximum, max_words, min_connectors = profile(level)
+    minimum_words, maximum_words = article_word_limits(level)
+    minimum_paragraphs = 2 if level in {"A1", "A2"} else 3
+    maximum_paragraphs = 3 if level in {"A1", "A2"} else 4
     targets = [
         {"word": word["text"], "meaning": word["meaning"]}
         for word in lesson["new_words"]
@@ -308,21 +454,32 @@ def build_prompt(
         "allowed_names": sorted(NAMES),
         "sentence_count": [minimum, maximum],
         "max_words_per_sentence": max_words,
+        "article_word_count": [minimum_words, maximum_words],
+        "paragraph_count": [minimum_paragraphs, maximum_paragraphs],
+        "minimum_sentences_with_commas": minimum_comma_sentences(level),
         "minimum_distinct_connectors": min_connectors,
     }
     return (
-        "Write one coherent English micro-story for an English learner. Return JSON only. "
-        "Use only usable_known_words, ordinary noun/verb inflections, and declared "
-        "allowed_names. Every target must appear in exact dictionary form in at least two "
-        "different sentences. The story must have a setup, goal, concrete problem, at least "
-        "two attempts, a turn, optional reveal, and a resolution that recalls an earlier "
-        "object, action, or piece of advice. Vary openings; do not create a list of example "
-        "sentences. Give the story a short Simplified Chinese title. Also provide one natural "
+        "Write one coherent English short article for an English learner. Return JSON only. "
+        "Use known vocabulary plus a small amount of ordinary bridge vocabulary, ordinary "
+        "noun/verb inflections, and declared allowed_names. Every target must appear in exact "
+        "dictionary form in at least two different sentences. Write one continuous event in "
+        "one setting: carry the same characters and concrete objects from sentence to sentence, "
+        "use natural causal or temporal links, and make each sentence advance the same goal. "
+        "Write connected paragraphs, not a list of independent example sentences. Do not "
+        "switch to a new topic or add a sentence only to place a target word. The article "
+        "must have a setup, goal, concrete problem, at least two attempts, a turn, optional "
+        "reveal, and a resolution that recalls an earlier object, action, or piece of advice. "
+        "must read naturally when the target words are ignored. Use natural commas in "
+        "appropriate compound, time, cause, and contrast sentences, while keeping each "
+        "sentence short enough for the level. Vary openings. Give the article "
+        "a short Simplified Chinese title. Also provide one natural "
         "Simplified Chinese translation for every English sentence. The translations array "
         "must have exactly the same length and order as sentences. JSON schema: "
         "{lesson_id,title,level,characters,sentences,translations,arc:{setup_sentence,"
         "goal_sentence,problem_sentence,attempt_sentences,turn_sentence,reveal_sentence,"
-        "resolution_sentence}}. Sentence indexes are zero-based.\nCONTRACT:\n"
+        "resolution_sentence},paragraphs:[{start,end}]}. Paragraph ranges are zero-based, "
+        "start-inclusive and end-exclusive.\nCONTRACT:\n"
         + json.dumps(contract, ensure_ascii=False, separators=(",", ":"))
     )
 

@@ -80,6 +80,7 @@ impl IpaApp {
         )
     }
 
+    #[allow(dead_code)]
     pub fn locked_today(&self) -> bool {
         self.locked_today
     }
@@ -90,6 +91,7 @@ impl IpaApp {
         self.status = "已手动进入下一天音标课程。".to_owned();
     }
 
+    #[allow(dead_code)]
     pub fn jump_relative_day(&mut self, offset: isize) -> Result<String, String> {
         let total = self.lessons.len();
         if total == 0 {

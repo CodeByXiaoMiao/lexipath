@@ -23,6 +23,9 @@ on:
 jobs:
   build-course:
     runs-on: windows-latest
+    permissions:
+      contents: read
+      models: read
     steps:
       - name: Checkout LexiPath
         uses: actions/checkout@v4
@@ -117,6 +120,23 @@ jobs:
             --output raw-course.json 2>&1 | Tee-Object -FilePath course-generation.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Generate complete LLM reading bank
+        working-directory: lexipath
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          & python tools/generate_course_stories.py raw-course.json `
+            --all `
+            --resume `
+            --output assets/course-stories/curated.json `
+            --model openai/gpt-4.1 2>&1 | Tee-Object -FilePath story-generation.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & python tools/generate_course_stories.py raw-course.json `
+            --validate-only `
+            --require-complete 2>&1 | Tee-Object -FilePath story-validation.log
+          exit $LASTEXITCODE
+
       - name: Finalize complete catalog
         working-directory: lexipath
         shell: pwsh
@@ -124,7 +144,8 @@ jobs:
           & cargo run --release -- `
             --finalize-catalog `
             --input raw-course.json `
-            --output course.json 2>&1 | Tee-Object -FilePath course-finalization.log
+            --output course.json `
+            --require-llm-readings 2>&1 | Tee-Object -FilePath course-finalization.log
           exit $LASTEXITCODE
 
       - name: Validate reviewed example translations
@@ -143,6 +164,8 @@ jobs:
           path: |
             lexipath/dictionary-repair.log
             lexipath/course-generation.log
+            lexipath/story-generation.log
+            lexipath/story-validation.log
             lexipath/course-finalization.log
             lexipath/example-translation-validation.log
           if-no-files-found: warn

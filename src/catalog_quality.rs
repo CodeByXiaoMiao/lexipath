@@ -1,6 +1,8 @@
 use std::collections::HashSet;
 use std::fmt;
 
+use crate::catalog_stories::has_curated_story;
+use crate::controlled_english::{infer_morph_class, sequence_count};
 use crate::course::{CoursePack, Lesson};
 use crate::validator::tokenize;
 
@@ -90,6 +92,7 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
                         "phonetic transcription is empty",
                     ));
                 }
+                validate_ipa(lesson, &format!("{field}.ipa"), &word.ipa, &mut issues);
 
                 validate_sentence(
                     lesson,
@@ -113,11 +116,19 @@ pub fn validate_content_quality(course: &CoursePack) -> Result<(), Vec<QualityIs
                 }
 
                 let entry_tokens = tokenize(&word.text);
+                let morph_class = infer_morph_class(
+                    &word.text,
+                    &word.meaning,
+                    &word.phrase,
+                    &word.example,
+                );
                 let containing_sentences = lesson
                     .reading
                     .sentences
                     .iter()
-                    .filter(|sentence| contains_sequence(&tokenize(sentence), &entry_tokens))
+                    .filter(|sentence| {
+                        sequence_count(&tokenize(sentence), &entry_tokens, morph_class) > 0
+                    })
                     .count();
                 if containing_sentences < 2 {
                     issues.push(issue(
@@ -190,7 +201,9 @@ fn validate_lesson_shape(lesson: &Lesson, issues: &mut Vec<QualityIssue>) {
             "every new entry must have one sentence exercise",
         ));
     }
-    if lesson.reading.sentences.len() < lesson.new_words.len() * 2 {
+    if !has_curated_story(&lesson.id)
+        && lesson.reading.sentences.len() < lesson.new_words.len() * 2
+    {
         issues.push(issue(
             lesson,
             "reading.sentences",
@@ -256,23 +269,36 @@ fn validate_sentence(
         if !trimmed.ends_with('.') && !trimmed.ends_with('?') && !trimmed.ends_with('!') {
             issues.push(issue(lesson, field, "sentence has no terminal punctuation"));
         }
-        let token_count = tokenize(trimmed).len();
-        if token_count > 16 {
-            issues.push(issue(
-                lesson,
-                field,
-                &format!("controlled sentence is too long: {token_count} tokens"),
-            ));
+        let enforce_controlled_length =
+            !field.starts_with("reading.sentences[") || !has_curated_story(&lesson.id);
+        if enforce_controlled_length {
+            let token_count = tokenize(trimmed).len();
+            if token_count > 16 {
+                issues.push(issue(
+                    lesson,
+                    field,
+                    &format!("controlled sentence is too long: {token_count} tokens"),
+                ));
+            }
         }
     }
 }
 
-fn contains_sequence(haystack: &[String], needle: &[String]) -> bool {
-    !needle.is_empty()
-        && haystack.len() >= needle.len()
-        && haystack
-            .windows(needle.len())
-            .any(|window| window == needle)
+fn validate_ipa(lesson: &Lesson, field: &str, ipa: &str, issues: &mut Vec<QualityIssue>) {
+    if ipa.chars().any(|character| {
+        character.is_control()
+            || matches!(
+                character,
+                '?' | '\u{200b}' | '\u{200c}' | '\u{200d}' | '\u{2060}' | '\u{feff}'
+            )
+            || character == '\u{fffd}'
+    }) {
+        issues.push(issue(
+            lesson,
+            field,
+            "phonetic transcription contains an unknown, invisible, or control character",
+        ));
+    }
 }
 
 fn issue(lesson: &Lesson, field: &str, message: &str) -> QualityIssue {
@@ -341,5 +367,15 @@ mod tests {
         assert!(errors
             .iter()
             .any(|error| error.message.contains("manual review rejected")));
+    }
+
+    #[test]
+    fn rejects_corrupted_ipa_markers() {
+        let mut course = course_with_word("thing", "This thing is useful.");
+        course.stages[0].lessons[0].new_words[0].ipa = format!("/ˈθ{}ŋ/", '\u{fffd}');
+        let errors = validate_content_quality(&course).expect_err("corrupted IPA must fail");
+        assert!(errors
+            .iter()
+            .any(|error| error.message.contains("unknown, invisible, or control")));
     }
 }

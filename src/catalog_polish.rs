@@ -224,7 +224,45 @@ enum LexicalClass {
     Other,
 }
 
+const TRANSITIVE_CONTEXT_WORDS: &[&str] = &[
+    "get",
+    "take",
+    "feel",
+    "follow",
+    "bring",
+    "hear",
+    "write",
+    "include",
+    "learn",
+    "understand",
+    "add",
+    "create",
+    "remember",
+    "buy",
+    "win",
+    "describe",
+    "sell",
+    "choose",
+    "discuss",
+    "prepare",
+    "imagine",
+    "throw",
+    "protect",
+    "identify",
+    "recognize",
+    "avoid",
+    "replace",
+    "discover",
+    "destroy",
+    "solve",
+    "advertise",
+    "pull",
+];
+
 fn lexical_class(word: &str, meaning: &str) -> LexicalClass {
+    if TRANSITIVE_CONTEXT_WORDS.contains(&word) {
+        return LexicalClass::TransitiveVerb;
+    }
     let normalized = meaning.trim().to_ascii_lowercase();
     if normalized.starts_with("adv.") {
         return LexicalClass::Adverb;
@@ -566,6 +604,14 @@ mod tests {
     fn transitive_verbs_receive_an_object() {
         let template = template_for("accept", "vt. 接受");
         assert_eq!(template.first, "I can accept it.");
+    }
+
+    #[test]
+    fn reviewed_contexts_keep_common_verbs_transitive() {
+        for word in ["get", "take", "feel", "pull", "understand", "advertise"] {
+            let template = template_for(word, "v. reviewed context");
+            assert_eq!(template.first, format!("I can {word} it."));
+        }
     }
 
     #[test]
