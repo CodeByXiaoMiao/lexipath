@@ -16,6 +16,7 @@ pub enum Phase {
 #[derive(Debug, Clone)]
 pub struct AnswerResult {
     pub correct: bool,
+    #[allow(dead_code)]
     pub remaining: usize,
 }
 
@@ -123,19 +124,6 @@ impl LearningSession {
         ))
     }
 
-    pub fn listening_options(&self) -> Option<(Vec<String>, usize)> {
-        let current = self.current_mastery_index()?;
-        Some(stable_options(
-            self.lesson
-                .new_words
-                .iter()
-                .map(|word| word.text.clone())
-                .collect(),
-            current,
-            option_seed(&self.lesson.id, "listening", current),
-        ))
-    }
-
     pub fn current_sentence(&self) -> Option<&SentenceItem> {
         let index = self.current_mastery_index()?;
         self.lesson.sentences.get(index)
@@ -215,6 +203,18 @@ impl LearningSession {
             correct,
             remaining: self.queue.len(),
         }
+    }
+
+    pub fn answer_current_text(&mut self, answer: &str) -> AnswerResult {
+        let Some(index) = self.current_mastery_index() else {
+            return AnswerResult {
+                correct: false,
+                remaining: 0,
+            };
+        };
+        let expected = self.lesson.new_words[index].text.as_str();
+        let correct = normalize_answer(answer) == normalize_answer(expected);
+        self.answer_current(usize::from(!correct), 0)
     }
 
     pub fn mark_reading_audio_played(&mut self) {
@@ -313,6 +313,14 @@ fn stable_hash(value: &str) -> u64 {
     })
 }
 
+fn normalize_answer(value: &str) -> String {
+    value
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_ascii_lowercase()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -339,6 +347,21 @@ mod tests {
         let result = session.answer_current(wrong, correct);
         assert!(!result.correct);
         assert_eq!(result.remaining, count);
+    }
+
+    #[test]
+    fn typed_answer_accepts_case_and_whitespace_variants() {
+        let mut session = recognition_session();
+        let count = session.lesson().new_words.len();
+        for _ in 0..count {
+            let (_, correct) = session.recognition_options().expect("options");
+            assert!(session.answer_current(correct, correct).correct);
+        }
+
+        let index = session.current_mastery_index().expect("listening item");
+        let expected = session.lesson().new_words[index].text.clone();
+        let answer = format!("  {}  ", expected.to_ascii_uppercase());
+        assert!(session.answer_current_text(&answer).correct);
     }
 
     #[test]

@@ -13,7 +13,7 @@ pub fn load() -> anyhow::Result<CoursePack> {
         .context("executable has no parent directory")?
         .join("course.json");
 
-    let mut course = if external_path.exists() {
+    let course = if external_path.exists() {
         let data = fs::read(&external_path)
             .with_context(|| format!("failed to read {}", external_path.display()))?;
         serde_json::from_slice(&data)
@@ -22,11 +22,13 @@ pub fn load() -> anyhow::Result<CoursePack> {
         embedded_course::load()?
     };
 
+    Ok(course)
+}
+
+pub fn add_daily_readings(course: &mut CoursePack) {
     for stage in &mut course.stages {
         if stage.id.starts_with("ogden-") || stage.id.starts_with("oxford-") {
             add_daily_combined_readings(stage);
         }
     }
-
-    Ok(course)
 }

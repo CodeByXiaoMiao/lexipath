@@ -16,6 +16,12 @@ pub struct IpaApp {
     locked_today: bool,
 }
 
+const IPA_SURFACE: egui::Color32 = egui::Color32::from_rgb(30, 41, 59);
+const IPA_BACKGROUND: egui::Color32 = egui::Color32::from_rgb(15, 23, 42);
+const IPA_TEXT: egui::Color32 = egui::Color32::from_rgb(241, 245, 249);
+const IPA_MUTED: egui::Color32 = egui::Color32::from_rgb(148, 163, 184);
+const IPA_ACCENT: egui::Color32 = egui::Color32::from_rgb(45, 212, 191);
+
 impl IpaApp {
     pub fn load() -> anyhow::Result<Option<Self>> {
         let lessons = phonetics_catalog::lessons();
@@ -80,6 +86,7 @@ impl IpaApp {
         )
     }
 
+    #[allow(dead_code)]
     pub fn locked_today(&self) -> bool {
         self.locked_today
     }
@@ -90,6 +97,7 @@ impl IpaApp {
         self.status = "已手动进入下一天音标课程。".to_owned();
     }
 
+    #[allow(dead_code)]
     pub fn jump_relative_day(&mut self, offset: isize) -> Result<String, String> {
         let total = self.lessons.len();
         if total == 0 {
@@ -133,29 +141,44 @@ impl IpaApp {
 
         let mut all_complete = false;
 
-        egui::TopBottomPanel::top("ipa_header").show(context, |ui| {
-            ui.horizontal(|ui| {
-                ui.strong("LexiPath IPA");
-                ui.separator();
-                ui.label(format!(
-                    "第 {} / {} 天",
-                    self.current_day_number(),
-                    self.lessons.len()
-                ));
-                ui.separator();
-                ui.label(self.session.lesson().title);
+        egui::TopBottomPanel::bottom("ipa_status")
+            .frame(
+                egui::Frame::new()
+                    .fill(IPA_SURFACE)
+                    .inner_margin(egui::Margin::symmetric(22, 9)),
+            )
+            .show(context, |ui| {
+                ui.label(egui::RichText::new(&self.status).color(IPA_MUTED));
             });
-        });
 
-        egui::TopBottomPanel::bottom("ipa_status").show(context, |ui| {
-            ui.label(&self.status);
-        });
-
-        egui::CentralPanel::default().show(context, |ui| {
-            ui.vertical_centered_justified(|ui| {
+        egui::CentralPanel::default()
+            .frame(egui::Frame::new().fill(IPA_BACKGROUND))
+            .show(context, |ui| {
+            let available = ui.available_size();
+            let card_width = available.x.min(760.0);
+            let top_space = ((available.y - 520.0).max(0.0) * 0.5).min(96.0);
+            ui.add_space(top_space);
+            ui.vertical_centered(|ui| {
+                ui.set_width(card_width);
+                egui::Frame::new()
+                    .fill(IPA_SURFACE)
+                    .corner_radius(egui::CornerRadius::same(18))
+                    .inner_margin(egui::Margin::same(28))
+                    .show(ui, |ui| {
+                    ui.label(
+                        egui::RichText::new(format!(
+                            "音标训练  ·  第 {} / {} 天  ·  {}",
+                            self.current_day_number(),
+                            self.lessons.len(),
+                            self.session.lesson().title
+                        ))
+                        .size(13.0)
+                        .color(IPA_MUTED),
+                    );
+                    ui.add_space(12.0);
                 if self.locked_today {
-                    ui.heading("今日音标学习已完成");
-                    ui.label("固定计划每天只开放一课音标；需要继续测试时，可以手动进入下一天。");
+                    ui.heading(egui::RichText::new("今日音标学习已完成").color(IPA_TEXT));
+                    ui.label(egui::RichText::new("固定计划每天只开放一课音标；需要继续测试时，可以手动进入下一天。").color(IPA_MUTED));
                     if ui.button("进入下一天音标").clicked() {
                         self.continue_after_daily_limit();
                     }
@@ -166,7 +189,7 @@ impl IpaApp {
                     PhoneticPhase::Exposure => self.show_exposure(ui),
                     PhoneticPhase::ListeningTest => self.show_test(ui),
                     PhoneticPhase::Complete => {
-                        ui.heading("本日音标测试最终正确率 100%");
+                        ui.heading(egui::RichText::new("本日音标测试最终正确率 100%").color(IPA_TEXT));
                         if ui.button("完成今天课程").clicked() {
                             let completed_day = self.current_day_number();
                             let total_days = self.lessons.len();
@@ -189,6 +212,7 @@ impl IpaApp {
                         }
                     }
                 }
+                });
             });
         });
 
@@ -199,12 +223,20 @@ impl IpaApp {
         let Some(item) = self.session.current_item().cloned() else {
             return;
         };
-        ui.heading(egui::RichText::new(safe_ipa(item.symbol)).size(42.0));
-        ui.label(item.hint);
+        ui.heading(egui::RichText::new(safe_ipa(item.symbol)).size(42.0).color(IPA_ACCENT));
+        ui.label(egui::RichText::new(item.hint).color(IPA_MUTED));
         ui.add_space(12.0);
         ui.label(egui::RichText::new(item.example).size(28.0));
         ui.label(egui::RichText::new(safe_ipa(item.example_ipa)).size(21.0));
-        if ui.button("▶ 播放英文示例").clicked() {
+        if ui
+            .add(
+                egui::Button::new("▶  播放英文示例")
+                    .fill(IPA_ACCENT)
+                    .corner_radius(egui::CornerRadius::same(10))
+                    .min_size(egui::vec2(150.0, 40.0)),
+            )
+            .clicked()
+        {
             match self.speaker.speak(item.example) {
                 Ok(()) => {
                     self.session.mark_audio_played();
@@ -233,8 +265,16 @@ impl IpaApp {
             return;
         };
 
-        ui.heading("听音选择对应音标");
-        if ui.button("▶ 播放英文示例").clicked() {
+        ui.heading(egui::RichText::new("听音选择对应音标").color(IPA_TEXT));
+        if ui
+            .add(
+                egui::Button::new("▶  播放英文示例")
+                    .fill(IPA_ACCENT)
+                    .corner_radius(egui::CornerRadius::same(10))
+                    .min_size(egui::vec2(150.0, 40.0)),
+            )
+            .clicked()
+        {
             match self.speaker.speak(item.example) {
                 Ok(()) => {
                     self.session.mark_audio_played();

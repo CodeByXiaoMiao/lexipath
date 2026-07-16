@@ -184,6 +184,7 @@ pub struct RootApp {
     pointer_faded: bool,
     topmost_applied: bool,
     opacity: NativeOpacity,
+    theme_ready: bool,
 }
 
 impl RootApp {
@@ -214,14 +215,15 @@ impl RootApp {
             pointer_faded: false,
             topmost_applied: false,
             opacity: NativeOpacity::new(WINDOW_TITLE),
+            theme_ready: false,
         })
     }
 
-    fn active_progress_label(&self) -> String {
+    fn active_progress_summary(&self) -> String {
         if let Some(ipa) = &self.ipa {
-            ipa.current_label()
+            format!("音标 · 第 {} / {} 天", ipa.current_day_number(), IpaApp::total_day_count())
         } else {
-            format!("当前词汇课：{}", self.vocabulary.current_lesson_label())
+            format!("词汇 · {}", self.vocabulary.current_lesson_label())
         }
     }
 
@@ -259,30 +261,53 @@ impl RootApp {
 
     fn show_window_settings(&mut self, context: &egui::Context) {
         let mut changed = false;
-        egui::TopBottomPanel::top("window_settings").show(context, |ui| {
-            ui.horizontal_wrapped(|ui| {
-                ui.strong("LexiPath");
+        egui::TopBottomPanel::top("window_settings")
+            .frame(
+                egui::Frame::new()
+                    .fill(egui::Color32::from_rgb(30, 41, 59))
+                    .inner_margin(egui::Margin::symmetric(20, 10)),
+            )
+            .show(context, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(
+                    egui::RichText::new("LEXIPATH")
+                        .strong()
+                        .color(egui::Color32::from_rgb(45, 212, 191)),
+                );
                 ui.separator();
                 if ui
-                    .small_button(if self.show_window_settings { "收起窗口设置" } else { "窗口设置" })
+                    .small_button(if self.show_window_settings { "窗口" } else { "窗口" })
                     .clicked()
                 {
                     self.show_window_settings = !self.show_window_settings;
                 }
                 if ui
-                    .small_button(if self.show_progress_settings { "收起进度设置" } else { "进度设置" })
+                    .small_button("进度")
                     .clicked()
                 {
                     self.show_progress_settings = !self.show_progress_settings;
                     self.refresh_progress_inputs();
                 }
                 ui.separator();
-                ui.label("窗口保持置顶");
-                ui.separator();
-                ui.label(self.active_progress_label());
+                ui.label(
+                    egui::RichText::new("窗口保持置顶")
+                        .size(13.0)
+                        .color(egui::Color32::from_rgb(148, 163, 184)),
+                );
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(
+                        egui::RichText::new(self.active_progress_summary())
+                            .size(13.0)
+                            .color(egui::Color32::from_rgb(148, 163, 184)),
+                    );
+                });
                 if self.pointer_faded {
                     ui.separator();
-                    ui.label("鼠标已移出：窗口已透明到 0%。");
+                    ui.label(
+                        egui::RichText::new("窗口已隐藏")
+                            .size(13.0)
+                            .color(egui::Color32::from_rgb(148, 163, 184)),
+                    );
                 }
             });
             if self.show_window_settings {
@@ -503,6 +528,10 @@ impl RootApp {
 
 impl eframe::App for RootApp {
     fn update(&mut self, context: &egui::Context, frame: &mut eframe::Frame) {
+        if !self.theme_ready {
+            reset_normal_style(context);
+            self.theme_ready = true;
+        }
         self.ensure_topmost(context);
         self.apply_window_alpha();
         self.update_pointer_fade(context);
@@ -512,7 +541,7 @@ impl eframe::App for RootApp {
             if ipa.update(context) {
                 self.ipa = None;
                 context.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
-                    620.0, 520.0,
+                    900.0, 680.0,
                 )));
             }
             return;
@@ -529,6 +558,35 @@ impl eframe::App for RootApp {
 
 fn reset_normal_style(context: &egui::Context) {
     let mut style = egui::Style::default();
-    style.visuals = egui::Visuals::light();
+    style.visuals = egui::Visuals::dark();
+    style.visuals.window_fill = egui::Color32::from_rgb(15, 23, 42);
+    style.visuals.panel_fill = egui::Color32::from_rgb(15, 23, 42);
+    style.visuals.faint_bg_color = egui::Color32::from_rgb(30, 41, 59);
+    style.visuals.extreme_bg_color = egui::Color32::from_rgb(15, 23, 42);
+    style.visuals.override_text_color = Some(egui::Color32::from_rgb(241, 245, 249));
+    style.visuals.hyperlink_color = egui::Color32::from_rgb(45, 212, 191);
+    style.visuals.widgets.inactive.bg_fill = egui::Color32::from_rgb(51, 65, 85);
+    style.visuals.widgets.inactive.weak_bg_fill = egui::Color32::from_rgb(30, 41, 59);
+    style.visuals.widgets.hovered.bg_fill = egui::Color32::from_rgb(71, 85, 105);
+    style.visuals.widgets.active.bg_fill = egui::Color32::from_rgb(20, 184, 166);
+    style.visuals.widgets.inactive.corner_radius = egui::CornerRadius::same(10);
+    style.visuals.widgets.hovered.corner_radius = egui::CornerRadius::same(10);
+    style.visuals.widgets.active.corner_radius = egui::CornerRadius::same(10);
+    style.spacing.item_spacing = egui::vec2(10.0, 9.0);
+    style.spacing.window_margin = egui::Margin::symmetric(20, 16);
+    style.spacing.button_padding = egui::vec2(14.0, 8.0);
+    style.spacing.interact_size = egui::vec2(40.0, 36.0);
+    style.text_styles.insert(
+        egui::TextStyle::Body,
+        egui::FontId::proportional(15.0),
+    );
+    style.text_styles.insert(
+        egui::TextStyle::Button,
+        egui::FontId::proportional(14.0),
+    );
+    style.text_styles.insert(
+        egui::TextStyle::Heading,
+        egui::FontId::proportional(24.0),
+    );
     context.set_style(style);
 }

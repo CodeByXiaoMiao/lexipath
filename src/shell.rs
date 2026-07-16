@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use global_hotkey::{
     hotkey::{Code, HotKey, Modifiers},
     GlobalHotKeyEvent, GlobalHotKeyManager, HotKeyState,

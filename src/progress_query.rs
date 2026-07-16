@@ -7,10 +7,6 @@ impl ProgressStore {
         self.data.current_lesson_id.as_deref()
     }
 
-    pub fn completed_count(&self) -> usize {
-        self.data.lessons.len()
-    }
-
     pub fn due_count(&self) -> usize {
         let today = current_day();
         self.data

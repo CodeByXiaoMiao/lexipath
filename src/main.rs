@@ -81,17 +81,18 @@ fn main() -> eframe::Result<()> {
         return Ok(());
     }
 
-    let course = catalog_load::load().expect("course catalog could not be loaded");
+    let mut course = catalog_load::load().expect("course catalog could not be loaded");
     if course.first_lesson().is_none() {
         panic!("course catalog contains no lesson");
     }
-    course_finalize::validate_finalized_course(&course)
+    course_finalize::validate_release_course(&course)
         .expect("course catalog failed final content validation");
+    catalog_load::add_daily_readings(&mut course);
 
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
-            .with_inner_size([620.0, 520.0])
-            .with_min_inner_size([360.0, 220.0]),
+            .with_inner_size([900.0, 680.0])
+            .with_min_inner_size([640.0, 480.0]),
         ..Default::default()
     };
 

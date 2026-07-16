@@ -95,12 +95,18 @@ pub fn validate_example_translation_bank(course: &CoursePack) -> anyhow::Result<
             }
         }
     }
-    for record in records() {
-        if !course_ids.contains(record.word_id.as_str()) {
-            issues.push(format!(
-                "translation record '{}' has no matching course word",
-                record.word_id
-            ));
+    let foundation_only = course
+        .stages
+        .iter()
+        .all(|stage| stage.id == "foundation-words");
+    if !foundation_only {
+        for record in records() {
+            if !course_ids.contains(record.word_id.as_str()) {
+                issues.push(format!(
+                    "translation record '{}' has no matching course word",
+                    record.word_id
+                ));
+            }
         }
     }
 
